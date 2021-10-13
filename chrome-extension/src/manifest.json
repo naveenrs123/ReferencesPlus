@@ -1,0 +1,18 @@
+{
+    "name": "References+ for GitHub",
+    "description": "An extension that provides greater support for referencing in GitHub Pull Requests.",
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh5Ui01J8WgldTGgheFi2i22cuN2DmhmXStuiDZ1OfJ1KC+hVn59r+RGFSQagZxgpSZ3hwS5N+T1AOidf1Yotj75UBB/rRJFJ5CD48BwP3hVLdiDU7xmMIRoIVvbF2LDqO1QFPAzOjO1sXitJ2sBgUDpHGOqY/tcSB9wfUAsmoIJlO38mxcjECJp1CbOCfMhz+qx+qh3zS+eRa9cWDYrNg3L+dTtbB07wDeEkQDQbKmV2XpBFvwpaexFjEOqOg7DZaN+Vto1wo9PGqLZTMtafcN0j57X8Hk6hOosBgBbztTjAr0F1MPzKuoe7SgKNfB2Lhe5/wXDm/nm1vYtIPBVY4wIDAQAB",
+    "background": {
+        "service_worker": "background.js"
+    },
+    "permissions": ["storage", "identity"],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "oauth2": {
+        "client_id": "91a16e0d9c142eeac319",
+        "scopes": [""]
+    }
+}

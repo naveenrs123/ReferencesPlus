@@ -1,0 +1,21 @@
+{
+  "name": "chrome-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension for improved referencing in GitHub",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "scss": "sass --load-path=node_modules/ src/styles/index.scss:src/css/index.css",
+    "scss-watch": "sass --watch --load-path=node_modules/ src/styles/index.scss:src/css/index.css"
+  },
+  "private": "true",
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  },
+  "dependencies": {
+    "@primer/css": "^18.0.1",
+    "@primer/primitives": "^5.1.0"
+  }
+}
