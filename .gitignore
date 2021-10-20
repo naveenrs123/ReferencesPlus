@@ -2,3 +2,5 @@
 .idea/
 .DS_Store
 **/*.zip
+**/nodemon-local.json
+**/*.zip
