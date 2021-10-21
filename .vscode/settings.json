@@ -1,4 +1,0 @@
-{
-    "appService.defaultWebAppToDeploy": "/subscriptions/8d56c6b3-4f11-45df-baa6-5f4233f1d31f/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/pr-referencing",
-    "appService.deploySubpath": "backend-server"
-}
