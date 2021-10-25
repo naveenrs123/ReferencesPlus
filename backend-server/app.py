@@ -9,17 +9,11 @@ CORS(app)
 
 load_dotenv()
 
-pmk = os.environ.get("PRIMARY_MASTER_KEY")
-app_name = os.environ.get("COSMOSDB_NAME")
-
-conn_str="mongodb://" + app_name + ":" + pmk + "@" + app_name + ".mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@" + app_name + "@"
-#conn_str="mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000"
-
-client = mongo.MongoClient(conn_str, serverSelectionTimeoutMS=2000)
+client = mongo.MongoClient(os.environ.get("LOCAL_CONNECTION_STRING"), serverSelectionTimeoutMS=2000)
 
 @app.route("/")
 def welcome():
-    return render_template('index.html');
+    return render_template('index.html')
     
 @app.route("/health", methods=["GET"])
 def hello():
