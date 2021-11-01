@@ -60,8 +60,6 @@ def auth(user):
 @app.route("/auth_callback", methods=["GET", "POST"])
 def auth_callback():
     if "code" in request.args:
-        print(request.args.get("code"), file=sys.stderr)
-
         token_url = "https://github.com/login/oauth/access_token"
         headers = { "Accept": "application/json"}
         params = {
@@ -78,9 +76,8 @@ def auth_callback():
             g = Github(session['access_token'])
             print(g.get_user().name, file=sys.stderr)
             print(g.get_rate_limit().core.limit, file=sys.stderr)
-            return "<h1>Successfully Authenticated!</h1>"
 
-    return "<h1>Authentication Unsuccessful :(</h1>"
+    return redirect("https://www.github.com")
 
 @app.route("/token_callback", methods=["GET", "POST"])
 def token_callback():
