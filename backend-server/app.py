@@ -93,7 +93,6 @@ def func_parser():
     dependee = "documentationjs/documentation"
     definitions = processor.process_dee(dependee, ext=LANGUAGE_METADATA[lang]["ext"])
     return jsonify(definitions)
-    #return jsonify(pd.DataFrame(definitions).to_json())
 
 
 @app.route("/github_test", methods=["GET"])
@@ -124,10 +123,4 @@ if __name__ == "__main__":
     app.secret_key = os.environ.get("SECRET_KEY")
     app.debug = True
     app.run() 
-
-""" 
-if __name__ == "__main__":
-    db_list = client.list_database_names()
-    print() 
-"""
     

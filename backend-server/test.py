@@ -11,10 +11,8 @@ url3_search = "https://api.github.com/repositories/167174/contents/src/attribute
 
 def printFileFromSearch(file_url):
     file = urllib.request.urlopen(file_url)
-    for line in file:
-        decoded_line = line.decode("utf-8")
-        json_line = json.loads(decoded_line)
-        printFileFromRaw(json_line["download_url"])
+    json_file = json.loads(file.read())
+    printFileFromRaw(json_file["download_url"])
 
 def printFileFromRaw(file_url):
     file = urllib.request.urlopen(file_url)

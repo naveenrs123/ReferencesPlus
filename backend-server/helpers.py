@@ -1,17 +1,16 @@
-import urllib.request
+from urllib.request import urlopen
 import json
-import sys
+#import sys
 
 def print_file_from_search(file_url):
-    file = urllib.request.urlopen(file_url)
-    for line in file:
-        decoded_line = line.decode("utf-8")
-        json_line = json.loads(decoded_line)
-        raw_file_to_line_array(json_line["download_url"])
+    file = urlopen(file_url)
+    json_file = json.loads(file.read())
+    raw_file_to_line_array(json_file["download_url"])
 
 
 def raw_file_to_line_array(file_url):
-    file = urllib.request.urlopen(file_url)
+    file = urlopen(file_url)
+    file.read()
     count = 0
     lines_array = [];
     for line in file:
