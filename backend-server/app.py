@@ -1,23 +1,28 @@
 # region imports
-import pymongo
-import urllib.parse
+import os
 import random
-import requests
 import string
 import sys
-import os
+import urllib.parse
+from typing import Any, Dict, List, Type
 
-from flask import Flask, jsonify, render_template, request, redirect, session
-from flask_cors import CORS
+import pymongo
+import requests
 from dotenv import load_dotenv
+from flask import Flask, jsonify, redirect, render_template, request, session
+from flask_cors import CORS
 from github import Github
-
-import function_parser as fp
-from function_parser.language_data import LANGUAGE_METADATA
-from function_parser.process import DataProcessor
+from github.ContentFile import ContentFile
+from github.Repository import Repository
+from pymongo import MongoClient
+from requests.models import Response
 from tree_sitter import Language
 
+import function_parser as fp
 import helpers as hp
+from function_parser.language_data import LANGUAGE_METADATA
+from function_parser.process import DataProcessor
+
 # endregion imports
 
 load_dotenv()
@@ -25,10 +30,13 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-client = pymongo.MongoClient(os.environ.get("LOCAL_CONNECTION_STRING"))
+client: Type[MongoClient] = MongoClient(
+    os.environ.get("LOCAL_CONNECTION_STRING"))
 
-lang = "javascript"
-DataProcessor.PARSER.set_language(Language(os.path.join(fp.__path__[0], "tree-sitter-languages.so"), lang))
+lang: str = "javascript"
+DataProcessor.PARSER.set_language(Language(os.path.join(
+    fp.__path__[0], "tree-sitter-languages.so"), lang))
+
 
 @app.route("/")
 def welcome():
@@ -46,19 +54,20 @@ def mongo():
 
 @app.route("/auth/<user>", methods=["GET"])
 def auth(user):
-    state = "".join(random.choice(string.ascii_letters) for i in range(16))
+    state: str = "".join(random.choice(string.ascii_letters)
+                         for i in range(16))
     session['state'] = state
 
-    auth_url = "https://github.com/login/oauth/authorize"
-    params = {
+    auth_url: str = "https://github.com/login/oauth/authorize"
+    params: Dict[str, Any] = {
         "client_id": os.environ.get("CLIENT_ID"),
         "redirect_uri": os.environ.get("REDIRECT_URI"),
         "login": user,
         "scope": "repo user",
         "state":  state
     }
-    encoded_params = urllib.parse.urlencode(params, safe=':/')
-    full_auth_url = auth_url + "?" + encoded_params
+    encoded_params: str = urllib.parse.urlencode(params, safe=':/')
+    full_auth_url: str = auth_url + "?" + encoded_params
     print(full_auth_url, file=sys.stderr)
     return redirect(full_auth_url)
 
@@ -66,15 +75,16 @@ def auth(user):
 @app.route("/auth_callback", methods=["GET", "POST"])
 def auth_callback():
     if "code" in request.args:
-        token_url = "https://github.com/login/oauth/access_token"
-        headers = {"Accept": "application/json"}
-        params = {
+        token_url: str = "https://github.com/login/oauth/access_token"
+        headers: Dict[str, Any] = {"Accept": "application/json"}
+        params: Dict[str, Any] = {
             "client_id": os.environ.get("CLIENT_ID"),
             "client_secret": os.environ.get("CLIENT_SECRET"),
             "code": request.args.get("code")
         }
-        req = requests.post(token_url, params=params, headers=headers)
-        res = req.json()
+        req: Type[Response] = requests.post(
+            token_url, params=params, headers=headers)
+        res: Dict[str, Any] = req.json()
 
         if "access_token" in res:
             session['access_token'] = res['access_token']
@@ -84,34 +94,43 @@ def auth_callback():
 
 @app.route("/func_parser", methods=["GET"])
 def func_parser():
-    processor = DataProcessor(language=lang, language_parser=LANGUAGE_METADATA[lang]["language_parser"])
-    dependee = "documentationjs/documentation"
-    definitions = processor.process_dee(dependee, ext=LANGUAGE_METADATA[lang]["ext"])
-    
+    processor: Type[DataProcessor] = DataProcessor(
+        language=lang, language_parser=LANGUAGE_METADATA[lang]["language_parser"])
+    dependee: str = "documentationjs/documentation"
+    definitions: List[Dict[str, Any]] = processor.process_dee(
+        dependee, ext=LANGUAGE_METADATA[lang]["ext"])
+
     return jsonify(definitions)
 
 
-@app.route("/github_test", methods=["GET"])
-def github_test():
+@app.route("/github", methods=["GET"])
+def github():
     if (session.get("access_token") != None):
-        g = Github(session.get("access_token"))
-        
-        repo = g.get_repo("naveenrs123/documentation")
-        contents = repo.get_contents("src/github.js")
-        print(contents.download_url, file=sys.stderr)
-        file_contents = hp.raw_file_to_line_array(contents.download_url)
-        number_of_lines = len(file_contents["lines"])
-        
-        document = {
-            "file_name": contents.name,
-            "path": contents.path,
-            "parent_directory": hp.get_directory(contents.path),
-            "sha": contents.sha,
-            "number_of_lines": number_of_lines,
-            "contents": file_contents["contents"],
-            "lines": file_contents["lines"],
-            "rate_limit": g.get_rate_limit().core.limit
-        }
+        g: Type[Github] = Github(session.get("access_token"))
+        repo: Type[Repository] = g.get_repo("naveenrs123/documentation")
+        contents: Type[ContentFile] = repo.get_contents("")
+        documents: List[Dict[str, Any]] = []
+
+        while contents:
+            file_content: Type[ContentFile] = contents.pop(0)
+            if file_content.type == "dir":
+                contents.extend(repo.get_contents(file_content.path))
+            else:
+                file_contents: Dict[str, List[str]] = hp.raw_file_to_line_array(
+                    file_content.download_url)
+                number_of_lines: int = len(file_contents["lines"])
+                document: Dict[str, Any] = {
+                    "file_name": file_content.name,
+                    "path": file_content.path,
+                    "parent_directory": hp.get_directory(file_content.path),
+                    "sha": file_content.sha,
+                    "number_of_lines": number_of_lines,
+                    "contents": file_contents["contents"],
+                    "lines": file_contents["lines"],
+                    "rate_limit": g.get_rate_limit().core.limit
+                }
+                documents.append(document)
+
         return jsonify(document)
 
     return "No access token."
@@ -120,5 +139,4 @@ def github_test():
 if __name__ == "__main__":
     app.secret_key = os.environ.get("SECRET_KEY")
     app.debug = True
-    app.run() 
-    
+    app.run()
