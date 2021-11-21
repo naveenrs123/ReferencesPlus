@@ -1,12 +1,9 @@
-# TODO: Improve OAuth2 Flow to include session tokens and make better use of state.
-
 # region imports
-import pymongo as mongo
+import pymongo
 import urllib.parse
 import random
 import requests
 import string
-import json
 import sys
 import os
 
@@ -16,7 +13,6 @@ from dotenv import load_dotenv
 from github import Github
 
 import function_parser as fp
-import pandas as pd
 from function_parser.language_data import LANGUAGE_METADATA
 from function_parser.process import DataProcessor
 from tree_sitter import Language
@@ -29,11 +25,10 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-client = mongo.MongoClient(os.environ.get("LOCAL_CONNECTION_STRING"))
+client = pymongo.MongoClient(os.environ.get("LOCAL_CONNECTION_STRING"))
 
 lang = "javascript"
 DataProcessor.PARSER.set_language(Language(os.path.join(fp.__path__[0], "tree-sitter-languages.so"), lang))
-
 
 @app.route("/")
 def welcome():
@@ -92,6 +87,7 @@ def func_parser():
     processor = DataProcessor(language=lang, language_parser=LANGUAGE_METADATA[lang]["language_parser"])
     dependee = "documentationjs/documentation"
     definitions = processor.process_dee(dependee, ext=LANGUAGE_METADATA[lang]["ext"])
+    
     return jsonify(definitions)
 
 
@@ -100,10 +96,11 @@ def github_test():
     if (session.get("access_token") != None):
         g = Github(session.get("access_token"))
         
-        repo = g.get_repo("PyGithub/PyGithub")
-        contents = repo.get_contents("doc/examples/Branch.rst")
+        repo = g.get_repo("naveenrs123/documentation")
+        contents = repo.get_contents("src/github.js")
+        print(contents.download_url, file=sys.stderr)
         file_contents = hp.raw_file_to_line_array(contents.download_url)
-        number_of_lines = len(file_contents)
+        number_of_lines = len(file_contents["lines"])
         
         document = {
             "file_name": contents.name,
@@ -111,7 +108,8 @@ def github_test():
             "parent_directory": hp.get_directory(contents.path),
             "sha": contents.sha,
             "number_of_lines": number_of_lines,
-            "file_contents": file_contents,
+            "contents": file_contents["contents"],
+            "lines": file_contents["lines"],
             "rate_limit": g.get_rate_limit().core.limit
         }
         return jsonify(document)

@@ -70,13 +70,18 @@ def match_from_span(node, blob: str) -> str:
         return lines[line_start][char_start:char_end]
 
 
-def traverse_type(node, results: List, kind: str) -> None:
+def traverse_type(node, results: List, kind: str, child_kind="") -> None:
     if node.type == kind:
-        results.append(node)
+        if child_kind != "":
+            for n in node.children:
+                if n.type == child_kind:
+                    results.append(node)
+        else:
+            results.append(node)
     if not node.children:
         return
     for n in node.children:
-        traverse_type(n, results, kind)
+        traverse_type(n, results, kind, child_kind)
 
 
 class LanguageParser(ABC):

@@ -20,6 +20,8 @@ class JavascriptParser(LanguageParser):
             base_node = node_parent(tree, parent_node)  # Get the variable declaration
         elif parent_node.type == 'pair':
             base_node = parent_node  # This is a common pattern where a function is assigned as a value to a dictionary.
+        elif parent_node.type == 'function_declaration':
+            base_node = parent_node
         else:
             base_node = node
 
@@ -41,6 +43,8 @@ class JavascriptParser(LanguageParser):
     def get_definition(tree, blob: str) -> List[Dict[str, Any]]:
         function_nodes = []
         functions = []
+        traverse_type(tree.root_node, function_nodes, 'export_statement', 'function')
+        traverse_type(tree.root_node, function_nodes, 'function_declaration')
         traverse_type(tree.root_node, function_nodes, 'function')
         for function in function_nodes:
             if function.children is None or len(function.children) == 0:
@@ -55,17 +59,25 @@ class JavascriptParser(LanguageParser):
 
             if metadata['identifier'] in JavascriptParser.BLACKLISTED_FUNCTION_NAMES:
                 continue
-            definitions.append({
-                'type': node_type,
-                'identifier': metadata['identifier'],
-                'parameters': metadata['parameters'],
-                'function': match_from_span(function_node, blob),
-                'function_tokens': tokenize_code(function_node, blob),
-                'docstring': docstring,
-                'docstring_summary': docstring_summary,
-                'start_point': function_node.start_point,
-                'end_point': function_node.end_point     
-            })
+
+            isNested = False
+            for defin in definitions:
+                if (match_from_span(function_node, blob) in defin["function"]):
+                    isNested = True
+                    break
+
+            if (not isNested):
+                definitions.append({
+                    'type': node_type,
+                    'identifier': metadata['identifier'],
+                    'parameters': metadata['parameters'],
+                    'function': match_from_span(function_node, blob),
+                    'function_tokens': tokenize_code(function_node, blob),
+                    'docstring': docstring,
+                    'docstring_summary': docstring_summary,
+                    'start_point': function_node.start_point,
+                    'end_point': function_node.end_point     
+                })
         return definitions
 
 

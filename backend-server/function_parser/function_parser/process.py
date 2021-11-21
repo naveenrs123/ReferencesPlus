@@ -9,12 +9,12 @@ Options:
     --license-filter FILE           License metadata to filter, every row contains [nwo, license, language, score] (e.g. ['pandas-dev/pandas', 'bsd-3-clause', 'Python', 0.9997])
     --tree-sitter-build FILE        [default: /src/build/py-tree-sitter-languages.so]
 """
-import sys
 import functools
 from multiprocessing import Pool
 import pickle
-from os import PathLike
+import os
 from typing import Optional, Tuple, Type, List, Dict, Any
+from pathlib import PurePath
 
 from docopt import docopt
 from dpu_utils.codeutils.deduplication import DuplicateDetector
@@ -114,7 +114,7 @@ class DataProcessor:
                             edges.append((dent['url'], depended_library_function['url']))
         return dents, edges
 
-    def process_single_file(self, filepath: PathLike) -> List[Dict[str, Any]]:
+    def process_single_file(self, filepath: os.PathLike) -> List[Dict[str, Any]]:
         definitions = self.get_function_definitions(filepath)
         if definitions is None:
             return []
@@ -137,6 +137,8 @@ class DataProcessor:
             'docstring_tokens': tokenize_docstring(function['docstring_summary']),
             'function': function['function'].strip(),
             'function_tokens': function['function_tokens'],
+            'start': function['start_point'][0] + 1,
+            'end':function['end_point'][0] + 1,
             'url': 'https://github.com/{}/blob/{}/{}#L{}-L{}'.format(nwo, sha, path, function['start_point'][0] + 1,
                                                                      function['end_point'][0] + 1)
         }
@@ -155,14 +157,18 @@ class DataProcessor:
             return None
 
     def get_function_definitions(self, filepath: str) -> Optional[Tuple[str, str, List]]:
-        nwo = '/'.join(filepath.split('/')[3:5])
-        path = '/'.join(filepath.split('/')[5:])
+        cwd_split = PurePath(os.getcwd()).as_posix().split('/')
+        filepath_split = PurePath(filepath).as_posix().split('/')
+        base_idx = len(cwd_split) + 1
+
+        nwo = '/'.join(filepath_split[base_idx : base_idx + 2])
+        path = '/'.join(filepath_split[base_idx + 2:])
+
         if any(fp in path.lower() for fp in self.language_parser.FILTER_PATHS):
             return None
         try:
             with open(filepath) as source_code:
                 blob = source_code.read()
-            print(filepath, file=sys.stderr)
             tree = DataProcessor.PARSER.parse(blob.encode())
             return (nwo, path, self.language_parser.get_definition(tree, blob))
         except (UnicodeDecodeError, FileNotFoundError, IsADirectoryError, ValueError, OSError):

@@ -1,6 +1,6 @@
 from urllib.request import urlopen
 import json
-#import sys
+import sys
 
 def print_file_from_search(file_url):
     file = urlopen(file_url)
@@ -10,19 +10,22 @@ def print_file_from_search(file_url):
 
 def raw_file_to_line_array(file_url):
     file = urlopen(file_url)
-    file.read()
     count = 0
-    lines_array = [];
+    lines = []
+    contents = ""
     for line in file:
         decoded_line = line.decode("utf-8")
         # remove the new line character after each line.
         decoded_line = decoded_line[0: len(decoded_line) - 1]
-        lines_array.append(decoded_line)
+        #print(decoded_line, file=sys.stderr)
+        lines.append(decoded_line)
+        contents += decoded_line.strip()
         count += 1
-    return lines_array
+
+    return {"contents": contents, "lines": lines}
 
 def get_directory(path: str) -> str:
-    path_tokens = path.split("/");
+    path_tokens = path.split("/")
     if len(path_tokens) > 1:
         return path_tokens[len(path_tokens) - 2]
     else:
