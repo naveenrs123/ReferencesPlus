@@ -1,4 +1,5 @@
 # region imports
+from datetime import timedelta
 import os
 import random
 import string
@@ -28,7 +29,7 @@ from function_parser.process import DataProcessor
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, )
 
 client: Type[MongoClient] = MongoClient(
     os.environ.get("LOCAL_CONNECTION_STRING"))
@@ -88,9 +89,19 @@ def auth_callback():
 
         if "access_token" in res:
             session['access_token'] = res['access_token']
+            os.environ["ACCESS_TOKEN"] = res['access_token']
 
     return redirect("https://www.github.com")
 
+@app.route("/authenticated", methods=["GET"])
+def authenticated():
+    authenticated: bool = False
+    if os.environ.get("ACCESS_TOKEN") != None:
+        authenticated = True
+    response: Type[Response] = jsonify({"authenticated": authenticated })
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+        
 
 @app.route("/func_parser", methods=["GET"])
 def func_parser():
