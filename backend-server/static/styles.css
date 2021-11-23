@@ -1,19 +1,29 @@
 h1 {
     color: blue;
-    font-size: 64px;
+    font-size: 48px;
+    margin: 20px 0px;
 }
 
 body {
-    height: 100vh;
     margin: 0;
     padding: 0;
 }
 
-div {
+#main {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
     height: 90%;
+}
+
+input {
+    font-size: 24px;
+    margin: 10px 0px 40px;
+}
+
+button {
+    font-size: 24px;
+    margin: 0px 0px 40px;
 }

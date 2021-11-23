@@ -6,8 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "scss": "sass --load-path=node_modules/ src/styles/index.scss:dist/css/index.css",
     "scss-watch": "sass --watch --load-path=node_modules/ src/styles/index.scss:dist/css/index.css",
-    "start": "webpack --watch --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js"
+    "build": "parcel build src/scripts/{background.js,popup.js,content.js} src/templates/* src/manifest.json && npm run scss"
   },
   "private": "true",
   "author": "",
@@ -15,14 +14,14 @@
   "dependencies": {
     "@primer/css": "^19.0.0",
     "@primer/primitives": "^7.1.0",
-    "puppeteer": "^11.0.0"
+    "webdriverio": "^7.16.8"
   },
   "devDependencies": {
-    "clean-webpack-plugin": "^4.0.0",
-    "copy-webpack-plugin": "^10.0.0",
-    "html-webpack-plugin": "^5.5.0",
-    "node-polyfill-webpack-plugin": "^1.1.4",
-    "webpack": "^5.64.2",
-    "webpack-cli": "^4.9.1"
+    "@parcel/config-webextension": "^2.0.1",
+    "parcel": "^2.0.1"
+  },
+  "@parcel/transformer-js": {
+    "inlineEnvironment": true,
+    "inlineFS": true
   }
 }

@@ -9,7 +9,7 @@ function toggleAuthView() {
     document.getElementById("post-auth").classList.toggle("d-none");
 }
 
-(function handleAuth() {
+window.addEventListener("DOMContentLoaded", function() {
     let rawAuth = localStorage.getItem("authenticated");
     let authenticated = rawAuth != null ? JSON.parse(rawAuth) : null;
 
@@ -31,12 +31,10 @@ function toggleAuthView() {
                     localStorage.setItem("authenticated", JSON.stringify(item));
                     toggleAuthView();
                 } else {
-                    document
-                        .getElementById("auth")
-                        .addEventListener("click", authenticate, false);
+                    document.getElementById("auth").addEventListener("click", authenticate, false);
                 }
             });
     } else {
-        toggleAuthView()
+        toggleAuthView();
     }
-})();
+})

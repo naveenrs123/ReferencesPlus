@@ -1,5 +1,4 @@
 # region imports
-from datetime import timedelta
 import os
 import random
 import string
@@ -93,15 +92,16 @@ def auth_callback():
 
     return redirect("https://www.github.com")
 
+
 @app.route("/authenticated", methods=["GET"])
 def authenticated():
     authenticated: bool = False
     if os.environ.get("ACCESS_TOKEN") != None:
         authenticated = True
-    response: Type[Response] = jsonify({"authenticated": authenticated })
+    response: Type[Response] = jsonify({"authenticated": authenticated})
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
-        
+
 
 @app.route("/func_parser", methods=["GET"])
 def func_parser():
