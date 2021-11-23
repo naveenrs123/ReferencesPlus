@@ -13,7 +13,6 @@ module.exports = {
     target: "web",
     resolve: {
         extensions: ['.js'],
-        modules: ['node_modules'],
         fallback: {
             "fs": false,
             "net": false,
