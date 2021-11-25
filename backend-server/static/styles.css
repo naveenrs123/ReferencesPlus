@@ -27,3 +27,8 @@ button {
     font-size: 24px;
     margin: 0px 0px 40px;
 }
+
+iframe {
+    resize: both;
+    overflow: auto;
+}

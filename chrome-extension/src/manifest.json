@@ -7,9 +7,21 @@
     "background": {
         "service_worker": "background.js"
     },
-    "permissions": ["storage", "identity", "tabs"],
+    "permissions": ["storage", "identity", "tabs", "webNavigation", "contextMenus"],
     "action": {
-        "default_popup": "popup.html"
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "static/favicon-16x16.png",
+            "32": "static/favicon-32x32.png",
+            "48": "static/favicon-32x32.png",
+            "128": "static/favicon-32x32.png"
+        }
+    },
+    "icons": {
+        "16": "static/favicon-16x16.png",
+        "32": "static/favicon-32x32.png",
+        "48": "static/favicon-32x32.png",
+        "128": "static/favicon-32x32.png"
     },
     "oauth2": {
         "client_id": "91a16e0d9c142eeac319",
@@ -17,7 +29,8 @@
     },
     "content_scripts": [
         {
-            "matches": ["http://127.0.0.1:5000/*"],
+            "matches": ["http://*/*", "https://*/*"],
+            "all_frames": true,
             "js":["content.js"]
         }
     ],
