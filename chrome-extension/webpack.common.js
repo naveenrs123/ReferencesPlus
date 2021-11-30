@@ -6,7 +6,8 @@ module.exports = {
     entry: { 
         popup: './src/scripts/popup.js', 
         background: './src/scripts/background.js', 
-        content: './src/scripts/content.js'
+        content: './src/scripts/content.js',
+        helpers: './src/scripts/helpers.js'
     },
     target: "web",
     resolve: {
@@ -23,6 +24,6 @@ module.exports = {
         })
     ],
     output: {
-        filename: '[name].js', path: path.resolve(__dirname, 'dist')
+        filename: '[name].js', path: path.resolve(__dirname, 'dist'), clean: true
     }
 }
