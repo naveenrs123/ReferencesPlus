@@ -72,6 +72,7 @@ export function buildDragHeader() {
   grab.style.alignItems = "center";
 
   text.textContent = "Move";
+  text.style.margin = "0";
   grab.appendChild(text);
   return grab;
 }
@@ -92,7 +93,7 @@ export function buildEmulatorButton(id, text) {
   btn.style.backgroundColor = "#FFFFFF";
   btn.style.position = "static";
   btn.style.border = "1px solid black";
-  btn.style.width = "95px";
+  btn.style.width = "100px";
   btn.style.textAlign = "center";
   btn.style.display = "flex";
   btn.style.justifyContent = "center";
@@ -100,6 +101,7 @@ export function buildEmulatorButton(id, text) {
 
   t.style.color = "inherit";
   t.style.backgroundColor = "inherit";
+  t.style.margin = "0";
   t.textContent = text;
 
   btn.appendChild(t);
@@ -131,7 +133,7 @@ export function shiftPosition(pos, elmntDimension, clientDimension) {
 // #region RECORDING
 // Code taken from: https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API/Recording_a_media_element
 
-export function startRecording(stream, lengthInMS) {
+export function startRecording(stream) {
   recorder = new MediaRecorder(stream);
   let data = [];
 

@@ -1,5 +1,8 @@
 import * as helpers from "./helpers";
 
+// GLOBALS for MAIN PANEL
+let emulatorActive = false;
+
 // GLOBALS for BORDER
 let border;
 let borderTimeout = null;
@@ -20,6 +23,20 @@ let downloadButton = null;
 
 // Common DOM Elements
 let body = document.querySelector("body");
+
+function setState() {
+  localStorage.setItem("borderState", JSON.stringify(borderState));
+  localStorage.setItem('tooltipState', JSON.stringify(tooltipState));
+  localStorage.setItem('recordingState', JSON.stringify(recordingState));
+  localStorage.setItem('emulatorActive', JSON.stringify(emulatorActive));
+}
+
+function getState() {
+  borderState = JSON.parse(localStorage.getItem("borderState"));
+  tooltipState = JSON.parse(localStorage.getItem("tooltipState"));
+  recordingState = JSON.parse(localStorage.getItem("recordingState"));
+  emulatorActive = JSON.parse(localStorage.getItem("emulatorActive"));
+}
 
 // #region BORDERS
 
@@ -69,17 +86,35 @@ function toggleBorders(event) {
   if (borderState) {
     button.style.color = "#000000";
     button.style.backgroundColor = "#FFFFFF";
-    button.childNodes[0].textContent = "Borders: OFF";
     window.removeEventListener("mouseover", onMouseEnterBorders);
     window.removeEventListener("mouseout", onMouseLeaveBorders);
+    borderState = false;
   } else {
     button.style.color = "#FFFFFF";
     button.style.backgroundColor = "#000000";
-    button.childNodes[0].textContent = "Borders: ON";
     window.addEventListener("mouseover", onMouseEnterBorders);
     window.addEventListener("mouseout", onMouseLeaveBorders);
+    borderState = true;
   }
-  borderState = !borderState;
+  setState();
+}
+
+function setBordersManual() {
+  let button = document.getElementById('toggle-borders');
+  console.log(button);
+  if (button) {
+    if (!borderState) {
+      button.style.color = "#000000";
+      button.style.backgroundColor = "#FFFFFF";
+      window.removeEventListener("mouseover", onMouseEnterBorders);
+      window.removeEventListener("mouseout", onMouseLeaveBorders);
+    } else {
+      button.style.color = "#FFFFFF";
+      button.style.backgroundColor = "#000000";
+      window.addEventListener("mouseover", onMouseEnterBorders);
+      window.addEventListener("mouseout", onMouseLeaveBorders);
+    }
+  }
 }
 
 /**
@@ -91,8 +126,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     let container = document.getElementById("emulator-buttons");
     if (!container) {
       createEmulatorButtons();
+      setBordersManual();
+      emulatorActive = true;
+      setState();
     } else {
       body.removeChild(container);
+      emulatorActive = false;
+      setState();
+    }
+  } else if (message.action === "initial load") {
+    getState();
+    if (emulatorActive) {
+      createEmulatorButtons();
+      setBordersManual();
+      setState();
     }
   }
   sendResponse("Response!");
@@ -184,15 +231,14 @@ function toggleTooltips(event) {
   if (tooltipState) {
     button.style.color = "#000000";
     button.style.backgroundColor = "#FFFFFF";
-    button.childNodes[0].textContent = "Tooltips: OFF";
     window.removeEventListener("mousemove", onMouseMoveTooltips);
   } else {
     button.style.color = "#FFFFFF";
     button.style.backgroundColor = "#000000";
-    button.childNodes[0].textContent = "Tooltips: ON";
     window.addEventListener("mousemove", onMouseMoveTooltips);
   }
   tooltipState = !tooltipState;
+  setState();
 }
 
 /**
@@ -228,16 +274,17 @@ function onMouseMoveTooltips(event) {
   container.style.zIndex = "200000";
   container.style.backgroundColor = "white";
   container.style.border = "1px solid black";
-  container.style.height = "40px";
+  container.style.height = "45px";
+  container.style.fontSize = "14px";
 
   // construct emulator controls.
   let grab = helpers.buildDragHeader();
-  let btn1 = helpers.buildEmulatorButton("toggle-borders", "Borders: OFF");
+  let btn1 = helpers.buildEmulatorButton("toggle-borders", "Borders");
   btn1.addEventListener("click", toggleBorders);
   let colorPicker = helpers.buildColorPicker();
-  let btn2 = helpers.buildEmulatorButton("toggle-tooltips", "Tooltips: OFF");
+  let btn2 = helpers.buildEmulatorButton("toggle-tooltips", "Tooltips");
   btn2.addEventListener("click", toggleTooltips);
-  let btn3 = helpers.buildEmulatorButton("toggle-recording", "Recording: OFF");
+  let btn3 = helpers.buildEmulatorButton("toggle-recording", "Recording");
   btn3.addEventListener("click", toggleRecording);
   let btn4 = helpers.buildEmulatorButton("refg-download", "Download");
   btn4.style.display = "none";
@@ -261,15 +308,15 @@ function toggleRecording(event) {
   if (recordingState) {
     button.style.color = "#000000";
     button.style.backgroundColor = "#FFFFFF";
-    button.childNodes[0].textContent = "Recording: OFF";
     helpers.stop(stream);
     recordingState = false;
+    setState();
   } else {
     button.style.color = "#FFFFFF";
     button.style.backgroundColor = "#000000";
-    button.childNodes[0].textContent = "Recording: ON";
     downloadButton.style.display = "none";
     recordingState = true;
+    setState();
 
     navigator.mediaDevices.getDisplayMedia({
       video: true,
@@ -284,11 +331,13 @@ function toggleRecording(event) {
       downloadButton.download = "RecordedVideo.mp4";
       downloadButton.style.display = "flex";
       recordingState = false;
+      setState();
+
     }).catch((err) => {
       button.style.color = "#000000";
       button.style.backgroundColor = "#FFFFFF";
-      button.childNodes[0].textContent = "Recording: OFF";
       recordingState = false;
+      setState();
     })
   }
 }
