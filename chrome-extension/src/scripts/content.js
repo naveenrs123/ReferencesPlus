@@ -1,4 +1,5 @@
-import * as helpers from "./helpers";
+import * as helpers from "./helpers.js";
+import * as EBML from "./EBML.js";
 
 // GLOBALS for MAIN PANEL
 let emulatorActive = false;
@@ -58,10 +59,12 @@ function onMouseEnterBorders(event) {
         `3px solid ${helpers.color}`,
         "important"
       );
-      
+
       if (recordingState) {
-        let timeStamp = (Date.now() - start) / 1000; 
-        logs.push(`${timeStamp}s - Border for: ${event.target.nodeName}, parent: ${event.target.parentNode.nodeName}, id: ${event.target.id}\n`);
+        let timeStamp = (Date.now() - start) / 1000;
+        logs.push(
+          `${timeStamp}s - Border for: ${event.target.nodeName}, parent: ${event.target.parentNode.nodeName}, id: ${event.target.id}\n`
+        );
       }
     }
   }, 500);
@@ -175,13 +178,15 @@ document.onkeydown = function (event) {
     properties["Classes"] = hoverInfo.node.classList;
     properties["Height"] = Math.round(rect.height) + "px";
     properties["Width"] = Math.round(rect.width) + "px";
-    
+
     let tooltip = createTooltip(hoverInfo.posX, hoverInfo.posY, properties);
     body.appendChild(tooltip);
 
     if (recordingState) {
-      let timeStamp = (Date.now() - start) / 1000; 
-      logs.push(`${timeStamp}s - Tooltip for: ${event.target.nodeName}, parent: ${event.target.parentNode.nodeName}, id: ${event.target.id}\n`);
+      let timeStamp = (Date.now() - start) / 1000;
+      logs.push(
+        `${timeStamp}s - Tooltip for: ${event.target.nodeName}, parent: ${event.target.parentNode.nodeName}, id: ${event.target.id}\n`
+      );
     }
   }
 
@@ -373,18 +378,22 @@ function toggleRecording(event) {
         return helpers.startRecording(stm);
       })
       .then((recordedChunks) => {
-        let recordedBlob = new Blob(recordedChunks, { type: "video/mp4" });
-        downloadButton.href = URL.createObjectURL(recordedBlob);
-        downloadButton.download = "RecordedVideo.mp4";
-        downloadButton.style.display = "flex";
-        
-        let logBlob = new Blob(logs, {type: "text/plain;charset=utf-8" });
-        logButton.href = URL.createObjectURL(logBlob);
-        logButton.download = "logs.txt";
-        logButton.style.display = "flex";
+        getSeekableBlob(
+          new Blob(recordedChunks, { type: "video/webm" }),
+          (seekableBlob) => {
+            downloadButton.href = URL.createObjectURL(seekableBlob);
+            downloadButton.download = "RecordedVideo.mp4";
+            downloadButton.style.display = "flex";
 
-        recordingState = false;
-        setState();
+            let logBlob = new Blob(logs, { type: "text/plain;charset=utf-8" });
+            logButton.href = URL.createObjectURL(logBlob);
+            logButton.download = "logs.txt";
+            logButton.style.display = "flex";
+
+            recordingState = false;
+            setState();
+          }
+        );
       })
       .catch((err) => {
         button.style.color = "#000000";
@@ -395,12 +404,38 @@ function toggleRecording(event) {
   }
 }
 
-/*
-THINGS TO NOTE:
+/**
+ * 
+ * @param inputBlob Blob representing a video that is currently not seekable.
+ * @param callback 
+ */
+function getSeekableBlob(inputBlob, callback) {
+  // EBML.js copyrights goes to: https://github.com/legokichi/ts-ebml
+  if (typeof EBML === "undefined") {
+    throw new Error("Please link: https://www.webrtc-experiment.com/EBML.js");
+  }
+  var reader = new EBML.Reader();
+  var decoder = new EBML.Decoder();
+  var tools = EBML.tools;
 
-A MediaStream is tied to its responsible document, so in general, 
-you cannot continue recording when the tab is reloaded. You must start the 
-recording from another document (popup/tab) that remains open while
-the recording is in progress.
+  var fileReader = new FileReader();
+  fileReader.onload = function (e) {
+    var ebmlElms = decoder.decode(this.result);
+    ebmlElms.forEach(function (element) {
+      reader.read(element);
+    });
+    reader.stop();
+    var refinedMetadataBuf = tools.makeMetadataSeekable(
+      reader.metadatas,
+      reader.duration,
+      reader.cues
+    );
+    var body = this.result.slice(reader.metadataSize);
+    var newBlob = new Blob([refinedMetadataBuf, body], {
+      type: "video/mp4",
+    });
 
-*/
+    callback(newBlob);
+  };
+  fileReader.readAsArrayBuffer(inputBlob);
+}

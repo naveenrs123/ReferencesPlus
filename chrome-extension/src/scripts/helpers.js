@@ -1,5 +1,3 @@
-import { RecordRTC } from "./RecordRTC";
-
 export let color = "#ee2020";
 export let recorder = null;
 let draggable = true;
@@ -135,11 +133,7 @@ export function shiftPosition(pos, elmntDimension, clientDimension) {
 // Code taken from: https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API/Recording_a_media_element
 
 export function startRecording(stream) {
-  recorder = RecordRTC(stream, { type: 'video'});
-
-  recorder.startRecording();
-
-/*   recorder = new MediaRecorder(stream);
+  recorder = new MediaRecorder(stream);
   let data = [];
 
   recorder.ondataavailable = (event) => data.push(event.data);
@@ -150,18 +144,14 @@ export function startRecording(stream) {
     recorder.onerror = (event) => reject(event.name);
   });
 
-  return stopped.then(() => data); */
+  return stopped.then(() => data);
 }
 
 export function stop(stream) {
   if (recorder) {
-    recorder.stopRecording()
-  }
-
-/*   if (recorder) {
     recorder.state == "recording" && recorder.stop();
     stream.getTracks().forEach((track) => track.stop());
-  } */
+  }
 }
 
 export function forbiddenElement(event) {
