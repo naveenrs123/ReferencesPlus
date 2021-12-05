@@ -20,22 +20,25 @@ let hoverInfo = {
 let recordingState = false;
 let stream = null;
 let downloadButton = null;
+let logButton = null;
+let start = null;
+let logs = [];
 
 // Common DOM Elements
 let body = document.querySelector("body");
 
 function setState() {
-  localStorage.setItem("borderState", JSON.stringify(borderState));
-  localStorage.setItem('tooltipState', JSON.stringify(tooltipState));
-  localStorage.setItem('recordingState', JSON.stringify(recordingState));
-  localStorage.setItem('emulatorActive', JSON.stringify(emulatorActive));
+  sessionStorage.setItem("borderState", JSON.stringify(borderState));
+  sessionStorage.setItem("tooltipState", JSON.stringify(tooltipState));
+  sessionStorage.setItem("recordingState", JSON.stringify(recordingState));
+  sessionStorage.setItem("emulatorActive", JSON.stringify(emulatorActive));
 }
 
 function getState() {
-  borderState = JSON.parse(localStorage.getItem("borderState"));
-  tooltipState = JSON.parse(localStorage.getItem("tooltipState"));
-  recordingState = JSON.parse(localStorage.getItem("recordingState"));
-  emulatorActive = JSON.parse(localStorage.getItem("emulatorActive"));
+  borderState = JSON.parse(sessionStorage.getItem("borderState"));
+  tooltipState = JSON.parse(sessionStorage.getItem("tooltipState"));
+  recordingState = JSON.parse(sessionStorage.getItem("recordingState"));
+  emulatorActive = JSON.parse(sessionStorage.getItem("emulatorActive"));
 }
 
 // #region BORDERS
@@ -46,7 +49,7 @@ function getState() {
  *
  * @param event A mouseover event.
  */
- function onMouseEnterBorders(event) {
+function onMouseEnterBorders(event) {
   borderTimeout = setTimeout(() => {
     if (!helpers.forbiddenElement(event)) {
       border = event.target.style.border;
@@ -55,8 +58,13 @@ function getState() {
         `3px solid ${helpers.color}`,
         "important"
       );
+      
+      if (recordingState) {
+        let timeStamp = (Date.now() - start) / 1000; 
+        logs.push(`${timeStamp}s - Border for: ${event.target.nodeName}, parent: ${event.target.parentNode.nodeName}, id: ${event.target.id}\n`);
+      }
     }
-  }, 250);
+  }, 500);
 }
 
 /**
@@ -100,8 +108,7 @@ function toggleBorders(event) {
 }
 
 function setBordersManual() {
-  let button = document.getElementById('toggle-borders');
-  console.log(button);
+  let button = document.getElementById("toggle-borders");
   if (button) {
     if (!borderState) {
       button.style.color = "#000000";
@@ -127,6 +134,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!container) {
       createEmulatorButtons();
       setBordersManual();
+      setTooltipsManual();
       emulatorActive = true;
       setState();
     } else {
@@ -139,6 +147,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (emulatorActive) {
       createEmulatorButtons();
       setBordersManual();
+      setTooltipsManual();
       setState();
     }
   }
@@ -156,27 +165,30 @@ document.onkeydown = function (event) {
       body.removeChild(oldTooltip);
     }
     let properties = {};
+    let rect = hoverInfo.node.getBoundingClientRect();
+
     properties["Node Name"] = hoverInfo.node.nodeName;
     properties["Parent"] = hoverInfo.node.parentNode
       ? hoverInfo.node.parentNode.nodeName
       : "TOP LEVEL";
     properties["Id"] = hoverInfo.node.id != "" ? hoverInfo.node.id : "N/A";
     properties["Classes"] = hoverInfo.node.classList;
-
-    let rect = hoverInfo.node.getBoundingClientRect();
-
     properties["Height"] = Math.round(rect.height) + "px";
     properties["Width"] = Math.round(rect.width) + "px";
+    
     let tooltip = createTooltip(hoverInfo.posX, hoverInfo.posY, properties);
     body.appendChild(tooltip);
-  }
-};
 
-document.onkeyup = function (event) {
-  if (event.altKey || event.key.toLowerCase() == "t") {
-    let tooltip = document.getElementById("refg-tooltip");
-    if (tooltip) {
-      body.removeChild(tooltip);
+    if (recordingState) {
+      let timeStamp = (Date.now() - start) / 1000; 
+      logs.push(`${timeStamp}s - Tooltip for: ${event.target.nodeName}, parent: ${event.target.parentNode.nodeName}, id: ${event.target.id}\n`);
+    }
+  }
+
+  if (event.altKey && event.key.toLowerCase() === "y") {
+    let oldTooltip = document.getElementById("refg-tooltip");
+    if (oldTooltip) {
+      body.removeChild(oldTooltip);
     }
   }
 };
@@ -208,11 +220,25 @@ function createTooltip(posX, posY, properties) {
     container.appendChild(content);
   }
 
-  posX = helpers.shiftPosition(posX, 300, document.documentElement.scrollWidth);
-  posY = helpers.shiftPosition(posY, 300, document.documentElement.scrollHeight);
+  let computedStyle = getComputedStyle(hoverInfo.node);
+
+  posX = helpers.shiftPosition(
+    posX,
+    300,
+    computedStyle.position == "fixed"
+      ? document.documentElement.clientWidth
+      : document.documentElement.scrollWidth
+  );
+  posY = helpers.shiftPosition(
+    posY,
+    300,
+    computedStyle.position == "fixed"
+      ? document.documentElement.clientHeight
+      : document.documentElement.scrollHeight
+  );
 
   let sheet = document.styleSheets[0];
-  let refgTooltipRules = `.refg-tooltip { width: fit-content; max-width: 300px; background-color: #FFF; color: #000; border-radius: 10px; border: 3px solid #000; position: absolute; top: ${posY}px; left: ${posX}px; padding: 15px; z-index: 200000; font-size: 12pt; }`;
+  let refgTooltipRules = `.refg-tooltip { width: fit-content; max-width: 300px; max-height: 300px; overflow-y: auto; background-color: #FFF; color: #000; border-radius: 10px; border: 3px solid #000; position: absolute; top: ${posY}px; left: ${posX}px; padding: 15px; z-index: 200000; font-size: 12pt; }`;
 
   sheet.insertRule(refgTooltipRules, sheet.cssRules.length);
 
@@ -241,6 +267,19 @@ function toggleTooltips(event) {
   setState();
 }
 
+function setTooltipsManual(event) {
+  let button = document.getElementById("toggle-tooltips");
+  if (!tooltipState) {
+    button.style.color = "#000000";
+    button.style.backgroundColor = "#FFFFFF";
+    window.removeEventListener("mousemove", onMouseMoveTooltips);
+  } else {
+    button.style.color = "#FFFFFF";
+    button.style.backgroundColor = "#000000";
+    window.addEventListener("mousemove", onMouseMoveTooltips);
+  }
+}
+
 /**
  * Mouseover Event listener for the window when tooltips are enabled. Extracts useful
  * properties from the moused-over element and creates a tooltip to display this information
@@ -262,13 +301,13 @@ function onMouseMoveTooltips(event) {
  * Creates the emulator buttons panel, which contains all the controls needed
  * for emulation and video capture.
  */
- function createEmulatorButtons() {
+function createEmulatorButtons() {
   // Set up container
   let container = document.createElement("div");
   container.id = "emulator-buttons";
   container.style.display = "flex";
   container.style.flexDirection = "row";
-  container.style.position = "absolute";
+  container.style.position = "fixed";
   container.style.top = "60px";
   container.style.left = "20px";
   container.style.zIndex = "200000";
@@ -289,6 +328,9 @@ function onMouseMoveTooltips(event) {
   let btn4 = helpers.buildEmulatorButton("refg-download", "Download");
   btn4.style.display = "none";
   downloadButton = btn4;
+  let btn5 = helpers.buildEmulatorButton("refg-log", "Log");
+  btn5.style.display = "none";
+  logButton = btn5;
 
   // build and insert component
   container.appendChild(grab);
@@ -297,6 +339,7 @@ function onMouseMoveTooltips(event) {
   container.appendChild(btn2);
   container.appendChild(btn3);
   container.appendChild(btn4);
+  container.appendChild(btn5);
 
   helpers.dragElement(container);
 
@@ -318,26 +361,46 @@ function toggleRecording(event) {
     recordingState = true;
     setState();
 
-    navigator.mediaDevices.getDisplayMedia({
-      video: true,
-      audio: false
-    }).then(stm => {
-      stream = stm;
-      return helpers.startRecording(stm, 10000);
-    })
-    .then (recordedChunks => {
-      let recordedBlob = new Blob(recordedChunks, { type: "video/mp4" });
-      downloadButton.href = URL.createObjectURL(recordedBlob);
-      downloadButton.download = "RecordedVideo.mp4";
-      downloadButton.style.display = "flex";
-      recordingState = false;
-      setState();
+    navigator.mediaDevices
+      .getDisplayMedia({
+        video: true,
+        audio: false,
+      })
+      .then((stm) => {
+        stream = stm;
+        logs = [];
+        start = Date.now();
+        return helpers.startRecording(stm);
+      })
+      .then((recordedChunks) => {
+        let recordedBlob = new Blob(recordedChunks, { type: "video/mp4" });
+        downloadButton.href = URL.createObjectURL(recordedBlob);
+        downloadButton.download = "RecordedVideo.mp4";
+        downloadButton.style.display = "flex";
+        
+        let logBlob = new Blob(logs, {type: "text/plain;charset=utf-8" });
+        logButton.href = URL.createObjectURL(logBlob);
+        logButton.download = "logs.txt";
+        logButton.style.display = "flex";
 
-    }).catch((err) => {
-      button.style.color = "#000000";
-      button.style.backgroundColor = "#FFFFFF";
-      recordingState = false;
-      setState();
-    })
+        recordingState = false;
+        setState();
+      })
+      .catch((err) => {
+        button.style.color = "#000000";
+        button.style.backgroundColor = "#FFFFFF";
+        recordingState = false;
+        setState();
+      });
   }
 }
+
+/*
+THINGS TO NOTE:
+
+A MediaStream is tied to its responsible document, so in general, 
+you cannot continue recording when the tab is reloaded. You must start the 
+recording from another document (popup/tab) that remains open while
+the recording is in progress.
+
+*/

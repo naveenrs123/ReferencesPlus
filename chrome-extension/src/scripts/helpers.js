@@ -1,5 +1,8 @@
+import { RecordRTC } from "./RecordRTC";
+
 export let color = "#ee2020";
 export let recorder = null;
+let draggable = true;
 
 /**
  * Function that allows an element to be dragged across a page.
@@ -74,6 +77,7 @@ export function buildDragHeader() {
   text.textContent = "Move";
   text.style.margin = "0";
   grab.appendChild(text);
+  
   return grab;
 }
 
@@ -93,7 +97,6 @@ export function buildEmulatorButton(id, text) {
   btn.style.backgroundColor = "#FFFFFF";
   btn.style.position = "static";
   btn.style.border = "1px solid black";
-  btn.style.width = "100px";
   btn.style.textAlign = "center";
   btn.style.display = "flex";
   btn.style.justifyContent = "center";
@@ -113,7 +116,7 @@ export function buildColorPicker() {
   colorPicker.type = "color";
   colorPicker.id = "border-color-picker";
   colorPicker.value = color;
-  colorPicker.style.height = "inherit";
+  colorPicker.style.height = "auto";
   colorPicker.addEventListener("input", (event) => {
     color = event.target.value;
   });
@@ -125,8 +128,6 @@ export function shiftPosition(pos, elmntDimension, clientDimension) {
     pos -= 25;
   }
 
-  //pos = pos - 30 > 10 ? pos - 30 : pos;
-
   return pos;
 }
 
@@ -134,7 +135,11 @@ export function shiftPosition(pos, elmntDimension, clientDimension) {
 // Code taken from: https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API/Recording_a_media_element
 
 export function startRecording(stream) {
-  recorder = new MediaRecorder(stream);
+  recorder = RecordRTC(stream, { type: 'video'});
+
+  recorder.startRecording();
+
+/*   recorder = new MediaRecorder(stream);
   let data = [];
 
   recorder.ondataavailable = (event) => data.push(event.data);
@@ -145,14 +150,18 @@ export function startRecording(stream) {
     recorder.onerror = (event) => reject(event.name);
   });
 
-  return stopped.then(() => data);
+  return stopped.then(() => data); */
 }
 
 export function stop(stream) {
   if (recorder) {
+    recorder.stopRecording()
+  }
+
+/*   if (recorder) {
     recorder.state == "recording" && recorder.stop();
     stream.getTracks().forEach((track) => track.stop());
-  }
+  } */
 }
 
 export function forbiddenElement(event) {
@@ -165,35 +174,3 @@ export function forbiddenElement(event) {
 }
 
 // #endregion RECORDING
-
-/* 
-function createFrame() {
-  let entryPoint = document.getElementById("main");
-
-  let fragment = document.createDocumentFragment();
-  let miniForm = document.createElement("div");
-
-  let input = document.createElement("input");
-  input.type = "text";
-  input.placeholder = "www.google.com";
-
-  let button = document.createElement("button");
-  button.innerText = "Load URL";
-
-  let frame = document.createElement("iframe");
-  frame.height = "700";
-  frame.width = "1200";
-
-  miniForm.appendChild(input);
-  miniForm.appendChild(button);
-
-  fragment.appendChild(miniForm);
-  fragment.appendChild(frame);
-
-  entryPoint.appendChild(fragment);
-
-  button.addEventListener("click", () => {
-    frame.src = input.value;
-  });
-}
- */

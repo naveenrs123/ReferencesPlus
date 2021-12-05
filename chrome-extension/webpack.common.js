@@ -7,7 +7,8 @@ module.exports = {
         popup: './src/scripts/popup.js', 
         background: './src/scripts/background.js', 
         content: './src/scripts/content.js',
-        helpers: './src/scripts/helpers.js'
+        helpers: './src/scripts/helpers.js',
+        RecordRTC: './src/scripts/RecordRTC.js'
     },
     target: "web",
     resolve: {
