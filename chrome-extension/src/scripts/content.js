@@ -139,15 +139,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       setBordersManual();
       setTooltipsManual();
       emulatorActive = true;
+      window.addEventListener("mousemove", onMouseMoveTooltips);
       setState();
     } else {
       body.removeChild(container);
       emulatorActive = false;
+      window.removeEventListener("mousemove", onMouseMoveTooltips);
       setState();
     }
   } else if (message.action === "initial load") {
     getState();
     if (emulatorActive) {
+      window.addEventListener("mousemove", onMouseMoveTooltips);
       createEmulatorButtons();
       setBordersManual();
       setTooltipsManual();
@@ -179,7 +182,7 @@ document.onkeydown = function (event) {
     properties["Height"] = Math.round(rect.height) + "px";
     properties["Width"] = Math.round(rect.width) + "px";
 
-    let tooltip = createTooltip(hoverInfo.posX, hoverInfo.posY, properties);
+    let tooltip = createTooltip(properties);
     body.appendChild(tooltip);
 
     if (recordingState) {
@@ -196,6 +199,23 @@ document.onkeydown = function (event) {
       body.removeChild(oldTooltip);
     }
   }
+
+  if (
+    event.altKey &&
+    event.shiftKey &&
+    event.key.toLowerCase() === "d" &&
+    emulatorActive
+  ) {
+    let DOMChangeForm = createDOMChangeForm();
+    body.appendChild(DOMChangeForm);
+  }
+
+  if (event.altKey && event.shiftKey && event.key.toLowerCase() === "e") {
+    let DOMChangeForm = document.getElementById("refg-dom-form");
+    if (DOMChangeForm) {
+      body.removeChild(DOMChangeForm);
+    }
+  }
 };
 
 /**
@@ -207,7 +227,7 @@ document.onkeydown = function (event) {
  * @param properties An object containing useful properties of the element.
  * @returns the tooltip.
  */
-function createTooltip(posX, posY, properties) {
+function createTooltip(properties) {
   let container = document.createElement("div");
   container.classList.add("refg-tooltip");
   container.id = "refg-tooltip";
@@ -227,15 +247,15 @@ function createTooltip(posX, posY, properties) {
 
   let computedStyle = getComputedStyle(hoverInfo.node);
 
-  posX = helpers.shiftPosition(
-    posX,
+  let posX = helpers.shiftPosition(
+    hoverInfo.posX,
     300,
     computedStyle.position == "fixed"
       ? document.documentElement.clientWidth
       : document.documentElement.scrollWidth
   );
-  posY = helpers.shiftPosition(
-    posY,
+  let posY = helpers.shiftPosition(
+    hoverInfo.posY,
     300,
     computedStyle.position == "fixed"
       ? document.documentElement.clientHeight
@@ -262,11 +282,9 @@ function toggleTooltips(event) {
   if (tooltipState) {
     button.style.color = "#000000";
     button.style.backgroundColor = "#FFFFFF";
-    window.removeEventListener("mousemove", onMouseMoveTooltips);
   } else {
     button.style.color = "#FFFFFF";
     button.style.backgroundColor = "#000000";
-    window.addEventListener("mousemove", onMouseMoveTooltips);
   }
   tooltipState = !tooltipState;
   setState();
@@ -277,11 +295,9 @@ function setTooltipsManual(event) {
   if (!tooltipState) {
     button.style.color = "#000000";
     button.style.backgroundColor = "#FFFFFF";
-    window.removeEventListener("mousemove", onMouseMoveTooltips);
   } else {
     button.style.color = "#FFFFFF";
     button.style.backgroundColor = "#000000";
-    window.addEventListener("mousemove", onMouseMoveTooltips);
   }
 }
 
@@ -405,9 +421,9 @@ function toggleRecording(event) {
 }
 
 /**
- * 
+ *
  * @param inputBlob Blob representing a video that is currently not seekable.
- * @param callback 
+ * @param callback
  */
 function getSeekableBlob(inputBlob, callback) {
   // EBML.js copyrights goes to: https://github.com/legokichi/ts-ebml
@@ -438,4 +454,80 @@ function getSeekableBlob(inputBlob, callback) {
     callback(newBlob);
   };
   fileReader.readAsArrayBuffer(inputBlob);
+}
+
+function createDOMChangeForm() {
+  let container = document.createElement("div");
+  container.id = "refg-dom-form";
+  container.style.backgroundColor = "#FFF";
+  container.style.color = "#000";
+
+  let form = document.createElement("form");
+  form.style.display = "flex";
+  form.style.flexDirection = "column";
+
+  let title = document.createElement("h3");
+  title.textContent = "DOM Change Form";
+  title.style.marginBottom = "15px";
+  title.style.color = "#4461EE";
+
+  let label = document.createElement("label");
+  label.setAttribute("for", "dom-element-selector");
+  label.style.fontSize = "18px";
+  label.textContent = "CSS Query Selector";
+
+  let text = document.createElement("input");
+  text.placeholder = "Blank for current element.";
+  text.id = "dom-element-selector";
+  text.value = "";
+  text.style.marginBottom = "10px";
+
+  let subtitle = document.createElement("label");
+  subtitle.style.fontSize = "18px";
+  subtitle.setAttribute("for", "dom-change-text");
+  subtitle.textContent = "Enter properties in JSON Format";
+
+  let textarea = document.createElement("textarea");
+  textarea.id = "dom-change-text";
+  textarea.textContent = "{\n\t'property': 'value'\n}";
+  textarea.style.marginBottom = "15px";
+
+  let submit = document.createElement("input");
+  submit.type = "submit";
+  submit.value = "Submit";
+
+  
+
+  form.appendChild(label);
+  form.appendChild(text);
+  form.appendChild(subtitle);
+  form.appendChild(textarea);
+  form.appendChild(submit);
+
+  container.appendChild(title);
+  container.appendChild(form);
+
+  let computedStyle = getComputedStyle(hoverInfo.node);
+
+  let posX = helpers.shiftPosition(
+    hoverInfo.posX,
+    400,
+    computedStyle.position == "fixed"
+      ? document.documentElement.clientWidth
+      : document.documentElement.scrollWidth
+  );
+  let posY = helpers.shiftPosition(
+    hoverInfo.posY,
+    500,
+    computedStyle.position == "fixed"
+      ? document.documentElement.clientHeight
+      : document.documentElement.scrollHeight
+  );
+
+  let sheet = document.styleSheets[0];
+  let refgDomFormRules = `#refg-dom-form { width: fit-content; max-width: 400px; max-height: 500px; overflow-y: auto; background-color: #FFF; color: #000; border-radius: 10px; border: 3px solid #000; position: absolute; top: ${posY}px; left: ${posX}px; padding: 15px; z-index: 200000; font-size: 12pt; }`;
+
+  sheet.insertRule(refgDomFormRules, sheet.cssRules.length);
+
+  return container;
 }

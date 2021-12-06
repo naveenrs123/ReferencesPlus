@@ -8,7 +8,7 @@ module.exports = {
         background: './src/scripts/background.js', 
         content: './src/scripts/content.js',
         helpers: './src/scripts/helpers.js',
-        RecordRTC: './src/scripts/RecordRTC.js'
+        EBML: './src/scripts/EBML.js'
     },
     target: "web",
     resolve: {
