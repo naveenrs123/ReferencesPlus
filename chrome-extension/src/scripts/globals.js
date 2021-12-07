@@ -1,0 +1,54 @@
+// STATE
+let emulatorActive = false;
+let tooltipState = false;
+let recordingState = false;
+let borderState = false;
+
+// BORDER 
+let border;
+let borderTimeout = null;
+
+// TOOLTIPS
+let hoverInfo = {
+  node: null,
+  posX: 0,
+  posY: 0,
+};
+
+// RECORDING
+let stream = null;
+let downloadButton = null;
+let logButton = null;
+let start = null;
+let logs = [];
+
+// DOM CHANGE FORM
+let DOMFormInfo = {
+  node: null,
+  posX: 0,
+  posY: 0
+};
+let DOMFormOpen = false;
+
+// Common DOM Elements
+let body = document.querySelector("body");
+
+let globals = {
+    emulatorActive: emulatorActive,
+    tooltipState: tooltipState,
+    recordingState: recordingState,
+    borderState: borderState,
+    border: border,
+    borderTimeout: borderTimeout,
+    hoverInfo: hoverInfo,
+    stream: stream,
+    downloadButton: downloadButton,
+    logButton: logButton,
+    start: start,
+    logs: logs,
+    DOMFormInfo: DOMFormInfo,
+    DOMFormOpen: DOMFormOpen,
+    body: body
+}
+
+export default globals;

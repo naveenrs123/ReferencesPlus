@@ -8,7 +8,8 @@ module.exports = {
         background: './src/scripts/background.js', 
         content: './src/scripts/content.js',
         helpers: './src/scripts/helpers.js',
-        EBML: './src/scripts/EBML.js'
+        EBML: './src/scripts/EBML.js',
+        gloabls: './src/scripts/globals.js'
     },
     target: "web",
     resolve: {

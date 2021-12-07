@@ -1,6 +1,22 @@
+import * as EBML from "./EBML.js";
+import g from "./globals.js";
+
 export let color = "#ee2020";
 export let recorder = null;
-let draggable = true;
+
+export function setState() {
+  sessionStorage.setItem("borderState", JSON.stringify(g.borderState));
+  sessionStorage.setItem("tooltipState", JSON.stringify(g.tooltipState));
+  sessionStorage.setItem("recordingState", JSON.stringify(g.recordingState));
+  sessionStorage.setItem("emulatorActive", JSON.stringify(g.emulatorActive));
+}
+
+export function getState() {
+  g.borderState = JSON.parse(sessionStorage.getItem("borderState"));
+  g.tooltipState = JSON.parse(sessionStorage.getItem("tooltipState"));
+  g.recordingState = JSON.parse(sessionStorage.getItem("recordingState"));
+  g.emulatorActive = JSON.parse(sessionStorage.getItem("emulatorActive"));
+}
 
 /**
  * Function that allows an element to be dragged across a page.
@@ -62,7 +78,7 @@ export function dragElement(elmnt) {
 export function buildDragHeader() {
   let grab = document.createElement("div");
   let text = document.createElement("p");
-  grab.id = "emulator-buttons-header";
+  grab.id = "refg-emulator-header";
   grab.style.backgroundColor = "blue";
   grab.style.cursor = "move";
   grab.style.color = "#FFFFFF";
@@ -155,12 +171,102 @@ export function stop(stream) {
 }
 
 export function forbiddenElement(event) {
-  return (
-    event.target.id == "emulator-buttons" || event.target.parentNode.id == "emulator-buttons" ||
-    event.target.id == "refg-tooltip" || event.target.parentNode.id == "toggle-borders" ||
-    event.target.parentNode.id == "toggle-tooltips" || event.target.parentNode.id == "toggle-recording" ||
-    event.target.parentNode.id == "refg-download" || event.target.parentNode.id == "emulator-buttons-header"
-  );
+  let emulatorContainer = document.getElementById("refg-emulator");
+  let tooltip = document.getElementById("refg-tooltip");
+  let DOMChangeForm = document.getElementById('refg-dom-form');
+
+  let targetId = event.target.id;
+
+  let isForbidden = 
+  targetId == "refg-emulator" || targetId == "refg-tooltip" || targetId == "refg-dom-form"
+  || (emulatorContainer != null && emulatorContainer.contains(event.target)) 
+  || (tooltip != null && tooltip?.contains(event.target)) 
+  || (DOMChangeForm != null && DOMChangeForm?.contains(event.target));
+
+  return isForbidden;
+}
+
+/**
+ *
+ * @param inputBlob Blob representing a video that is currently not seekable.
+ * @param callback
+ */
+export function getSeekableBlob(inputBlob, callback) {
+  // EBML.js copyrights goes to: https://github.com/legokichi/ts-ebml
+  if (typeof EBML === "undefined") {
+    throw new Error("Please link: https://www.webrtc-experiment.com/EBML.js");
+  }
+  let reader = new EBML.Reader();
+  let decoder = new EBML.Decoder();
+  let tools = EBML.tools;
+
+  let fileReader = new FileReader();
+  fileReader.onload = function (e) {
+    let ebmlElms = decoder.decode(this.result);
+    ebmlElms.forEach(function (element) {
+      reader.read(element);
+    });
+    reader.stop();
+    let refinedMetadataBuf = tools.makeMetadataSeekable(
+      reader.metadatas,
+      reader.duration,
+      reader.cues
+    );
+    let body = this.result.slice(reader.metadataSize);
+    let newBlob = new Blob([refinedMetadataBuf, body], {
+      type: "video/mp4",
+    });
+
+    callback(newBlob);
+  };
+  fileReader.readAsArrayBuffer(inputBlob);
 }
 
 // #endregion RECORDING
+
+export function toggleButton(state, eventListeners = {}, success = null, failure = null) {
+  return function (event) {
+    let button = event.currentTarget;
+    if (g[state]) {
+      button.style.color = "#000000";
+      button.style.backgroundColor = "#FFFFFF";
+      for (let listener in eventListeners) {
+        window.removeEventListener(listener, eventListeners[listener]);
+      }
+      g[state] = false;
+      if (success) {
+        success();
+      }
+    } else {
+      button.style.color = "#FFFFFF";
+      button.style.backgroundColor = "#000000";
+      for (let listener in eventListeners) {
+        window.addEventListener(listener, eventListeners[listener]);
+      }
+      g[state] = true;
+      if (failure) {
+        failure();
+      }
+    }
+    helpers.setState();
+  };
+}
+
+export function setButtonManual(id, state, eventListeners = {}) {
+  let button = document.getElementById(id);
+  if (button) {
+    if (!g[state]) {
+      button.style.color = "#000000";
+      button.style.backgroundColor = "#FFFFFF";
+      for (let listener in eventListeners) {
+        window.removeEventListener(listener, eventListeners[listener]);
+      }
+    } else {
+      button.style.color = "#FFFFFF";
+      button.style.backgroundColor = "#000000";
+      for (let listener in eventListeners) {
+        window.addEventListener(listener, eventListeners[listener]);
+      }
+    }
+  }
+}
