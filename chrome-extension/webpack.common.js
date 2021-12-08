@@ -6,10 +6,17 @@ module.exports = {
     entry: { 
         popup: './src/scripts/popup.js', 
         background: './src/scripts/background.js', 
-        content: './src/scripts/content.js',
-        helpers: './src/scripts/helpers.js',
+        content: {
+            import: './src/scripts/content.js',
+            dependOn: ['helpers', 'globals']
+        },
+        helpers: {
+            import: './src/scripts/helpers.js',
+            dependOn: 'globals'
+        },
         EBML: './src/scripts/EBML.js',
-        gloabls: './src/scripts/globals.js'
+        globals: './src/scripts/globals.js',
+        html2canvas: "./src/scripts/html2canvas.js"
     },
     target: "web",
     resolve: {
@@ -27,5 +34,10 @@ module.exports = {
     ],
     output: {
         filename: '[name].js', path: path.resolve(__dirname, 'dist'), clean: true
+    },
+    optimization: {
+        splitChunks: {
+            chunks: 'all'
+        }
     }
 }

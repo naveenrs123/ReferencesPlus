@@ -248,7 +248,7 @@ export function toggleButton(state, eventListeners = {}, success = null, failure
         failure();
       }
     }
-    helpers.setState();
+    setState();
   };
 }
 

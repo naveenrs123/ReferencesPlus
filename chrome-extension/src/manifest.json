@@ -31,11 +31,7 @@
         {
             "matches": ["http://*/*", "https://*/*"],
             "all_frames": true,
-            "js":["content.js"]
+            "js":["globals.js", "helpers.js", "content.js"]
         }
-    ],
-    "web_accessible_resources": [{
-        "resources": ["content.js"],
-        "matches": ["http://127.0.0.1:5000/*"]
-      }]
+    ]
 }

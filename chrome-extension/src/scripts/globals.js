@@ -15,12 +15,14 @@ let hoverInfo = {
   posY: 0,
 };
 
-// RECORDING
+// RECORDING AND SCREENSHOTS
 let stream = null;
 let downloadButton = null;
 let logButton = null;
 let start = null;
 let logs = [];
+
+let dlScreenshotButton = null;
 
 // DOM CHANGE FORM
 let DOMFormInfo = {
@@ -29,6 +31,7 @@ let DOMFormInfo = {
   posY: 0
 };
 let DOMFormOpen = false;
+
 
 // Common DOM Elements
 let body = document.querySelector("body");
@@ -44,6 +47,7 @@ let globals = {
     stream: stream,
     downloadButton: downloadButton,
     logButton: logButton,
+    dlScreenshotButton: dlScreenshotButton,
     start: start,
     logs: logs,
     DOMFormInfo: DOMFormInfo,
