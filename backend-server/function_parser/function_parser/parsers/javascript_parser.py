@@ -4,6 +4,7 @@ from function_parser.parsers.language_parser import LanguageParser, match_from_s
     node_parent
 from function_parser.parsers.commentutils import get_docstring_summary, strip_c_style_comment_delimiters
 
+import sys
 
 class JavascriptParser(LanguageParser):
 
@@ -71,6 +72,7 @@ class JavascriptParser(LanguageParser):
                     'type': node_type,
                     'identifier': metadata['identifier'],
                     'parameters': metadata['parameters'],
+                    'return_statement': metadata['return_statement'],
                     'function': match_from_span(function_node, blob),
                     'function_tokens': tokenize_code(function_node, blob),
                     'docstring': docstring,
@@ -86,11 +88,24 @@ class JavascriptParser(LanguageParser):
         metadata = {
             'identifier': '',
             'parameters': '',
+            'return_statement': ''
         }
         identifier_nodes = [child for child in function_node.children if child.type == 'identifier']
         formal_parameters_nodes = [child for child in function_node.children if child.type == 'formal_parameters']
+        
+        """
+        return_statement_nodes = []
+        for statement_block in function_node.children:
+            if statement_block.type == "statement_block":
+                for statement in statement_block.children:
+                    if statement.type == "return_statement":
+                        return_statement_nodes.append(statement)
+        """
+        
         if identifier_nodes:
             metadata['identifier'] = match_from_span(identifier_nodes[0], blob)
         if formal_parameters_nodes:
             metadata['parameters'] = match_from_span(formal_parameters_nodes[0], blob)
+        # if return_statement_nodes:
+        #     metadata['return_statement'] = match_from_span(return_statement_nodes[0], blob)
         return metadata

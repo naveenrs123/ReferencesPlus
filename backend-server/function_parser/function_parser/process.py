@@ -137,8 +137,6 @@ class DataProcessor:
             'docstring_tokens': tokenize_docstring(function['docstring_summary']),
             'function': function['function'].strip(),
             'function_tokens': function['function_tokens'],
-            'start': function['start_point'][0] + 1,
-            'end':function['end_point'][0] + 1,
             'url': 'https://github.com/{}/blob/{}/{}#L{}-L{}'.format(nwo, sha, path, function['start_point'][0] + 1,
                                                                      function['end_point'][0] + 1)
         }
@@ -170,6 +168,7 @@ class DataProcessor:
             with open(filepath) as source_code:
                 blob = source_code.read()
             tree = DataProcessor.PARSER.parse(blob.encode())
+
             return (nwo, path, self.language_parser.get_definition(tree, blob))
         except (UnicodeDecodeError, FileNotFoundError, IsADirectoryError, ValueError, OSError):
             return None

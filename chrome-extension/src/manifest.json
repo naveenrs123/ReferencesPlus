@@ -30,8 +30,13 @@
     "content_scripts": [
         {
             "matches": ["http://*/*", "https://*/*"],
-            "all_frames": true,
-            "js":["globals.js", "helpers.js", "content.js"]
+            "js":["globals.js", "helpers.js", "rrweb.js", "content.js"]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": ["rrweb.js"],
+            "matches": ["http://*/*", "https://*/*"]
         }
     ]
 }

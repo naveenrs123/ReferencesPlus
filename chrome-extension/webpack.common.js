@@ -16,7 +16,8 @@ module.exports = {
         },
         EBML: './src/scripts/EBML.js',
         globals: './src/scripts/globals.js',
-        html2canvas: "./src/scripts/html2canvas.js"
+        html2canvas: "./src/scripts/html2canvas.js",
+        rrweb: "./src/scripts/rrweb.js"
     },
     target: "web",
     resolve: {
