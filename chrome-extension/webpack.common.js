@@ -6,18 +6,21 @@ module.exports = {
     entry: { 
         popup: './src/scripts/popup.js', 
         background: './src/scripts/background.js', 
+        content: './src/scripts/content.js',
+        /*
         content: {
             import: './src/scripts/content.js',
             dependOn: ['helpers', 'globals']
         },
         helpers: {
             import: './src/scripts/helpers.js',
-            dependOn: 'globals'
+            dependOn: ['globals', 'EBML']
         },
         EBML: './src/scripts/EBML.js',
         globals: './src/scripts/globals.js',
         html2canvas: "./src/scripts/html2canvas.js",
         rrweb: "./src/scripts/rrweb.js"
+        */
     },
     target: "web",
     resolve: {

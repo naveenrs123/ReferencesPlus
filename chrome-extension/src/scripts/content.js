@@ -1,6 +1,7 @@
 import * as helpers from "./helpers.js";
 import g from "./globals.js";
 import html2canvas from "./html2canvas.js";
+import * as rrweb from "./rrweb.js";
 
 /**
  * Mouseover Event listener for the window when borders are enabled. Adds a border
@@ -142,9 +143,16 @@ function toggleRecording() {
   return helpers.toggleButton(
     "recordingState",
     {},
+    () => true,
+    runRecording
+  )
+
+/*   return helpers.toggleButton(
+    "recordingState",
+    {},
     () => helpers.stop(g.stream),
     runRecording
-  );
+  ); */
 }
 
 function activate() {
@@ -307,8 +315,21 @@ function createEmulatorButtons() {
   g.body.insertBefore(container, g.body.childNodes[0]);
 }
 
+let events = [];
+
 function runRecording() {
-  navigator.mediaDevices
+  let stopFn = rrweb.record({
+    emit(event) {
+      events.push(event);
+      if (events.length > 10) {
+        stopFn();
+        console.log(events);
+        events = [];
+      }
+    },
+  })
+
+  /* navigator.mediaDevices
     .getDisplayMedia({
       video: true,
       audio: false,
@@ -345,7 +366,7 @@ function runRecording() {
       button.style.backgroundColor = "#FFFFFF";
       g.recordingState = false;
       helpers.setState();
-    });
+    }); */
 }
 
 function createDOMChangeForm() {
