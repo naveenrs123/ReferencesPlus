@@ -9,7 +9,6 @@
     },
     "permissions": ["storage", "identity", "tabs", "webNavigation", "contextMenus"],
     "action": {
-        "default_popup": "popup.html",
         "default_icon": {
             "16": "static/favicon-16x16.png",
             "32": "static/favicon-32x32.png",

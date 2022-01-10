@@ -1,6 +1,6 @@
 import * as EBML from "./EBML.js";
 import g from "./globals.js";
-
+//import * as rrweb from "./rrweb.js";
 export let color = "#ee2020";
 export let recorder = null;
 
@@ -91,7 +91,7 @@ export function buildDragHeader() {
   text.textContent = "Move";
   text.style.margin = "0";
   grab.appendChild(text);
-  
+
   return grab;
 }
 
@@ -173,15 +173,17 @@ export function stop(stream) {
 export function forbiddenElement(event) {
   let emulatorContainer = document.getElementById("refg-emulator");
   let tooltip = document.getElementById("refg-tooltip");
-  let DOMChangeForm = document.getElementById('refg-dom-form');
+  let DOMChangeForm = document.getElementById("refg-dom-form");
 
   let targetId = event.target.id;
 
-  let isForbidden = 
-  targetId == "refg-emulator" || targetId == "refg-tooltip" || targetId == "refg-dom-form"
-  || (emulatorContainer != null && emulatorContainer.contains(event.target)) 
-  || (tooltip != null && tooltip?.contains(event.target)) 
-  || (DOMChangeForm != null && DOMChangeForm?.contains(event.target));
+  let isForbidden =
+    targetId == "refg-emulator" ||
+    targetId == "refg-tooltip" ||
+    targetId == "refg-dom-form" ||
+    (emulatorContainer != null && emulatorContainer.contains(event.target)) ||
+    (tooltip != null && tooltip?.contains(event.target)) ||
+    (DOMChangeForm != null && DOMChangeForm?.contains(event.target));
 
   return isForbidden;
 }
@@ -201,7 +203,7 @@ export function getSeekableBlob(inputBlob, callback) {
   let tools = EBML.tools;
 
   let fileReader = new FileReader();
-  fileReader.onload = function (e) {
+  fileReader.onload = function () {
     let ebmlElms = decoder.decode(this.result);
     ebmlElms.forEach(function (element) {
       reader.read(element);
@@ -269,4 +271,55 @@ export function setButtonManual(id, state, eventListeners = {}) {
       }
     }
   }
+}
+
+export function runRecording() {
+  /*
+  let stopFn = rrweb.record({
+    emit(event) {
+      events.push(event);
+      if (events.length > 10) {
+        stopFn();
+        console.log(events);
+        events = [];
+      }
+    },
+  })
+  */
+
+  navigator.mediaDevices
+    .getDisplayMedia({
+      video: true,
+      audio: false,
+    })
+    .then((stm) => {
+      g.stream = stm;
+      g.logs = [];
+      g.start = Date.now();
+      return startRecording(stm);
+    })
+    .then((recordedChunks) => {
+      getSeekableBlob(new Blob(recordedChunks, { type: "video/webm" }), (seekableBlob) => {
+        g.downloadButton.href = URL.createObjectURL(seekableBlob);
+        g.downloadButton.download = "RecordedVideo.mp4";
+        g.downloadButton.style.display = "flex";
+
+        let logBlob = new Blob(g.logs, {
+          type: "text/plain;charset=utf-8",
+        });
+        g.logButton.href = URL.createObjectURL(logBlob);
+        g.logButton.download = "logs.txt";
+        g.logButton.style.display = "flex";
+
+        g.recordingState = false;
+        setState();
+      });
+    })
+    .catch(() => {
+      let button = document.getElementById("toggle-recording");
+      button.style.color = "#000000";
+      button.style.backgroundColor = "#FFFFFF";
+      g.recordingState = false;
+      setState();
+    });
 }

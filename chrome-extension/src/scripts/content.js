@@ -1,166 +1,16 @@
-import * as helpers from "./helpers.js";
+import * as h from "./helpers.js";
 import g from "./globals.js";
 import html2canvas from "./html2canvas.js";
-import * as rrweb from "./rrweb.js";
-
-/**
- * Mouseover Event listener for the window when borders are enabled. Adds a border
- * around the currently moused-over element after a short timeout.
- *
- * @param event A mouseover event.
- */
-function onMouseEnterBorders(event) {
-  let target = event.target;
-  g.borderTimeout = setTimeout(() => {
-    if (!helpers.forbiddenElement(event)) {
-      g.border = target.style.border;
-      target.style.setProperty("border", `3px solid ${helpers.color}`, "important");
-
-      if (g.recordingState) {
-        let timeStamp = (Date.now() - g.start) / 1000;
-        let hoverNodeHTML = g.hoverInfo.node.innerHTML.trim();
-        let innerHTML =
-          hoverNodeHTML.length > 100
-            ? hoverNodeHTML.slice(0, 100)
-            : hoverNodeHTML;
-        g.logs.push(
-          `${timeStamp}s - Border for: ${target.nodeName}, parent: ${target.parentNode.nodeName}, id: ${target.id}, innerHTML: ${innerHTML}\n`
-        );
-      }
-    }
-  }, 500);
-}
-
-/**
- * Mouseout Event listener for the window when borders are enabled. Resets the border
- * around the moused-over element when the mouse cursor exits the element area. Also
- * clears the timeout to prevent a border from showing immediately while the cursor is
- * moving.
- *
- * @param event A mouseout event.
- */
-function onMouseLeaveBorders(event) {
-  clearTimeout(g.borderTimeout);
-  if (!helpers.forbiddenElement(event)) {
-    event.target.style.border = g.border;
-  }
-}
-
-/**
- * Mouseover Event listener for the window when tooltips are enabled. Extracts useful
- * properties from the moused-over element and creates a tooltip to display this information
- * after a short timeout.
- *
- * @param event A mouseover event.
- */
- function onMouseMove(event) {
-  if (!helpers.forbiddenElement(event) && g.emulatorActive) {
-    g.hoverInfo.node = event.target;
-    g.hoverInfo.posX = event.pageX;
-    g.hoverInfo.posY = event.pageY;
-  }
-}
-
-function onSubmitDOMChange(event) {
-  event.preventDefault();
-  let textarea = document.getElementById("dom-change-text");
-  let text = document.getElementById("dom-element-selector");
-  let elem;
-  try {
-    let cssProperties = JSON.parse(textarea.value.replace(/\n/g, ""));
-    let elementQuery = text.value;
-    elem = g.DOMFormInfo.node;
-    if (elementQuery != "") {
-      elem = document.querySelector(elementQuery);
-    }
-
-    let propertyString = "Changed Properties: ";
-
-    for (let property in cssProperties) {
-      elem.style.setProperty(property, cssProperties[property]);
-      if (g.recordingState) {
-        propertyString +=  `${property} : ${cssProperties[property]};`;
-      }
-    }
-
-    if (g.recordingState) {
-      g.logs.push(
-        `${timeStamp}s - Changed DOM for: ${g.hoverInfo.node.nodeName}, parent: ${g.hoverInfo.node.parentNode.nodeName}, id: ${g.hoverInfo.node.id}, innerHTML: ${innerHTML}\n` + propertyString + '\n'
-      );
-    }
-
-  } catch (error) {
-    let errorText = "An error occurred.";
-    if (elem == null) {
-      errorText = "Invalid CSS selector query.";
-    } else if (cssProperties == null) {
-      errorText = `Invalid JSON syntax provided\n${textarea.value.replace(
-        /\n/g,
-        ""
-      )}`;
-    }
-    alert(errorText);
-  }
-}
-
-/**
- * Event listener for the toggle-borders button. Changes
- * the button styles and adds/removes window listeners depending
- * on whether borders are enabled or disabled.
- */
-function toggleBorders() {
-  let eventListeners = {
-    mouseover: onMouseEnterBorders,
-    mouseout: onMouseLeaveBorders,
-  };
-  return helpers.toggleButton("borderState", eventListeners);
-}
-
-function setBordersManual() {
-  let eventListeners = {
-    mouseover: onMouseEnterBorders,
-    mouseout: onMouseLeaveBorders,
-  };
-  helpers.setButtonManual("toggle-borders", "borderState", eventListeners);
-}
-
-/**
- * Event listener for the toggle-tooltips button. Changes
- * the button styles and adds/removes window listeners depending
- * on whether tooltips are enabled or disabled.
- *
- * @param event A "click" DOM event.
- */
-function toggleTooltips(event) {
-  return helpers.toggleButton("tooltipState");
-}
-
-function setTooltipsManual() {
-  helpers.setButtonManual("toggle-tooltips", "tooltipState");
-}
-
-function toggleRecording() {
-  return helpers.toggleButton(
-    "recordingState",
-    {},
-    () => true,
-    runRecording
-  )
-
-/*   return helpers.toggleButton(
-    "recordingState",
-    {},
-    () => helpers.stop(g.stream),
-    runRecording
-  ); */
-}
+import * as l from "./listeners.js";
 
 function activate() {
-  window.addEventListener("mousemove", onMouseMove);
-  createEmulatorButtons();
-  setBordersManual();
-  setTooltipsManual();
-  helpers.setState();
+  window.addEventListener("mousemove", l.onMouseMove);
+  if (!document.getElementById("toggle-emulation")) {
+    createEmulatorButtons();
+  }
+  l.setBordersManual();
+  l.setTooltipsManual();
+  h.setState();
 }
 
 function activateTooltip() {
@@ -186,8 +36,7 @@ function activateTooltip() {
   if (g.recordingState) {
     let timeStamp = (Date.now() - g.start) / 1000;
     let hoverNodeHTML = g.hoverInfo.node.innerHTML.trim();
-    let innerHTML =
-      hoverNodeHTML.length > 100 ? hoverNodeHTML.slice(0, 100) : hoverNodeHTML;
+    let innerHTML = hoverNodeHTML.length > 100 ? hoverNodeHTML.slice(0, 100) : hoverNodeHTML;
 
     g.logs.push(
       `${timeStamp}s - Tooltip for: ${g.hoverInfo.node.nodeName}, parent: ${g.hoverInfo.node.parentNode.nodeName}, id: ${g.hoverInfo.node.id}, innerHTML: ${innerHTML}\n`
@@ -238,14 +87,14 @@ function createTooltip(properties) {
 
   let computedStyle = getComputedStyle(g.hoverInfo.node);
 
-  let posX = helpers.shiftPosition(
+  let posX = h.shiftPosition(
     g.hoverInfo.posX,
     300,
     computedStyle != null && computedStyle.position == "fixed"
       ? document.documentElement.clientWidth
       : document.documentElement.scrollWidth
   );
-  let posY = helpers.shiftPosition(
+  let posY = h.shiftPosition(
     g.hoverInfo.posY,
     300,
     computedStyle != null && computedStyle.position == "fixed"
@@ -281,24 +130,25 @@ function createEmulatorButtons() {
   container.style.fontSize = "14px";
 
   // construct emulator controls.
-  let grab = helpers.buildDragHeader();
-  let btn1 = helpers.buildEmulatorButton("toggle-borders", "Borders");
-  let bordersListener = toggleBorders();
-  btn1.addEventListener("click", bordersListener);
-  let colorPicker = helpers.buildColorPicker();
-  let btn2 = helpers.buildEmulatorButton("toggle-tooltips", "Tooltips");
-  btn2.addEventListener("click", toggleTooltips());
-  let btn3 = helpers.buildEmulatorButton("toggle-recording", "Recording");
-  btn3.addEventListener("click", toggleRecording());
-  let btn4 = helpers.buildEmulatorButton("refg-download", "Download");
+  let grab = h.buildDragHeader();
+  let colorPicker = h.buildColorPicker();
+  let btn1 = h.buildEmulatorButton("toggle-borders", "Borders");
+  let btn2 = h.buildEmulatorButton("toggle-tooltips", "Tooltips");
+  let btn3 = h.buildEmulatorButton("toggle-recording", "Recording");
+  let btn4 = h.buildEmulatorButton("refg-download", "Download");
+  let btn5 = h.buildEmulatorButton("refg-log", "Log");
+  let btn6 = h.buildEmulatorButton("refg-dl-screenshot", "Download Screenshot");
+
   btn4.style.display = "none";
   g.downloadButton = btn4;
-  let btn5 = helpers.buildEmulatorButton("refg-log", "Log");
   btn5.style.display = "none";
   g.logButton = btn5;
-  let btn6 = helpers.buildEmulatorButton("refg-dl-screenshot", "Download Screenshot");
   btn6.style.display = "none";
   g.dlScreenshotButton = btn6;
+
+  btn1.addEventListener("click", l.toggleBorders());
+  btn2.addEventListener("click", l.toggleTooltips());
+  btn3.addEventListener("click", l.toggleRecording());
 
   // build and insert component
   container.appendChild(grab);
@@ -310,63 +160,8 @@ function createEmulatorButtons() {
   container.appendChild(btn5);
   container.appendChild(btn6);
 
-  helpers.dragElement(container);
-
+  h.dragElement(container);
   g.body.insertBefore(container, g.body.childNodes[0]);
-}
-
-let events = [];
-
-function runRecording() {
-  let stopFn = rrweb.record({
-    emit(event) {
-      events.push(event);
-      if (events.length > 10) {
-        stopFn();
-        console.log(events);
-        events = [];
-      }
-    },
-  })
-
-  /* navigator.mediaDevices
-    .getDisplayMedia({
-      video: true,
-      audio: false,
-    })
-    .then((stm) => {
-      g.stream = stm;
-      g.logs = [];
-      g.start = Date.now();
-      return helpers.startRecording(stm);
-    })
-    .then((recordedChunks) => {
-      helpers.getSeekableBlob(
-        new Blob(recordedChunks, { type: "video/webm" }),
-        (seekableBlob) => {
-          g.downloadButton.href = URL.createObjectURL(seekableBlob);
-          g.downloadButton.download = "RecordedVideo.mp4";
-          g.downloadButton.style.display = "flex";
-
-          let logBlob = new Blob(g.logs, {
-            type: "text/plain;charset=utf-8",
-          });
-          g.logButton.href = URL.createObjectURL(logBlob);
-          g.logButton.download = "logs.txt";
-          g.logButton.style.display = "flex";
-
-          g.recordingState = false;
-          helpers.setState();
-        }
-      );
-    })
-    .catch((err) => {
-      let button = document.getElementById("toggle-recording")
-      button.style.color = "#000000";
-      button.style.backgroundColor = "#FFFFFF";
-      g.recordingState = false;
-      helpers.setState();
-    }); */
 }
 
 function createDOMChangeForm() {
@@ -387,14 +182,14 @@ function createDOMChangeForm() {
 
   let computedStyle = getComputedStyle(g.DOMFormInfo.node);
 
-  let posX = helpers.shiftPosition(
+  let posX = h.shiftPosition(
     g.DOMFormInfo.posX,
     400,
     computedStyle != null && computedStyle.position == "fixed"
       ? document.documentElement.clientWidth
       : document.documentElement.scrollWidth
   );
-  let posY = helpers.shiftPosition(
+  let posY = h.shiftPosition(
     g.DOMFormInfo.posY,
     500,
     computedStyle != null && computedStyle.position == "fixed"
@@ -439,7 +234,7 @@ function createForm() {
   let submit = document.createElement("input");
   submit.type = "submit";
   submit.value = "Submit";
-  form.addEventListener("submit", onSubmitDOMChange);
+  form.addEventListener("submit", l.onSubmitDOMChange);
 
   form.appendChild(label);
   form.appendChild(text);
@@ -454,7 +249,7 @@ function createForm() {
  * Chrome listener for messages sent between the different scripts used by the
  * extension.
  */
- chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message) => {
   if (message.action === "toggle emulation") {
     let container = document.getElementById("refg-emulator");
     if (!container) {
@@ -462,17 +257,18 @@ function createForm() {
       activate();
     } else {
       g.emulatorActive = false;
-      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mousemove", l.onMouseMove);
       g.body.removeChild(container);
-      helpers.setState();
+      h.setState();
     }
   } else if (message.action === "initial load") {
-    helpers.getState();
+    h.getState();
     if (g.emulatorActive) {
       activate();
     }
+  } else if (message.action === "start recording") {
+    console.log("RECORDING STARTED!");
   }
-  sendResponse("Response!");
 });
 
 document.onkeydown = function (event) {
@@ -487,21 +283,19 @@ document.onkeydown = function (event) {
     }
   }
 
-  if (event.altKey && event.shiftKey 
-    && event.key.toLowerCase() === "p" && g.emulatorActive) {
+  if (event.altKey && event.shiftKey && event.key.toLowerCase() === "p" && g.emulatorActive) {
     let options = {
-      backgroundColor: getComputedStyle(g.body).backgroundColor
-    }
-    html2canvas(g.hoverInfo.node, options).then(function(canvas) {
+      backgroundColor: getComputedStyle(g.body).backgroundColor,
+    };
+    html2canvas(g.hoverInfo.node, options).then(function (canvas) {
       const base64image = canvas.toDataURL("image/png");
       g.dlScreenshotButton.href = base64image;
       g.dlScreenshotButton.download = "screenshot.png";
       g.dlScreenshotButton.style.display = "flex";
-    })
+    });
   }
 
-  if (event.altKey && event.shiftKey 
-    && event.key.toLowerCase() === "d" && g.emulatorActive) {
+  if (event.altKey && event.shiftKey && event.key.toLowerCase() === "d" && g.emulatorActive) {
     activateDOMChangeForm();
   }
 
