@@ -1,3 +1,5 @@
+// bundled with content.js
+
 // STATE
 let emulatorActive = false;
 let tooltipState = false;
@@ -22,6 +24,7 @@ let logButton = null;
 let start = null;
 let logs = [];
 let events = [];
+let stopFn = null;
 
 let dlScreenshotButton = null;
 
@@ -51,6 +54,7 @@ let globals = {
   start: start,
   logs: logs,
   events: events,
+  stopFn: stopFn,
   DOMFormInfo: DOMFormInfo,
   DOMFormOpen: DOMFormOpen,
   body: body,

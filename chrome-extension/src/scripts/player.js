@@ -1,9 +1,12 @@
+function recordPageStart() {
+  chrome.runtime.sendMessage({ action: "record page start", source: "player" });
+}
 
-
-function recordPageClick() {
-    chrome.runtime.sendMessage({action: "record page"});
+function recordPageStop() {
+  chrome.runtime.sendMessage({ action: "record page stop", source: "player" });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    document.getElementById('record-page').addEventListener('click', recordPageClick);
-})
+  document.getElementById("record-page-start").addEventListener("click", recordPageStart);
+  document.getElementById("record-page-stop").addEventListener("click", recordPageStop);
+});

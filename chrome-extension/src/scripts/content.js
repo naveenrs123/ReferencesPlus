@@ -249,8 +249,8 @@ function createForm() {
  * Chrome listener for messages sent between the different scripts used by the
  * extension.
  */
-chrome.runtime.onMessage.addListener((message) => {
-  if (message.action === "toggle emulation") {
+chrome.runtime.onMessage.addListener((m) => {
+  if (m.action == "toggle emulation" && m.source == "background") {
     let container = document.getElementById("refg-emulator");
     if (!container) {
       g.emulatorActive = true;
@@ -261,13 +261,15 @@ chrome.runtime.onMessage.addListener((message) => {
       g.body.removeChild(container);
       h.setState();
     }
-  } else if (message.action === "initial load") {
+  } else if (m.action == "initial load" && m.source == "background") {
     h.getState();
     if (g.emulatorActive) {
       activate();
     }
-  } else if (message.action === "start recording") {
-    console.log("RECORDING STARTED!");
+  } else if (m.action == "start recording" && m.source == "background") {
+    h.recordInteractions();
+  } else if (m.action == "stop recording" && m.source == "background") {
+    h.stopRecording();
   }
 });
 

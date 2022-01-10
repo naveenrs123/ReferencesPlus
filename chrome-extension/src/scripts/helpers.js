@@ -1,6 +1,8 @@
+// bundled with content.js
+
 import * as EBML from "./EBML.js";
 import g from "./globals.js";
-//import * as rrweb from "./rrweb.js";
+import * as rrweb from "./rrweb.js";
 export let color = "#ee2020";
 export let recorder = null;
 
@@ -274,19 +276,6 @@ export function setButtonManual(id, state, eventListeners = {}) {
 }
 
 export function runRecording() {
-  /*
-  let stopFn = rrweb.record({
-    emit(event) {
-      events.push(event);
-      if (events.length > 10) {
-        stopFn();
-        console.log(events);
-        events = [];
-      }
-    },
-  })
-  */
-
   navigator.mediaDevices
     .getDisplayMedia({
       video: true,
@@ -322,4 +311,27 @@ export function runRecording() {
       g.recordingState = false;
       setState();
     });
+}
+
+export function recordInteractions() {
+  g.stopFn = rrweb.record({
+    emit(event) {
+      g.events.push(event);
+    },
+  });
+}
+
+export function stopRecording() {
+  if (g.stopFn) {
+    g.stopFn();
+    chrome.runtime.sendMessage(
+      { action: "recording stopped", source: "content", events: g.events },
+      (message) => {
+        if (message.response != "event log received") {
+          alert("Recording error encountered, please record again.");
+        }
+        g.events = [];
+      }
+    );
+  }
 }

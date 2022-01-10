@@ -1,3 +1,5 @@
+// bundled with content.js
+
 import * as h from "./helpers.js";
 import g from "./globals.js";
 
