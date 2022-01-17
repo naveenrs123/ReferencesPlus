@@ -28,7 +28,7 @@ from function_parser.process import DataProcessor
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, )
+CORS(app)
 
 client: Type[MongoClient] = MongoClient(
     os.environ.get("LOCAL_CONNECTION_STRING"))

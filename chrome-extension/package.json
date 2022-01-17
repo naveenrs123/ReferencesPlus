@@ -6,8 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "scss": "sass --load-path=node_modules/ src/styles/index.scss:dist/css/index.css",
     "scss-watch": "sass --watch --load-path=node_modules/ src/styles/index.scss:dist/css/index.css",
-    "start": "webpack --watch --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js && npm run scss"
+    "start": "webpack --watch --config webpack/webpack.dev.js",
+    "build": "webpack --config webpack/webpack.prod.js && npm run scss"
   },
   "private": "true",
   "author": "",

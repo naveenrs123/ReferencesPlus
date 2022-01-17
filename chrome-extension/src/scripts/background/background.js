@@ -26,7 +26,8 @@ chrome.action.onClicked.addListener((tab) => {
       .create({
         url: chrome.runtime.getURL("recordInterface.html"),
         type: "popup",
-      }).then((windowObj) => {
+      })
+      .then((windowObj) => {
         chrome.storage.local.set({ popupTabId: windowObj.tabs[0].id });
       });
   });
@@ -34,18 +35,21 @@ chrome.action.onClicked.addListener((tab) => {
 
 chrome.runtime.onMessage.addListener((m, sender, sendResponse) => {
   if (m.action == "record page start" && m.source == "player") {
-    chrome.storage.local.get(['tabId'], (result) => {
+    chrome.storage.local.get(["tabId"], (result) => {
       chrome.tabs.sendMessage(result.tabId, { action: "start recording", source: "background" });
     });
   } else if (m.action == "record page stop" && m.source == "player") {
-    chrome.storage.local.get(['tabId'], (result) => {
+    chrome.storage.local.get(["tabId"], (result) => {
       chrome.tabs.sendMessage(result.tabId, { action: "stop recording", source: "background" });
     });
-  } 
-  else if (m.action == "recording stopped" && m.source == "content") {
-    chrome.storage.local.get(['tabId'], (result) => {
-      console.log(m.events);
+  } else if (m.action == "recording stopped" && m.source == "content") {
+    chrome.storage.local.get(["popupTabId"], (result) => {
       sendResponse({ response: "event log received" });
+      chrome.tabs.sendMessage(result.popupTabId, {
+        action: "send log",
+        source: "background",
+        events: m.events,
+      });
     });
   }
   return true;

@@ -37,4 +37,4 @@ window.addEventListener("DOMContentLoaded", function() {
     } else {
         toggleAuthView();
     }
-})
+});

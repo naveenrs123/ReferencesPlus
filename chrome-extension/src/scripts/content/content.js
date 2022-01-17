@@ -1,6 +1,6 @@
 import * as h from "./helpers.js";
 import g from "./globals.js";
-import html2canvas from "./html2canvas.js";
+import html2canvas from "../external/html2canvas.js";
 import * as l from "./listeners.js";
 
 function activate() {

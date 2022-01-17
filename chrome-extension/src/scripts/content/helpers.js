@@ -1,8 +1,8 @@
 // bundled with content.js
 
-import * as EBML from "./EBML.js";
+import * as EBML from "../external/EBML.js";
 import g from "./globals.js";
-import * as rrweb from "./rrweb.js";
+import { record } from "../external/rrweb.js";
 export let color = "#ee2020";
 export let recorder = null;
 
@@ -314,7 +314,7 @@ export function runRecording() {
 }
 
 export function recordInteractions() {
-  g.stopFn = rrweb.record({
+  g.stopFn = record({
     emit(event) {
       g.events.push(event);
     },
