@@ -41,7 +41,6 @@ let DOMFormOpen: boolean = false;
 // Common DOM Elements
 let body: HTMLBodyElement = document.querySelector("body");
 
-
 let globals: Globals = {
   emulatorActive: emulatorActive,
   tooltipState: tooltipState,
@@ -82,7 +81,6 @@ interface Globals extends IDictionary<any> {
   DOMFormInfo: HoverInfo;
   DOMFormOpen: boolean;
   body: HTMLBodyElement;
-  
 }
 
 export default globals;

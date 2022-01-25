@@ -3,7 +3,7 @@ import g from "../../common/globals";
 import * as ebml from "ts-ebml";
 import EBMLDecoder from "ts-ebml/lib/EBMLDecoder";
 import EBMLReader from "ts-ebml/lib/EBMLReader";
-import { Buffer} from "buffer"
+import { Buffer } from "buffer";
 
 window.Buffer = Buffer;
 
@@ -94,9 +94,7 @@ export function runRecording() {
       });
     })
     .catch(() => {
-      let button: HTMLAnchorElement = document.getElementById(
-        "toggle-recording"
-      ) as HTMLAnchorElement;
+      let button: HTMLAnchorElement = document.getElementById("toggle-recording") as HTMLAnchorElement;
       button.style.color = "#000000";
       button.style.backgroundColor = "#FFFFFF";
       g.recordingState = false;

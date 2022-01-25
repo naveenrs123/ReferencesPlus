@@ -1,11 +1,10 @@
-@import '@primer/css/index.scss';
-@import "./rrweb-player.min.css";
+@import "@primer/css/index.scss";
 
 #welcome {
-    width: 300px;
-    text-align: center;
+  width: 300px;
+  text-align: center;
 
-    p {
-        width: 250px;
-    }
+  p {
+    width: 250px;
+  }
 }

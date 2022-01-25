@@ -25,7 +25,7 @@ function makeInterface(): void {
   playerContainer.style.top = "60px";
   playerContainer.style.left = "20px";
   playerContainer.style.marginTop = "0px";
-  playerContainer.classList.add("color-bg-default", "select-menu-modal","d-none");
+  playerContainer.classList.add("color-bg-default", "select-menu-modal", "d-none");
   playerContainer.style.zIndex = "20000";
   playerContainer.setAttribute("role", "menu");
 

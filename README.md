@@ -1,10 +1,13 @@
 # **PR Referencing**
+
 ## A Project to Improve Referencing Features in Github
+
 <br>
 
 ## **Backend Server**
 
 ### **Setup**
+
 This project makes use of Python's virtual environments. To setup the project for development, enter the following commands into the console.
 
 1. cd backend-server (Go to the backend-server directory)
@@ -19,4 +22,5 @@ This project makes use of Python's virtual environments. To setup the project fo
 ## **Chrome Extension**
 
 ### **Setup**
-markdown-toolbar[for="new_comment_field"] details 
+
+markdown-toolbar[for="new_comment_field"] details

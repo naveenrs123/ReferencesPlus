@@ -6,7 +6,7 @@ module.exports = {
   entry: {
     content: "./src/scripts/emulator/content.ts",
     background: "./src/scripts/background/background.ts",
-    g_content: "./src/scripts/github/g_content.ts"
+    g_content: "./src/scripts/github/g_content.ts",
   },
   module: {
     rules: [
