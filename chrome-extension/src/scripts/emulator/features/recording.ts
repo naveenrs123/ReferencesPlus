@@ -2,7 +2,10 @@ import * as h from "../../common/helpers";
 import g from "../../common/globals";
 import * as ebml from "ts-ebml";
 import EBMLDecoder from "ts-ebml/lib/EBMLDecoder";
-import EBMLEncoder from "ts-ebml/lib/EBMLEncoder";
+import EBMLReader from "ts-ebml/lib/EBMLReader";
+import { Buffer} from "buffer"
+
+window.Buffer = Buffer;
 
 let recorder: MediaRecorder = null;
 
@@ -37,7 +40,7 @@ export function stop(stream: MediaStream): void {
  * @param inputBlob Blob representing a video that is currently not seekable.
  * @param callback
  */
-/* export function getSeekableBlob(inputBlob: Blob, callback: (blob: Blob) => any) {
+export function getSeekableBlob(inputBlob: Blob, callback: (blob: Blob) => any) {
   let reader: EBMLReader = new ebml.Reader();
   let decoder: EBMLDecoder = new ebml.Decoder();
   let tools = ebml.tools;
@@ -61,7 +64,7 @@ export function stop(stream: MediaStream): void {
     callback(newBlob);
   };
   fileReader.readAsArrayBuffer(inputBlob);
-} */
+}
 
 export function runRecording() {
   navigator.mediaDevices
@@ -76,13 +79,7 @@ export function runRecording() {
       return startRecording(stm);
     })
     .then((recordedChunks: Blob[]) => {
-      //let decoder: EBMLDecoder = new ebml.Decoder();
-      //let encoder: EBMLEncoder = new ebml.Encoder();
-      /* let blob = new Blob(recordedChunks, { type: "video/webm" });
-      
-      blob.arrayBuffer().then((buf) => {
-        let seekableBlobBuf = encoder.encode(decoder.decode(buf));
-        let seekableBlob = new Blob([new Uint8Array(seekableBlobBuf)], { type: "video/webm" })
+      getSeekableBlob(new Blob(recordedChunks, { type: "video/webm" }), (seekableBlob: Blob) => {
         g.downloadButton.href = URL.createObjectURL(seekableBlob);
         g.downloadButton.download = "RecordedVideo.mp4";
         g.downloadButton.style.display = "flex";
@@ -94,21 +91,7 @@ export function runRecording() {
 
         g.recordingState = false;
         h.setState();
-      }) */
-      
-      /* getSeekableBlob(new Blob(recordedChunks, { type: "video/webm" }), (seekableBlob: Blob) => {
-        g.downloadButton.href = URL.createObjectURL(seekableBlob);
-        g.downloadButton.download = "RecordedVideo.mp4";
-        g.downloadButton.style.display = "flex";
-
-        let logBlob = new Blob(g.logs, { type: "text/plain;charset=utf-8" });
-        g.logButton.href = URL.createObjectURL(logBlob);
-        g.logButton.download = "logs.txt";
-        g.logButton.style.display = "flex";
-
-        g.recordingState = false;
-        h.setState();
-      }); */
+      });
     })
     .catch(() => {
       let button: HTMLAnchorElement = document.getElementById(

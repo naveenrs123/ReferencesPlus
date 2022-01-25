@@ -1,5 +1,8 @@
 import { ExtensionMessage } from "../common/interfaces";
 
+// Regular expression for GitHub PRs URLs
+let matchUrl: RegExp = /https:\/\/github.com\/.+\/.+\/pull\/\d+/;
+
 chrome.contextMenus.removeAll();
 chrome.contextMenus.create({
   checked: false,
@@ -23,32 +26,41 @@ chrome.contextMenus.create({
 chrome.webNavigation.onCompleted.addListener(
   (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => {
     if (details.frameId === 0) {
-      chrome.scripting.executeScript({
-        target: { tabId: details.tabId },
-        files: ['content.js']
-      }, () => {
-        chrome.tabs.get(details.tabId, (tab) => {
-          chrome.tabs.sendMessage<ExtensionMessage>(tab.id, {
-            action: "initial load",
-            source: "background",
-          });
-        });
-      })
+      if (matchUrl.test(details.url)) {
+        chrome.scripting
+          .executeScript({
+            target: { tabId: details.tabId },
+            files: ["vendors-g_content.js", "g_content.js"],
+          })
+          .then(() => {
+            chrome.scripting.insertCSS({
+              target: { tabId: details.tabId },
+              files: ["css/rrweb-player.min.css"],
+            });
+          }).then(() => insertContentScripts(details));
+      } else {
+        insertContentScripts(details);
+      }
     }
   }
 );
 
-chrome.tabs.onUpdated.addListener(
-  (tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-    let matchUrl: RegExp = /https:\/\/github.com\/.+\/.+\/pull\/\d+/;
-    if (tab.status == "complete" && matchUrl.test(tab.url)) {
-      chrome.tabs.sendMessage<ExtensionMessage>(tab.id, {
-        action: "[GITHUB] Load Content",
-        source: "background",
+function insertContentScripts(details: chrome.webNavigation.WebNavigationFramedCallbackDetails) {
+  chrome.scripting.executeScript(
+    {
+      target: { tabId: details.tabId },
+      files: ["vendors-content.js", "content.js"],
+    },
+    () => {
+      chrome.tabs.get(details.tabId, (tab) => {
+        chrome.tabs.sendMessage<ExtensionMessage>(tab.id, {
+          action: "initial load",
+          source: "background",
+        });
       });
     }
-  }
-);
+  );
+}
 
 chrome.contextMenus.onClicked.addListener(
   (info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) => {
@@ -84,7 +96,11 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 chrome.runtime.onMessage.addListener(
-  (m: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+  (
+    m: ExtensionMessage,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ) => {
     if (m.action == "record page start" && m.source == "player") {
       chrome.storage.local.get(["tabId"], ({ tabId }: { tabId: number }) => {
         chrome.tabs.sendMessage<ExtensionMessage>(tabId, {
@@ -101,16 +117,18 @@ chrome.runtime.onMessage.addListener(
       });
     } else if (m.action == "recording stopped" && m.source == "content") {
       // replace with popupTabId for popup implementation.
-      chrome.storage.local.get(["githubTabId"], ({ tabId }: { tabId: number }) => {
+      chrome.storage.local.get(["githubTabId"], (result) => {
+        console.log(result.githubTabId);
         sendResponse({ response: "event log received" });
-        chrome.tabs.sendMessage<ExtensionMessage>(tabId, {
-          action: "send log",
+        chrome.tabs.sendMessage<ExtensionMessage>(result.githubTabId, {
+          action: "[GITHUB] Send Log",
           source: "background",
           events: m.events,
         });
         // replace with [GITHUB] Send Log for github implementation
       });
     } else if (m.action == "[GITHUB] Ready to Receive" && m.source == "github_content") {
+      console.log(sender.tab.id);
       chrome.storage.local.set({ githubTabId: sender.tab.id });
     }
   }

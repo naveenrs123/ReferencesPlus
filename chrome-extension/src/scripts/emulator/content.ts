@@ -1,4 +1,3 @@
-import { toggleRecording } from "../../scripts/content/listeners";
 import g from "../common/globals";
 import * as h from "../common/helpers";
 import { ExtensionMessage } from "../common/interfaces";
@@ -49,7 +48,7 @@ function createEmulatorButtons(): void {
   let container: HTMLDivElement = createEmulatorContainer();
 
   // construct emulator controls.
-  let grab: HTMLDivElement = h.buildDragHeader();
+  let dragHeader: HTMLDivElement = h.buildDragHeader("refg-emulator-header");
   let colorPicker: HTMLInputElement = h.buildColorPicker();
   let btn1: HTMLAnchorElement = h.buildEmulatorButton("toggle-borders", "Borders");
   let btn2: HTMLAnchorElement = h.buildEmulatorButton("toggle-tooltips", "Tooltips");
@@ -65,7 +64,7 @@ function createEmulatorButtons(): void {
   btn3.addEventListener("click", toggleRecord());
 
   // build and insert component
-  container.appendChild(grab);
+  container.appendChild(dragHeader);
   container.appendChild(colorPicker);
   container.appendChild(btn1);
   container.appendChild(btn2);
@@ -73,7 +72,7 @@ function createEmulatorButtons(): void {
   container.appendChild(btn4);
   container.appendChild(btn5);
 
-  h.dragElement(container);
+  h.dragElement(container, dragHeader);
   g.body.insertBefore(container, g.body.childNodes[0]);
 }
 
@@ -82,9 +81,7 @@ function createEmulatorButtons(): void {
  * extension.
  */
 chrome.runtime.onMessage.addListener(function (m: ExtensionMessage, sender, sendResponse) {
-  console.log("HELLO!");
- /*  if (m.action == "toggle emulation" && m.source == "background") {
-    console.log("IT ME!");
+  if (m.action == "toggle emulation" && m.source == "background") {
     let container: HTMLDivElement = document.getElementById("refg-emulator") as HTMLDivElement;
     if (!container) {
       g.emulatorActive = true;
@@ -102,7 +99,7 @@ chrome.runtime.onMessage.addListener(function (m: ExtensionMessage, sender, send
     recordInteractions();
   } else if (m.action == "stop recording" && m.source == "background") {
     stopRecording();
-  } */
+  }
 });
 
 function keyboardEvents(event: KeyboardEvent): void {
@@ -127,5 +124,3 @@ function keyboardEvents(event: KeyboardEvent): void {
 }
 
 document.addEventListener("keydown", keyboardEvents);
-
-console.log("LOADED!");

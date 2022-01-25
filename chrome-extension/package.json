@@ -6,9 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "scss": "sass --load-path=node_modules/ src/styles/index.scss:dist/css/index.css",
     "scss-watch": "sass --watch --load-path=node_modules/ src/styles/index.scss:dist/css/index.css",
-    "start": "webpack --watch --config webpack/webpack.dev.js",
-    "build": "webpack --config webpack/webpack.prod.js && npm run scss",
-    "build2": "webpack --config webpack/webpack.main.js && npm run scss"
+    "start": "webpack --watch --config webpack/webpack.dev.js && npm run scss",
+    "build": "webpack --config webpack/webpack.prod.js && npm run scss"
   },
   "private": "true",
   "author": "",
@@ -17,6 +16,7 @@
     "@primer/css": "^19.0.0",
     "@primer/primitives": "^7.1.0",
     "@types/chrome": "^0.0.177",
+    "buffer": "^6.0.3",
     "rrweb": "^1.1.1",
     "rrweb-player": "^0.7.12",
     "ts-ebml": "^2.0.2"

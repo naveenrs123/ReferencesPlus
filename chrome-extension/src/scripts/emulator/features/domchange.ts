@@ -88,20 +88,18 @@ function createDOMChangeForm(): HTMLFormElement {
 
 function onSubmitDOMChange(event: SubmitEvent) {
   event.preventDefault();
-  let textarea: HTMLTextAreaElement = document.getElementById(
-    "dom-change-text"
-  ) as HTMLTextAreaElement;
+  let textarea: HTMLTextAreaElement = document.getElementById("dom-change-text") as HTMLTextAreaElement;
   let text: HTMLInputElement = document.getElementById("dom-element-selector") as HTMLInputElement;
   let elem: HTMLElement;
   let cssProperties: IDictionary<any> = {};
 
   try {
-    cssProperties: Object = JSON.parse(textarea.value.replace(/\n/g, ""));
+    cssProperties = JSON.parse(textarea.value.replace(/\n/g, ""));
     let elementQuery: string = text.value;
     elem = elementQuery != "" ? document.querySelector(elementQuery) : g.DOMFormInfo.node;
 
     let propertyString: string = "Changed Properties: ";
-    
+
     for (let property in cssProperties) {
       elem.style.setProperty(property, cssProperties[property]);
       if (g.recordingState) {
@@ -113,8 +111,7 @@ function onSubmitDOMChange(event: SubmitEvent) {
       let timeStamp: number = (Date.now() - g.start) / 1000;
       let node: HTMLElement = g.hoverInfo.node;
       let hoverNodeHTML: string = node.innerHTML.trim();
-      let innerHTML: string =
-        hoverNodeHTML.length > 100 ? hoverNodeHTML.slice(0, 100) : hoverNodeHTML;
+      let innerHTML: string = hoverNodeHTML.length > 100 ? hoverNodeHTML.slice(0, 100) : hoverNodeHTML;
       let log: string =
         timeStamp +
         "s - Changed DOM for: " +

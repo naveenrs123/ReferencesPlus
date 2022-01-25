@@ -1,6 +1,6 @@
 // bundled with content.js
 
-import { eventWithTime } from "rrweb/typings/types";
+import { event, eventWithTime } from "rrweb/typings/types";
 import { HoverInfo, IDictionary } from "./interfaces";
 
 // STATE
@@ -10,7 +10,7 @@ let emulatorActive: boolean = false;
 let borderState: boolean = false;
 let color: string = "#ee2020";
 let border: string;
-let borderTimeout: number = null;
+let borderTimeout: NodeJS.Timeout = null;
 
 // TOOLTIPS
 let tooltipState: boolean = false;
@@ -42,7 +42,7 @@ let DOMFormOpen: boolean = false;
 let body: HTMLBodyElement = document.querySelector("body");
 
 
-let globals: IDictionary<any> = {
+let globals: Globals = {
   emulatorActive: emulatorActive,
   tooltipState: tooltipState,
   recordingState: recordingState,
@@ -62,5 +62,27 @@ let globals: IDictionary<any> = {
   DOMFormOpen: DOMFormOpen,
   body: body,
 };
+
+interface Globals extends IDictionary<any> {
+  emulatorActive: boolean;
+  tooltipState: boolean;
+  recordingState: boolean;
+  borderState: boolean;
+  border: string;
+  borderTimeout: NodeJS.Timeout;
+  color: string;
+  hoverInfo: HoverInfo;
+  stream: MediaStream;
+  downloadButton: HTMLAnchorElement;
+  logButton: HTMLAnchorElement;
+  start: number;
+  logs: string[];
+  events: eventWithTime[];
+  stopFn: Function;
+  DOMFormInfo: HoverInfo;
+  DOMFormOpen: boolean;
+  body: HTMLBodyElement;
+  
+}
 
 export default globals;

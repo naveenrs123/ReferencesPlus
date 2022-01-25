@@ -8,7 +8,7 @@ import g from "../../common/globals";
  * @param event A mouseover event.
  */
 function onMouseEnterBorders(event: MouseEvent): void {
-  g.borderTimeout = setTimeout(borderTimeout, 500);
+  g.borderTimeout = setTimeout(() => borderTimeout(event), 500);
 }
 
 function borderTimeout(event: MouseEvent) {

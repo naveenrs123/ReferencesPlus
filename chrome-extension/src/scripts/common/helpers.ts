@@ -22,15 +22,16 @@ export function getState(): void {
  *
  * @param elmnt The element you want to make draggable.
  */
-export function dragElement(elmnt: HTMLElement): void {
+export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
   let pos1: number = 0;
   let pos2: number = 0;
   let pos3: number = 0;
   let pos4: number = 0;
 
-  if (document.getElementById(elmnt.id + "-header")) {
+  if (dragElmnt) {
+    console.log("TRUE");
     // if present, the header is where you move the DIV from:
-    document.getElementById(elmnt.id + "-header").onmousedown = dragMouseDown;
+    dragElmnt.onmousedown = dragMouseDown;
   } else {
     // otherwise, move the DIV from anywhere inside the DIV:
     elmnt.onmousedown = dragMouseDown;
@@ -73,9 +74,9 @@ export function dragElement(elmnt: HTMLElement): void {
  *
  * @returns A HTML Div Element representing the header used for dragging.
  */
-export function buildDragHeader(): HTMLDivElement {
+export function buildDragHeader(id: string): HTMLDivElement {
   let grab: HTMLDivElement = document.createElement("div");
-  grab.id = "refg-emulator-header";
+  grab.id = id;
   grab.style.backgroundColor = "blue";
   grab.style.cursor = "move";
   grab.style.color = "#FFFFFF";

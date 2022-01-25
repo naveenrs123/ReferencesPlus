@@ -4,15 +4,23 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: {
-    popup: "./src/scripts/popup/popup.js",
-    background: "./src/scripts/background/background.js",
-    content: "./src/scripts/content/content.js",
-    player: "./src/scripts/player/player.js",
-    github_content: "./src/scripts/content/github_content.js",
+    content: "./src/scripts/emulator/content.ts",
+    background: "./src/scripts/background/background.ts",
+    g_content: "./src/scripts/github/g_content.ts"
   },
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        use: "ts-loader",
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  devtool: "source-map",
   target: "web",
   resolve: {
-    extensions: [".js"],
+    extensions: [".ts", ".js"],
   },
   plugins: [
     new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
@@ -33,6 +41,11 @@ module.exports = {
   optimization: {
     splitChunks: {
       chunks: "all",
+      name: (module, chunks, cacheGroupKey) => {
+        const allChunksNames = chunks.map((chunk) => chunk.name).join("~");
+        const prefix = cacheGroupKey === "defaultVendors" ? "vendors" : cacheGroupKey;
+        return `${prefix}-${allChunksNames}`;
+      },
     },
   },
 };
