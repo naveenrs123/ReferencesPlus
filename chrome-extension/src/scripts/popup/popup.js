@@ -1,4 +1,4 @@
-function authenticate() {
+/* function authenticate() {
     let username = document.getElementById("username");
     window.open(`http:127.0.0.1:5000/auth/${username}`);
     chrome.storage.local.set({ username });
@@ -37,4 +37,4 @@ window.addEventListener("DOMContentLoaded", function() {
     } else {
         toggleAuthView();
     }
-});
+}); */

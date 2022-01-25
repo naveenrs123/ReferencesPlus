@@ -3,16 +3,24 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
+  mode: "development",
   entry: {
-    popup: "./src/scripts/popup/popup.js",
-    background: "./src/scripts/background/background.js",
-    content: "./src/scripts/content/content.js",
-    player: "./src/scripts/player/player.js",
-    github_content: "./src/scripts/content/github_content.js",
+    content: "./src/scripts_2/emulator/content.ts",
+    background: "./src/scripts_2/background/background.ts",
   },
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        use: "ts-loader",
+        exclude: /node_modules/
+      },
+    ],
+  },
+  devtool: "source-map",
   target: "web",
   resolve: {
-    extensions: [".js"],
+    extensions: [".ts", ".js"],
   },
   plugins: [
     new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
@@ -32,7 +40,7 @@ module.exports = {
   },
   optimization: {
     splitChunks: {
-      chunks: "all",
-    },
+      chunks: "all"
+    }
   },
 };

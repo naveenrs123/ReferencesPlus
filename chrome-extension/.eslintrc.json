@@ -13,5 +13,5 @@
         "no-unused-vars": ["warn", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }],
         "semi": ["warn", "always"]
     },
-    "ignorePatterns": ["**/scripts/external/*.js", "**/webpack/*.js"]
+    "ignorePatterns": ["**/scripts/external", "**/webpack", "dist"]
 }

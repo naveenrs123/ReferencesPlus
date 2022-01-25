@@ -6,17 +6,41 @@ chrome.webNavigation.onCompleted.addListener((details) => {
   }
 });
 
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  let matchUrl = /https:\/\/github.com\/.+\/.+\/pull\/\d+/;
+  if (tab.status == "complete" && matchUrl.test(tab.url)) {
+    console.log(tab);
+    chrome.tabs.sendMessage(tab.id, { action: "[GITHUB] Load Content", source: "background" });
+  }
+});
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     checked: false,
     id: "toggle-emulation",
     title: "Toggle Emulation",
   });
+
+  chrome.contextMenus.create({
+    checked: false,
+    id: "record-page-start",
+    title: "Record Page",
+  });
+
+  chrome.contextMenus.create({
+    checked: false,
+    id: "record-page-stop",
+    title: "Stop Recording",
+  });
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "toggle-emulation") {
     chrome.tabs.sendMessage(tab.id, { action: "toggle emulation", source: "background" });
+  } else if (info.menuItemId === "record-page-start") {
+    chrome.tabs.sendMessage(tab.id, { action: "start recording", source: "background" });
+  } else if (info.menuItemId === "record-page-stop") {
+    chrome.tabs.sendMessage(tab.id, { action: "stop recording", source: "background" });
   }
 });
 
@@ -43,14 +67,18 @@ chrome.runtime.onMessage.addListener((m, sender, sendResponse) => {
       chrome.tabs.sendMessage(result.tabId, { action: "stop recording", source: "background" });
     });
   } else if (m.action == "recording stopped" && m.source == "content") {
-    chrome.storage.local.get(["popupTabId"], (result) => {
+    // replace with popupTabId for popup implementation.
+    chrome.storage.local.get(["githubTabId"], (result) => {
+      console.log(result);
       sendResponse({ response: "event log received" });
-      chrome.tabs.sendMessage(result.popupTabId, {
-        action: "send log",
+      chrome.tabs.sendMessage(result.githubTabId, {
+        action: "send log", // replace with [GITHUB] Send Log for github implementation
         source: "background",
         events: m.events,
       });
     });
+  } else if (m.action == "[GITHUB] Ready to Receive" && m.source == "github_content") {
+    chrome.storage.local.set({ githubTabId: sender.tab.id });
   }
   return true;
 });

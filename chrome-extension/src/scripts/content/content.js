@@ -53,7 +53,7 @@ function activateDOMChangeForm() {
   g.DOMFormInfo.posX = g.hoverInfo.posX;
   g.DOMFormInfo.posY = g.hoverInfo.posY;
 
-  DOMChangeForm = createDOMChangeForm();
+  DOMChangeForm = createDOMChangeInterface();
   g.body.appendChild(DOMChangeForm);
   g.DOMFormOpen = true;
 }
@@ -62,8 +62,6 @@ function activateDOMChangeForm() {
  * Creates a tooltip at a specified position on the page with useful information
  * about a DOM element that is being moused-over.
  *
- * @param posX The x position of the cursor on the screen.
- * @param posY The y position of the cursor on the screen.
  * @param properties An object containing useful properties of the element.
  * @returns the tooltip.
  */
@@ -164,7 +162,7 @@ function createEmulatorButtons() {
   g.body.insertBefore(container, g.body.childNodes[0]);
 }
 
-function createDOMChangeForm() {
+function createDOMChangeInterface() {
   let container = document.createElement("div");
   container.id = "refg-dom-form";
   container.style.backgroundColor = "#FFF";
@@ -175,7 +173,7 @@ function createDOMChangeForm() {
   title.style.marginBottom = "15px";
   title.style.color = "#4461EE";
 
-  let form = createForm();
+  let form = createDOMChangeForm();
 
   container.appendChild(title);
   container.appendChild(form);
@@ -205,7 +203,7 @@ function createDOMChangeForm() {
   return container;
 }
 
-function createForm() {
+function createDOMChangeForm() {
   let form = document.createElement("form");
   form.style.display = "flex";
   form.style.flexDirection = "column";

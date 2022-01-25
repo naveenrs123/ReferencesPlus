@@ -324,6 +324,7 @@ export function recordInteractions() {
 export function stopRecording() {
   if (g.stopFn) {
     g.stopFn();
+    console.log(g.events);
     chrome.runtime.sendMessage(
       { action: "recording stopped", source: "content", events: g.events },
       (message) => {
