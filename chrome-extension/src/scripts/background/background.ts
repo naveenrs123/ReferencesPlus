@@ -3,26 +3,34 @@ import { ExtensionMessage } from "../common/interfaces";
 // Regular expression for GitHub PRs URLs
 let matchUrl: RegExp = /https:\/\/github.com\/.+\/.+\/pull\/\d+/;
 
-chrome.contextMenus.removeAll();
-chrome.contextMenus.create({
-  checked: false,
-  id: "toggle-emulation",
-  title: "Toggle Emulation",
-  contexts: ["all"],
-});
-chrome.contextMenus.create({
-  checked: false,
-  id: "record-page-start",
-  title: "Record Page",
-  contexts: ["all"],
-});
-chrome.contextMenus.create({
-  checked: false,
-  id: "record-page-stop",
-  title: "Stop Recording",
-  contexts: ["all"],
-});
+/**
+ * Create the Context Menu items required for the extension.
+ */
+function createContextMenuItems() {
+  chrome.contextMenus.removeAll();
+  chrome.contextMenus.create({
+    checked: false,
+    id: "toggle-emulation",
+    title: "Toggle Emulation",
+    contexts: ["all"],
+  });
+  chrome.contextMenus.create({
+    checked: false,
+    id: "record-page-start",
+    title: "Record Page",
+    contexts: ["all"],
+  });
+  chrome.contextMenus.create({
+    checked: false,
+    id: "record-page-stop",
+    title: "Stop Recording",
+    contexts: ["all"],
+  });
+}
 
+/**
+ * Listener to insert relevant content scripts into a GitHub PR page.
+ */
 chrome.webNavigation.onCompleted.addListener(
   (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => {
     if (details.frameId === 0) {
@@ -46,6 +54,11 @@ chrome.webNavigation.onCompleted.addListener(
   }
 );
 
+/**
+ * Inserts the content scripts into the tab where a web navigation was just completed.
+ *
+ * @param details An object containing information related to webNavigation.
+ */
 function insertContentScripts(details: chrome.webNavigation.WebNavigationFramedCallbackDetails) {
   chrome.scripting.executeScript(
     {
@@ -63,10 +76,12 @@ function insertContentScripts(details: chrome.webNavigation.WebNavigationFramedC
   );
 }
 
+/**
+ * An event listener to check for interactions with Context Menu items.
+ */
 chrome.contextMenus.onClicked.addListener(
   (info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) => {
     if (info.menuItemId === "toggle-emulation") {
-      console.log(tab);
       chrome.tabs.sendMessage<ExtensionMessage>(tab.id, {
         action: "toggle emulation",
         source: "background",
@@ -85,17 +100,10 @@ chrome.contextMenus.onClicked.addListener(
   }
 );
 
-chrome.action.onClicked.addListener((tab) => {
-  chrome.storage.local.set({ tabId: tab.id }, () => {
-    let interfaceUrl: string = chrome.runtime.getURL("recordInterface.html");
-    chrome.windows
-      .create({ url: interfaceUrl, type: "popup" })
-      .then((windowObj: chrome.windows.Window) => {
-        chrome.storage.local.set({ popupTabId: windowObj.tabs[0].id });
-      });
-  });
-});
-
+/**
+ * An event listener to respond to messages from different content scripts. All messages
+ * provided must be in the form of an {@link ExtensionMessage}.
+ */
 chrome.runtime.onMessage.addListener(
   (
     m: ExtensionMessage,
@@ -119,7 +127,6 @@ chrome.runtime.onMessage.addListener(
     } else if (m.action == "recording stopped" && m.source == "content") {
       // replace with popupTabId for popup implementation.
       chrome.storage.local.get(["githubTabId"], (result) => {
-        console.log(result.githubTabId);
         sendResponse({ response: "event log received" });
         chrome.tabs.sendMessage<ExtensionMessage>(result.githubTabId, {
           action: "[GITHUB] Send Log",
@@ -129,8 +136,9 @@ chrome.runtime.onMessage.addListener(
         // replace with [GITHUB] Send Log for github implementation
       });
     } else if (m.action == "[GITHUB] Ready to Receive" && m.source == "github_content") {
-      console.log(sender.tab.id);
       chrome.storage.local.set({ githubTabId: sender.tab.id });
     }
   }
 );
+
+createContextMenuItems();

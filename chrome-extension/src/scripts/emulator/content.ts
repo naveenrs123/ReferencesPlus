@@ -48,7 +48,7 @@ function createEmulatorButtons(): void {
   let container: HTMLDivElement = createEmulatorContainer();
 
   // construct emulator controls.
-  let dragHeader: HTMLDivElement = h.buildDragHeader("refg-emulator-header");
+  let dragHeader: HTMLDivElement = h.buildButtonDiv("refg-emulator-header", "Move");
   let colorPicker: HTMLInputElement = h.buildColorPicker();
   let btn1: HTMLAnchorElement = h.buildEmulatorButton("toggle-borders", "Borders");
   let btn2: HTMLAnchorElement = h.buildEmulatorButton("toggle-tooltips", "Tooltips");
@@ -73,7 +73,7 @@ function createEmulatorButtons(): void {
   container.appendChild(btn5);
 
   h.dragElement(container, dragHeader);
-  g.body.insertBefore(container, g.body.childNodes[0]);
+  document.body.insertBefore(container, document.body.childNodes[0]);
 }
 
 /**
@@ -89,7 +89,7 @@ chrome.runtime.onMessage.addListener(function (m: ExtensionMessage, sender, send
     } else {
       g.emulatorActive = false;
       window.removeEventListener("mousemove", onMouseMove);
-      g.body.removeChild(container);
+      document.body.removeChild(container);
       h.setState();
     }
   } else if (m.action == "initial load" && m.source == "background") {
@@ -109,7 +109,7 @@ function keyboardEvents(event: KeyboardEvent): void {
 
   if (event.altKey && event.key.toLowerCase() === "y") {
     let oldTooltip = document.getElementById("refg-tooltip");
-    if (oldTooltip) g.body.removeChild(oldTooltip);
+    if (oldTooltip) document.body.removeChild(oldTooltip);
   }
 
   if (event.altKey && event.shiftKey && event.key.toLowerCase() === "d" && g.emulatorActive) {
@@ -118,7 +118,7 @@ function keyboardEvents(event: KeyboardEvent): void {
 
   if (event.altKey && event.shiftKey && event.key.toLowerCase() === "e") {
     let DOMChangeForm = document.getElementById("refg-dom-form");
-    if (DOMChangeForm) g.body.removeChild(DOMChangeForm);
+    if (DOMChangeForm) document.body.removeChild(DOMChangeForm);
     g.DOMFormOpen = false;
   }
 }

@@ -4,14 +4,14 @@ import { IDictionary } from "../../common/interfaces";
 
 export function activateDOMChangeForm(): void {
   let oldDOMChangeForm: HTMLElement = document.getElementById("refg-dom-form");
-  if (oldDOMChangeForm) g.body.removeChild(oldDOMChangeForm);
+  if (oldDOMChangeForm) document.body.removeChild(oldDOMChangeForm);
 
   g.DOMFormInfo.node = g.hoverInfo.node;
   g.DOMFormInfo.posX = g.hoverInfo.posX;
   g.DOMFormInfo.posY = g.hoverInfo.posY;
 
   let DOMChangeForm: HTMLDivElement = createDOMChangeInterface();
-  g.body.appendChild(DOMChangeForm);
+  document.body.appendChild(DOMChangeForm);
   g.DOMFormOpen = true;
 }
 

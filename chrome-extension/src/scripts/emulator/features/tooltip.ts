@@ -4,7 +4,7 @@ import { IDictionary } from "../../common/interfaces";
 
 export function openTooltip(): void {
   let oldTooltip: HTMLElement = document.getElementById("refg-tooltip");
-  if (oldTooltip) g.body.removeChild(oldTooltip);
+  if (oldTooltip) document.body.removeChild(oldTooltip);
 
   let node: HTMLElement = g.hoverInfo.node;
 
@@ -19,7 +19,7 @@ export function openTooltip(): void {
   };
 
   let tooltip: HTMLDivElement = createTooltip(properties);
-  g.body.appendChild(tooltip);
+  document.body.appendChild(tooltip);
 
   if (g.recordingState) {
     let timeStamp: number = (Date.now() - g.start) / 1000;

@@ -19,6 +19,7 @@
     "buffer": "^6.0.3",
     "rrweb": "^1.1.1",
     "rrweb-player": "^0.7.12",
+    "rrweb-snapshot": "^1.1.12",
     "ts-ebml": "^2.0.2"
   },
   "devDependencies": {

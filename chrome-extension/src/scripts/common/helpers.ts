@@ -29,7 +29,6 @@ export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
   let pos4: number = 0;
 
   if (dragElmnt) {
-    console.log("TRUE");
     // if present, the header is where you move the DIV from:
     dragElmnt.onmousedown = dragMouseDown;
   } else {
@@ -74,11 +73,11 @@ export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
  *
  * @returns A HTML Div Element representing the header used for dragging.
  */
-export function buildDragHeader(id: string): HTMLDivElement {
+export function buildButtonDiv(id: string, content: string, color: string = "blue", cursor: string = "auto"): HTMLDivElement {
   let grab: HTMLDivElement = document.createElement("div");
   grab.id = id;
-  grab.style.backgroundColor = "blue";
-  grab.style.cursor = "move";
+  grab.style.backgroundColor = color;
+  grab.style.cursor = cursor;
   grab.style.color = "#FFFFFF";
   grab.style.width = "55px";
   grab.style.textAlign = "center";
@@ -87,7 +86,7 @@ export function buildDragHeader(id: string): HTMLDivElement {
   grab.style.alignItems = "center";
 
   let text: HTMLParagraphElement = document.createElement("p");
-  text.textContent = "Move";
+  text.textContent = content;
   text.style.margin = "0";
   grab.appendChild(text);
 
