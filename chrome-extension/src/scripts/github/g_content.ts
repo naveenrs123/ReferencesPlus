@@ -1,10 +1,14 @@
 import rrwebPlayer from "rrweb-player";
-import { buildButtonDiv, dragElement } from "../common/helpers";
+import { INode } from "rrweb-snapshot";
+import { PlayerMachineState, PlayerState } from "rrweb/typings/replay/machine";
+import { customEvent, Mirror } from "rrweb/typings/types";
+import { buildButtonDiv, buildColorPicker, dragElement } from "../common/helpers";
 import { ExtensionMessage } from "../common/interfaces";
 
-let borderTmt: any;
-let border: any;
+let borderTmt: NodeJS.Timeout;
+let border: string;
 let replayer: rrwebPlayer;
+let color: string = "red";
 
 /**
  * Create the emulator button responsible for opening the emulator interface.
@@ -47,7 +51,7 @@ function createPlayerContainer(): HTMLDivElement {
 function borderActions(event: MouseEvent) {
   const target = event.target as HTMLElement;
   border = target.style.border;
-  target.style.setProperty("border", "3px solid red", "important");
+  target.style.setProperty("border", `3px solid ${color}`, "important");
 }
 
 /**
@@ -75,40 +79,52 @@ function mouseOverBorders(event: any) {
 function buildPlayerContents(playerContainer: HTMLDivElement) {
   const buttonsContainer: HTMLDivElement = document.createElement("div") as HTMLDivElement;
   buttonsContainer.style.display = "flex";
-  buttonsContainer.style.marginBottom = "10px"
 
-  const hide: HTMLDivElement = buildButtonDiv("refg-github-hide", "Hide", "green");
+  const hide: HTMLDivElement = buildButtonDiv("refg-github-hide", "Hide", "green", "pointer");
   const dragHeader: HTMLDivElement = buildButtonDiv("refg-github-em-header", "Move", "blue", "move");
+  const colorPicker: HTMLInputElement = buildColorPicker();
 
-  const recordStart: HTMLButtonElement = document.createElement("button");
-  recordStart.id = "record-page-start";
-  recordStart.classList.add("m-2", "btn");
-  recordStart.innerText = "Receive Recording";
+  const toggleInteraction: HTMLButtonElement = document.createElement("button");
+  toggleInteraction.classList.add("m-2", "btn");
+  toggleInteraction.innerText = "Toggle Interaction";
 
-  const toggleBorders: HTMLButtonElement = document.createElement("button");
-  toggleBorders.classList.add("m-2", "btn");
-  toggleBorders.innerText = "Toggle Borders";
+  const addReference: HTMLButtonElement = document.createElement("button");
+  addReference.classList.add("m-2", "btn");
+  addReference.innerText = "Add Reference";
 
   const player: HTMLDivElement = document.createElement("div");
   player.id = "refg-github-player";
+  player.style.display = "flex";
+  player.style.height = "min-content";
+
+  const interactions: HTMLDivElement = document.createElement("div");
+  interactions.style.width = "300px";
+  interactions.style.padding = "10px";
+  interactions.style.overflowY = "auto";
+
+  const interactionsHeader: HTMLHeadingElement = document.createElement("h3");
+  interactionsHeader.innerText = "References";
+
+  colorPicker.addEventListener("input", (event: InputEvent) => {
+    let target: HTMLInputElement = event.target as HTMLInputElement;
+    color = target.value;
+  });
 
   hide.addEventListener("click", () => {
     playerContainer.classList.add("d-none");
   });
 
-  recordStart.addEventListener("click", () => {
-    chrome.runtime.sendMessage<ExtensionMessage>({
-      action: "[GITHUB] Ready to Receive",
-      source: "github_content",
-    });
-  });
-
-  toggleBorders.addEventListener("click", onToggleBorders);
+  toggleInteraction.addEventListener("click", onToggleInteraction);
 
   buttonsContainer.appendChild(dragHeader);
   buttonsContainer.appendChild(hide);
-  buttonsContainer.appendChild(recordStart);
-  buttonsContainer.appendChild(toggleBorders);
+  buttonsContainer.appendChild(colorPicker);
+  buttonsContainer.appendChild(toggleInteraction);
+  buttonsContainer.appendChild(addReference);
+
+  interactions.appendChild(interactionsHeader);
+  player.appendChild(interactions);
+
   playerContainer.appendChild(buttonsContainer);
   playerContainer.appendChild(player);
   dragElement(playerContainer, dragHeader);
@@ -121,12 +137,14 @@ function buildPlayerContents(playerContainer: HTMLDivElement) {
 function preventClicks(event: MouseEvent) {
   event.preventDefault();
   event.stopPropagation();
+  const mirror: Mirror = replayer.getMirror();
+  console.log(mirror.getId(event.target as INode));
 }
 
 /**
  * Event listener for the toggle borders button.
  */
-function onToggleBorders() {
+function onToggleInteraction() {
   const iframe = document.querySelector("iframe");
   if (iframe) {
     iframe.setAttribute("sandbox", "allow-same-origin");
@@ -138,7 +156,6 @@ function onToggleBorders() {
       iframe.removeAttribute("listener");
     } else {
       replayer.getReplayer().enableInteract();
-      console.log(replayer.getMirror().map);
       iframe.contentWindow.addEventListener("mouseover", mouseOverBorders);
       iframe.contentWindow.addEventListener("mouseout", mouseOutBorders);
       iframe.contentWindow.addEventListener("click", preventClicks);
@@ -162,6 +179,10 @@ function makeInterface(): void {
     playerContainer.classList.toggle("d-none");
     playerContainer.style.top = event.pageY.toString() + "px";
     playerContainer.style.left = event.pageX.toString() + "px";
+    chrome.runtime.sendMessage<ExtensionMessage>({
+      action: "[GITHUB] Ready to Receive",
+      source: "github_content",
+    });
   });
 
   buildPlayerContents(playerContainer);
@@ -176,18 +197,51 @@ function makeInterface(): void {
 chrome.runtime.onMessage.addListener((m: ExtensionMessage) => {
   if (m.action == "[GITHUB] Send Log" && m.source == "background") {
     const events = m.events;
-    console.log(events);
+
+    replayer = null;
+    let oldPlayers = document.querySelectorAll(".rr-player");
+    let playerDiv = document.getElementById("refg-github-player");
+    oldPlayers.forEach((player: Element) => {
+      if (playerDiv.contains(player)) playerDiv.removeChild(player);
+    });
+
     replayer = new rrwebPlayer({
       target: document.getElementById("refg-github-player"),
       props: {
         events,
         height: 476,
+        triggerFocus: false,
         pauseAnimation: true,
         mouseTail: false,
         autoPlay: false,
       },
     });
+
+    replayer.addEventListener("ui-update-player-state", (state: any) => {
+      const iframe = document.querySelector("iframe");
+      if (state.payload == "playing") {
+        disableInteractions(replayer, iframe);
+      } else {
+        enableInteractions(replayer, iframe);
+      }
+    });
   }
 });
+
+function disableInteractions(replayer: rrwebPlayer, iframe: HTMLIFrameElement) {
+  replayer.getReplayer().disableInteract();
+  iframe.contentWindow.removeEventListener("mouseover", mouseOverBorders);
+  iframe.contentWindow.removeEventListener("mouseout", mouseOutBorders);
+  iframe.contentWindow.removeEventListener("click", preventClicks);
+  iframe.removeAttribute("listener");
+}
+
+function enableInteractions(replayer: rrwebPlayer, iframe: HTMLIFrameElement) {
+  replayer.getReplayer().enableInteract();
+  iframe.contentWindow.addEventListener("mouseover", mouseOverBorders);
+  iframe.contentWindow.addEventListener("mouseout", mouseOutBorders);
+  iframe.contentWindow.addEventListener("click", preventClicks);
+  iframe.setAttribute("listener", "true");
+}
 
 makeInterface();

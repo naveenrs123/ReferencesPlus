@@ -16,6 +16,7 @@ export function stopRecording(): void {
     chrome.runtime.sendMessage<ExtensionMessage>(
       { action: "recording stopped", source: "content", events: g.events },
       (message) => {
+        console.log(message);
         if (message.response != "event log received") {
           alert("Recording error encountered, please record again.");
         }

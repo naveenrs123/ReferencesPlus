@@ -138,6 +138,7 @@ chrome.runtime.onMessage.addListener(
     } else if (m.action == "[GITHUB] Ready to Receive" && m.source == "github_content") {
       chrome.storage.local.set({ githubTabId: sender.tab.id });
     }
+    return true;
   }
 );
 

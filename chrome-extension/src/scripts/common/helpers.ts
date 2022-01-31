@@ -133,10 +133,6 @@ export function buildColorPicker(): HTMLInputElement {
   colorPicker.id = "border-color-picker";
   colorPicker.value = g.color;
   colorPicker.style.height = "auto";
-  colorPicker.addEventListener("input", (event: InputEvent) => {
-    let target: HTMLInputElement = event.target as HTMLInputElement;
-    g.color = target.value;
-  });
   return colorPicker;
 }
 

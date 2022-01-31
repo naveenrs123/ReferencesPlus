@@ -59,6 +59,10 @@ function createEmulatorButtons(): void {
   g.downloadButton = btn4;
   g.logButton = btn5;
 
+  colorPicker.addEventListener("input", (event: InputEvent) => {
+    let target: HTMLInputElement = event.target as HTMLInputElement;
+    g.color = target.value;
+  })
   btn1.addEventListener("click", toggleBorders());
   btn2.addEventListener("click", toggleTooltips());
   btn3.addEventListener("click", toggleRecord());
