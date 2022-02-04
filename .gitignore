@@ -100,3 +100,7 @@ ENV/
 
 # Azure Config
 .azure/
+
+# Index CSS
+chrome-extension/src/**/index.css
+chrome-extension/src/**/index.css.map

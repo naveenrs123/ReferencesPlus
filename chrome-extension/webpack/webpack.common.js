@@ -26,10 +26,10 @@ module.exports = {
     new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
     new CopyPlugin({
       patterns: [
-        { from: "./src/manifest.json" },
+        { from: "manifest.json" },
         { from: "./src/templates", to: "" },
         { from: "./src/static", to: "static" },
-        { from: "./src/styles/rrweb-player.min.css", to: "css" },
+        { from: "./src/styles/*.css", to: "css" },
       ],
     }),
   ],

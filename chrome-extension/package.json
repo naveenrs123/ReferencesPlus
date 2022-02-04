@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "Chrome extension for improved referencing in GitHub",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "scss": "sass --load-path=node_modules/ src/styles/index.scss:dist/css/index.css",
-    "scss-watch": "sass --watch --load-path=node_modules/ src/styles/index.scss:dist/css/index.css",
-    "start": "webpack --watch --config webpack/webpack.dev.js && npm run scss",
-    "build": "webpack --config webpack/webpack.prod.js && npm run scss"
+    "scss": "sass --load-path=node_modules/ src/styles/index.scss:src/styles/index.css --style compressed",
+    "scss-watch": "sass --watch --load-path=node_modules/ src/styles/index.scss:src/styles/index.css --style compressed",
+    "start": "npm run scss && webpack --watch --config webpack/webpack.dev.js",
+    "build": "npm run scss && webpack --config webpack/webpack.prod.js"
   },
   "private": "true",
   "author": "",
