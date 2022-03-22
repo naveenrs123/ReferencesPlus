@@ -8,7 +8,7 @@ export function buildInteractions() {
   return interactions;
 }
 
-export function buildPlayer() {
+export function Player() {
   const player = document.createElement("div") as HTMLDivElement;
   player.id = "refg-github-player";
   player.style.display = "flex";
@@ -16,11 +16,20 @@ export function buildPlayer() {
   return player;
 }
 
-export function buildPlayerBtn(text: string) {
+export function PlayerBtn(text: string) {
   const btn = document.createElement("button") as HTMLButtonElement;
   btn.classList.add("m-2", "btn");
   btn.innerText = text;
   return btn;
+}
+
+export function TextInput(placeholder: string, id?: string) {
+  const input = document.createElement("input") as HTMLInputElement;
+  input.type = "text";
+  input.placeholder = placeholder;
+  input.classList.add("form-control")
+  if (id !== undefined) input.id = id;
+  return input;
 }
 
 /**
@@ -28,33 +37,32 @@ export function buildPlayerBtn(text: string) {
  * @param parent A parent node that will contain the emulator button as a child.
  * @returns The emulator button.
  */
-export function buildEmulatorBtn(parent: ParentNode): HTMLButtonElement {
-  let emulator = document.getElementById("refg-github-emulator") as HTMLButtonElement;
-  if (emulator != null) parent.removeChild(emulator);
-  emulator = document.createElement("button");
-  emulator.id = "refg-github-emulator";
-  emulator.innerText = "X";
-  emulator.setAttribute("role", "button");
-  emulator.classList.add("toolbar-item", "details-reset", "btn-octicon");
-  return emulator;
+export function ShowInterfaceBtn(parent: ParentNode): HTMLButtonElement {
+  let btn = document.getElementById("refg-show-interface") as HTMLButtonElement;
+  if (btn != null) parent.removeChild(btn);
+  btn = document.createElement("button");
+  btn.id = "refg-show-interface";
+  btn.innerText = "X";
+  btn.setAttribute("role", "button");
+  btn.classList.add("toolbar-item", "details-reset", "btn-octicon");
+  return btn;
 }
 
 /**
  * Create a container div element that will contain emulator interactions.
  * @returns The created container div.
  */
-export function buildPlayerContainer(): HTMLDivElement {
-  const playerContainer = document.createElement("div") as HTMLDivElement;
-  playerContainer.id = "refg-github-em";
-  playerContainer.style.width = "fit-content";
-  playerContainer.style.maxHeight = "700px";
+export function InterfaceContainer(): HTMLDivElement {
+  const container = document.createElement("div") as HTMLDivElement;
+  container.id = "refg-player-container";
 
-  playerContainer.style.marginTop = "10px";
-  playerContainer.style.marginBottom = "10px";
-  playerContainer.style.zIndex = "20000";
-  playerContainer.style.paddingLeft = "56px";
-  playerContainer.classList.add("d-none");
+  container.style.maxHeight = "700px";
+  container.style.marginTop = "10px";
+  container.style.marginBottom = "10px";
+  container.style.zIndex = "20000";
+  container.style.paddingLeft = "56px";
+  container.classList.add("d-none");
 
-  playerContainer.setAttribute("role", "menu");
-  return playerContainer;
+  container.setAttribute("role", "menu");
+  return container;
 }

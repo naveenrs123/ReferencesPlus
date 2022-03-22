@@ -1,15 +1,17 @@
 import rrwebPlayer, { RRwebPlayerOptions } from "rrweb-player";
 import { INode } from "rrweb-snapshot";
 import { Mirror } from "rrweb/typings/types";
-import { buildButtonDiv } from "../common/helpers";
 import { ExtensionMessage } from "../common/interfaces";
 import * as components from "./player_components";
-import * as listeners from "./borders";
+import { mouseOutBorders, mouseOverBorders } from "./borders";
 
-const eventListeners: { [key: string]: (arg0: any) => void } = {
-  mouseover: listeners.mouseOverBorders,
-  mouseout: listeners.mouseOutBorders,
-  click: handleIFrameClick,
+const codeCommentQuery: string = "markdown-toolbar[for*='new_inline_comment_discussion'] details";
+const mainCommentQuery = "markdown-toolbar[for='new_comment_field'] details";
+
+const listeners: { [key: string]: (arg0: any) => void } = {
+  mouseover: mouseOverBorders,
+  mouseout: mouseOutBorders,
+  click: handleIframeClick,
 };
 
 const replayerOptions: RRwebPlayerOptions = {
@@ -29,17 +31,13 @@ let replayer: rrwebPlayer;
 
 function disableInteractions(replayer: rrwebPlayer, iframe: HTMLIFrameElement) {
   replayer.getReplayer().disableInteract();
-  for (let listener in eventListeners) {
-    iframe.contentWindow.removeEventListener(listener, eventListeners[listener]);
-  }
+  for (let l in listeners) iframe.contentWindow.removeEventListener(l, listeners[l]);
   iframe.removeAttribute("listener");
 }
 
 function enableInteractions(replayer: rrwebPlayer, iframe: HTMLIFrameElement) {
   replayer.getReplayer().enableInteract();
-  for (let listener in eventListeners) {
-    iframe.contentWindow.addEventListener(listener, eventListeners[listener]);
-  }
+  for (let l in listeners) iframe.contentWindow.addEventListener(l, listeners[l]);
   iframe.setAttribute("listener", "true");
 }
 
@@ -47,12 +45,13 @@ function enableInteractions(replayer: rrwebPlayer, iframe: HTMLIFrameElement) {
  * Prevents click events from firing when the replayer is active.
  * @param event A mouse event corresponding to a click.
  */
-function handleIFrameClick(event: MouseEvent) {
+function handleIframeClick(event: MouseEvent) {
   event.preventDefault();
   event.stopPropagation();
   const mirror: Mirror = replayer.getMirror();
   const targetId: number = mirror.getId(event.target as INode);
   const currTime: number = Math.floor(replayer.getReplayer().getCurrentTime() % 1000);
+  navigator.clipboard.writeText(targetId.toString());
 }
 
 function onPlayerStateChange(state: any) {
@@ -64,29 +63,127 @@ function onPlayerStateChange(state: any) {
   }
 }
 
+function SessionManagementSection() {
+  const container = document.createElement("div") as HTMLDivElement;
+  container.style.display = "flex";
+  container.style.flexDirection = "column";
+
+  const sessionID = document.createElement("label") as HTMLLabelElement;
+  sessionID.innerText = "Session ID: N/A";
+  sessionID.style.textAlign = "right";
+  sessionID.classList.add("text-normal");
+
+  const saveContainer = document.createElement("div") as HTMLDivElement;
+  saveContainer.style.display = "flex";
+  saveContainer.style.alignSelf = "flex-end";
+  const saveAs = components.PlayerBtn("Save As");
+  const save = components.PlayerBtn("Save");
+  saveContainer.appendChild(saveAs);
+  saveContainer.appendChild(save);
+
+  const loadSessionContainer = document.createElement("div") as HTMLDivElement;
+  loadSessionContainer.style.display = "flex";
+  loadSessionContainer.style.alignItems = "center"
+
+  const label = document.createElement("label") as HTMLLabelElement;
+  label.htmlFor = "refg-load-session-input";
+  label.innerText = "Load Session";
+  label.classList.add("text-normal", "mx-2");
+
+  const input = components.TextInput("Enter title/id.", "refg-load-session-input");
+  loadSessionContainer.appendChild(label);
+  loadSessionContainer.appendChild(input);
+
+  container.appendChild(sessionID);
+  container.appendChild(saveContainer);
+  container.appendChild(loadSessionContainer);
+  return container;
+}
+
 /**
  * Builds the contents of the player container for emulator interactions.
  * @param playerContainer The container to which the contents will be added.
  */
-function buildPlayerContents(playerContainer: HTMLDivElement) {
-  const buttonsContainer: HTMLDivElement = document.createElement("div") as HTMLDivElement;
-  buttonsContainer.style.display = "flex";
+function MainInterface() {
+  const closeResetSection: HTMLDivElement = CloseResetSection();
+  const sessionManagementSection: HTMLDivElement = SessionManagementSection();
 
-  // Button Bar
-  const hide: HTMLDivElement = buildButtonDiv("refg-github-hide", "Hide", "green", "pointer");
-  const addReference: HTMLButtonElement = components.buildPlayerBtn("Add Reference");
+  const buttonsSection: HTMLDivElement = document.createElement("div") as HTMLDivElement;
+  buttonsSection.style.display = "flex";
+  buttonsSection.style.justifyContent = "space-between";
+  buttonsSection.style.alignItems = "flex-start";
+  buttonsSection.appendChild(closeResetSection);
+  buttonsSection.appendChild(sessionManagementSection);
 
-  // Player
-  const player: HTMLDivElement = components.buildPlayer();
-  hide.addEventListener("click", () => playerContainer.classList.add("d-none"));
+  const player: HTMLDivElement = components.Player();
 
-  buttonsContainer.appendChild(hide);
-  buttonsContainer.appendChild(addReference);
-  playerContainer.appendChild(buttonsContainer);
-  playerContainer.appendChild(player);
+  const container = components.InterfaceContainer();
+  container.appendChild(buttonsSection);
+  container.appendChild(player);
+  return container;
 }
 
-function insertReference(target?: number, currTime?: number) {
+function CloseResetSection() {
+  const container: HTMLDivElement = document.createElement("div") as HTMLDivElement;
+  container.style.display = "flex";
+
+  const close: HTMLButtonElement = components.PlayerBtn("Close");
+  const reset: HTMLButtonElement = components.PlayerBtn("Reset");
+
+  container.appendChild(close);
+  container.appendChild(reset);
+  return container;
+}
+
+/**
+ * Create the interface required to support UI references in the GitHub PR page.
+ */
+function makeEditableInterface(query: string): void {
+  const details: HTMLDetailsElement = document.querySelector(query);
+  const detailsParent: ParentNode = details.parentNode;
+  const btn = components.ShowInterfaceBtn(detailsParent);
+  detailsParent.appendChild(btn);
+
+  const mainInterface = MainInterface();
+
+  btn.addEventListener("click", () => {
+    let active: boolean = mainInterface.classList.toggle("d-none");
+    if (!active) {
+      chrome.runtime.sendMessage<ExtensionMessage>({
+        action: "[GITHUB] Ready to Receive",
+        source: "github_content",
+      });
+    }
+  });
+
+  const timelineActions = document.querySelector(".discussion-timeline-actions") as HTMLDivElement;
+  const issueCommentBox = document.getElementById("issue-comment-box") as HTMLDivElement;
+  timelineActions.insertBefore(mainInterface, issueCommentBox);
+}
+
+/**
+ * Listener to handle messages sent by the background script. Messages should be in the
+ * form of an {@link ExtensionMessage}.
+ */
+chrome.runtime.onMessage.addListener((m: ExtensionMessage) => {
+  if (m.action == "[GITHUB] Send Log" && m.source == "background") {
+    replayer = null;
+    let oldPlayers = document.querySelectorAll(".rr-player");
+    let playerDiv = document.getElementById("refg-github-player");
+    oldPlayers.forEach((player: Element) => {
+      if (playerDiv.contains(player)) playerDiv.removeChild(player);
+    });
+
+    replayerOptions.target = document.getElementById("refg-github-player");
+    replayerOptions.props.events = m.events;
+    replayer = new rrwebPlayer(replayerOptions);
+    replayer.addEventListener("ui-update-player-state", onPlayerStateChange);
+  }
+});
+
+makeEditableInterface(mainCommentQuery);
+
+/* function insertReference(target?: number, currTime?: number) {
   const refContainer = document.getElementById("refg-interactions") as HTMLDivElement;
   const reference = document.createElement("div") as HTMLDivElement;
   reference.style.padding = "15px";
@@ -121,53 +218,4 @@ function insertReference(target?: number, currTime?: number) {
   reference.appendChild(remove);
   reference.appendChild(textarea);
   refContainer.appendChild(reference);
-}
-
-/**
- * Create the interface required to support UI references in the GitHub PR page.
- */
-function makeInterface(): void {
-  const detailsQuery = "markdown-toolbar[for='new_comment_field'] details";
-  const details: HTMLDetailsElement = document.querySelector(detailsQuery);
-  const detailsParent: ParentNode = details.parentNode;
-
-  const emulator = components.buildEmulatorBtn(detailsParent);
-  const playerContainer = components.buildPlayerContainer();
-
-  emulator.addEventListener("click", (event: MouseEvent) => {
-    playerContainer.classList.toggle("d-none");
-    chrome.runtime.sendMessage<ExtensionMessage>({
-      action: "[GITHUB] Ready to Receive",
-      source: "github_content",
-    });
-  });
-
-  buildPlayerContents(playerContainer);
-  detailsParent.appendChild(emulator);
-
-  const actionsContainer = document.querySelector(".discussion-timeline-actions") as HTMLDivElement;
-  const issueCommentBox = document.getElementById("issue-comment-box") as HTMLDivElement;
-  actionsContainer.insertBefore(playerContainer, issueCommentBox);
-}
-
-/**
- * Listener to handle messages sent by the background script. Messages should be in the
- * form of an {@link ExtensionMessage}.
- */
-chrome.runtime.onMessage.addListener((m: ExtensionMessage) => {
-  if (m.action == "[GITHUB] Send Log" && m.source == "background") {
-    replayer = null;
-    let oldPlayers = document.querySelectorAll(".rr-player");
-    let playerDiv = document.getElementById("refg-github-player");
-    oldPlayers.forEach((player: Element) => {
-      if (playerDiv.contains(player)) playerDiv.removeChild(player);
-    });
-
-    replayerOptions.target = document.getElementById("refg-github-player");
-    replayerOptions.props.events = m.events;
-    replayer = new rrwebPlayer(replayerOptions);
-    replayer.addEventListener("ui-update-player-state", onPlayerStateChange);
-  }
-});
-
-makeInterface();
+} */
