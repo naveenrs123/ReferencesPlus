@@ -1,19 +1,4 @@
-import g from "./globals";
 import { IDictionary } from "./interfaces";
-
-export function setState(): void {
-  sessionStorage.setItem("borderState", JSON.stringify(g.borderState));
-  sessionStorage.setItem("tooltipState", JSON.stringify(g.tooltipState));
-  sessionStorage.setItem("recordingState", JSON.stringify(g.recordingState));
-  sessionStorage.setItem("emulatorActive", JSON.stringify(g.emulatorActive));
-}
-
-export function getState(): void {
-  g.borderState = JSON.parse(sessionStorage.getItem("borderState"));
-  g.tooltipState = JSON.parse(sessionStorage.getItem("tooltipState"));
-  g.recordingState = JSON.parse(sessionStorage.getItem("recordingState"));
-  g.emulatorActive = JSON.parse(sessionStorage.getItem("emulatorActive"));
-}
 
 /**
  * Function that allows an element to be dragged across a page.
@@ -65,8 +50,6 @@ export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
   }
 }
 
-//#region Build Elements
-
 /**
  * Creates the header element used to drag the emulator buttons container.
  * Also adds appropriate styles.
@@ -93,120 +76,9 @@ export function buildButtonDiv(id: string, content: string, color: string = "blu
   return grab;
 }
 
-/**
- * Creates an emulator button with the appropriate styling.
- *
- * @param id The id of the button to be created.
- * @param text The text inside the button to be created.
- * @returns The created button.
- */
-export function buildEmulatorButton(
-  id: string,
-  text: string,
-  hidden: boolean = false
-): HTMLAnchorElement {
-  let btn: HTMLAnchorElement = document.createElement("a");
-  btn.id = id;
-  btn.style.padding = "5px 5px";
-  btn.style.color = "#000000";
-  btn.style.backgroundColor = "#FFFFFF";
-  btn.style.position = "static";
-  btn.style.border = "1px solid black";
-  btn.style.textAlign = "center";
-  btn.style.display = hidden ? "none" : "flex";
-  btn.style.justifyContent = "center";
-  btn.style.alignItems = "center";
-
-  let t = document.createElement("p");
-  t.style.color = "inherit";
-  t.style.backgroundColor = "inherit";
-  t.style.margin = "0";
-  t.textContent = text;
-
-  btn.appendChild(t);
-  return btn;
-}
-
-export function buildColorPicker(): HTMLInputElement {
-  let colorPicker: HTMLInputElement = document.createElement("input");
-  colorPicker.type = "color";
-  colorPicker.id = "border-color-picker";
-  colorPicker.value = g.color;
-  colorPicker.style.height = "auto";
-  return colorPicker;
-}
-
-//#endregion Build Elements
-
 export function shiftPosition(pos: number, elmntDimension: number, clientDimension: number) {
   while (pos + elmntDimension >= clientDimension) {
     pos -= 25;
   }
   return pos;
-}
-
-export function forbiddenElement(event: Event): boolean {
-  let emulatorContainer = document.getElementById("refg-emulator");
-  let tooltip = document.getElementById("refg-tooltip");
-  let DOMChangeForm = document.getElementById("refg-dom-form");
-
-  let target: HTMLElement = event.target as HTMLElement;
-
-  let isForbidden: boolean =
-    target.id == "refg-emulator" ||
-    target.id == "refg-tooltip" ||
-    target.id == "refg-dom-form" ||
-    (emulatorContainer != null && emulatorContainer.contains(target)) ||
-    (tooltip != null && tooltip?.contains(target)) ||
-    (DOMChangeForm != null && DOMChangeForm?.contains(target));
-
-  return isForbidden;
-}
-
-export function toggleButton(
-  state: string,
-  eventListeners: any = {},
-  success: Function = null,
-  failure: Function = null
-): (event: MouseEvent) => void {
-  return function (event: MouseEvent) {
-    let button: HTMLAnchorElement = event.currentTarget as HTMLAnchorElement;
-    if (g[state]) {
-      button.style.color = "#000000";
-      button.style.backgroundColor = "#FFFFFF";
-      for (let listener in eventListeners) {
-        window.removeEventListener(listener, eventListeners[listener]);
-      }
-      g[state] = false;
-      if (success) success();
-    } else {
-      button.style.color = "#FFFFFF";
-      button.style.backgroundColor = "#000000";
-      for (let listener in eventListeners) {
-        window.addEventListener(listener, eventListeners[listener]);
-      }
-      g[state] = true;
-      if (failure) failure();
-    }
-    setState();
-  };
-}
-
-export function setButtonManual(id: string, state: string, eventListeners: IDictionary<any> = {}): void {
-  let button: HTMLAnchorElement = document.getElementById(id) as HTMLAnchorElement;
-  if (button) {
-    if (!g[state]) {
-      button.style.color = "#000000";
-      button.style.backgroundColor = "#FFFFFF";
-      for (let listener in eventListeners) {
-        window.removeEventListener(listener, eventListeners[listener]);
-      }
-    } else {
-      button.style.color = "#FFFFFF";
-      button.style.backgroundColor = "#000000";
-      for (let listener in eventListeners) {
-        window.addEventListener(listener, eventListeners[listener]);
-      }
-    }
-  }
 }

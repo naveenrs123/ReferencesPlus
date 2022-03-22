@@ -4,9 +4,9 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: {
-    content: "./src/scripts/emulator/content.ts",
-    background: "./src/scripts/background/background.ts",
-    g_content: "./src/scripts/github/g_content.ts",
+    recorder: "./src/scripts/recorder/content.ts",
+    background: "./src/scripts/background.ts",
+    content: "./src/scripts/github/content.ts",
   },
   module: {
     rules: [
