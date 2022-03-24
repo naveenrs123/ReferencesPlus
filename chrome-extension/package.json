@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Chrome extension for improved referencing in GitHub",
   "scripts": {
-    "scss": "sass --load-path=node_modules/ src/styles/index.scss:src/styles/index.css --style compressed",
-    "scss-watch": "sass --watch --load-path=node_modules/ src/styles/index.scss:src/styles/index.css --style compressed",
+    "scss": "sass --load-path=node_modules/ src/styles/refg-styles.scss:src/styles/refg-styles.css --style compressed",
+    "scss-watch": "sass --watch --load-path=node_modules/ src/styles/refg-styles.scss:src/styles/refg-styles.css --style compressed",
     "start": "npm run scss && webpack --watch --config webpack/webpack.dev.js",
     "build": "npm run scss && webpack --config webpack/webpack.prod.js"
   },

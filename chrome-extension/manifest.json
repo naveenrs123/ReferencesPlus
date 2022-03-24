@@ -21,5 +21,6 @@
     "32": "static/favicon-32x32.png",
     "48": "static/favicon-32x32.png",
     "128": "static/favicon-32x32.png"
-  }
+  },
+  "web_accessible_resources" : ["css/refg-styles.css"]
 }

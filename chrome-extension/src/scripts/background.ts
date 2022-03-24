@@ -37,7 +37,7 @@ chrome.webNavigation.onCompleted.addListener(
           .then(() => {
             chrome.scripting.insertCSS({
               target: { tabId: details.tabId },
-              files: ["css/rrweb-player.min.css"],
+              files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
             });
           })
           .then(() => insertContentScripts(details));

@@ -1,34 +1,41 @@
-export function buildInteractions() {
-  const interactions = document.createElement("div") as HTMLDivElement;
-  interactions.style.width = "300px";
-  interactions.style.padding = "10px";
-  interactions.style.maxHeight = "600px";
-  interactions.style.overflowY = "auto";
-  interactions.id = "refg-interactions";
-  return interactions;
-}
+import { buttonColorToClass } from "../common/helpers";
+import { ButtonColor } from "../common/interfaces";
 
 export function Player() {
   const player = document.createElement("div") as HTMLDivElement;
   player.id = "refg-github-player";
-  player.style.display = "flex";
+  player.classList.add("d-flex");
   player.style.overflowY = "auto";
   return player;
 }
 
-export function PlayerBtn(text: string) {
+export function PlayerBtn(text: string, toggleClass: string[] = [], id?: string) {
   const btn = document.createElement("button") as HTMLButtonElement;
-  btn.classList.add("m-2", "btn");
+  if (id !== undefined) btn.id = id;
+  btn.classList.add("m-2", "btn", ...toggleClass);
   btn.innerText = text;
   return btn;
 }
 
-export function TextInput(placeholder: string, id?: string) {
+export function MiniPlayerBtn(
+  text: string,
+  color: ButtonColor,
+  toggleClass: string[] = [],
+  id?: string
+) {
+  const btn = document.createElement("button") as HTMLButtonElement;
+  if (id !== undefined) btn.id = id;
+  btn.classList.add("mx-2", "btn-sm", buttonColorToClass(color), ...toggleClass);
+  btn.innerText = text;
+  return btn;
+}
+
+export function TextInput(placeholder: string, toggleClass: string[] = [], id?: string) {
   const input = document.createElement("input") as HTMLInputElement;
+  if (id !== undefined) input.id = id;
+  input.classList.add("form-control", ...toggleClass);
   input.type = "text";
   input.placeholder = placeholder;
-  input.classList.add("form-control")
-  if (id !== undefined) input.id = id;
   return input;
 }
 
@@ -54,15 +61,12 @@ export function ShowInterfaceBtn(parent: ParentNode): HTMLButtonElement {
  */
 export function InterfaceContainer(): HTMLDivElement {
   const container = document.createElement("div") as HTMLDivElement;
-  container.id = "refg-player-container";
-
-  container.style.maxHeight = "700px";
-  container.style.marginTop = "10px";
-  container.style.marginBottom = "10px";
+  container.id = "refg-interface-container";
+  container.classList.add("d-none");
+  container.style.maxHeight = "1000px";
+  container.style.margin = "10px 0px";
   container.style.zIndex = "20000";
   container.style.paddingLeft = "56px";
-  container.classList.add("d-none");
-
   container.setAttribute("role", "menu");
   return container;
 }

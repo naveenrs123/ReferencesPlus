@@ -1,4 +1,5 @@
-import { IDictionary } from "./interfaces";
+import { RRwebPlayerOptions } from "rrweb-player";
+import { ButtonColor } from "./interfaces";
 
 /**
  * Function that allows an element to be dragged across a page.
@@ -56,7 +57,12 @@ export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
  *
  * @returns A HTML Div Element representing the header used for dragging.
  */
-export function buildButtonDiv(id: string, content: string, color: string = "blue", cursor: string = "auto"): HTMLDivElement {
+export function buildButtonDiv(
+  id: string,
+  content: string,
+  color: string = "blue",
+  cursor: string = "auto"
+): HTMLDivElement {
   let grab: HTMLDivElement = document.createElement("div");
   grab.id = id;
   grab.style.backgroundColor = color;
@@ -64,7 +70,7 @@ export function buildButtonDiv(id: string, content: string, color: string = "blu
   grab.style.color = "#FFFFFF";
   grab.style.width = "55px";
   grab.style.textAlign = "center";
-  grab.style.display = "flex";
+  grab.classList.add("d-flex");
   grab.style.justifyContent = "center";
   grab.style.alignItems = "center";
 
@@ -81,4 +87,17 @@ export function shiftPosition(pos: number, elmntDimension: number, clientDimensi
     pos -= 25;
   }
   return pos;
+}
+
+export function buttonColorToClass(color: ButtonColor) {
+  switch (color) {
+    case ButtonColor.Green:
+      return "color-bg-success";
+    case ButtonColor.Red:
+      return "color-bg-danger";
+    case ButtonColor.Yellow:
+      return "color-bg-attention";
+    default:
+      return "color-bg-subtle";
+  }
 }

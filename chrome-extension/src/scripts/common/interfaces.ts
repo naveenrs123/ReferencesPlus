@@ -15,3 +15,10 @@ export interface ExtensionMessage {
   source: string;
   events?: eventWithTime[];
 }
+
+export enum ButtonColor {
+  Default = 1,
+  Green,
+  Red,
+  Yellow,
+}
