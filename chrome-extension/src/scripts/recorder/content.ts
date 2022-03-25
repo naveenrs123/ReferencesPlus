@@ -27,7 +27,7 @@ function recordInteractions(): void {
 }
 
 function stopRecording(): void {
-  if (stopFn) {
+  if (stopFn && events.length > 2) {
     stopFn();
     let eventCopy = events
     events = [];

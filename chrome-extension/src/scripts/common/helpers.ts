@@ -101,3 +101,20 @@ export function buttonColorToClass(color: ButtonColor) {
       return "color-bg-subtle";
   }
 }
+
+function padToNDigits(num: number, digits: number = 2) {
+  return num.toString().padStart(digits, "0");
+}
+
+export function convertMsToTime(milliseconds: number) {
+  let ms = Math.floor(milliseconds % 1000);
+  let seconds = Math.floor(milliseconds / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+  hours = hours % 24;
+
+  return `${padToNDigits(minutes)}:${padToNDigits(seconds)}:${padToNDigits(ms, 3)}`;
+}

@@ -1,5 +1,5 @@
-import { buttonColorToClass } from "../common/helpers";
-import { ButtonColor } from "../common/interfaces";
+import { buttonColorToClass } from "../../common/helpers";
+import { ButtonColor } from "../../common/interfaces";
 
 export function Player() {
   const player = document.createElement("div") as HTMLDivElement;
@@ -9,7 +9,7 @@ export function Player() {
   return player;
 }
 
-export function PlayerBtn(text: string, toggleClass: string[] = [], id?: string) {
+export function PlayerBtn(text: string, color: ButtonColor = ButtonColor.Default, toggleClass: string[] = [], id?: string) {
   const btn = document.createElement("button") as HTMLButtonElement;
   if (id !== undefined) btn.id = id;
   btn.classList.add("m-2", "btn", ...toggleClass);

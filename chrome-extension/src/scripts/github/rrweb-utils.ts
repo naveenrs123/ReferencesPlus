@@ -11,10 +11,11 @@ const listeners: { [key: string]: (arg0: any) => void } = {
 };
 
 function onPlayerStateChange(state: any) {
-  if (state.payload == "playing") {
-    disableInteractions(listeners);
-  } else {
+  console.log("PLAYER STATE: " + JSON.stringify(state));
+  if (state.payload == "paused") {
     enableInteractions(listeners);
+  } else {
+    disableInteractions(listeners);
   }
 }
 
@@ -39,14 +40,15 @@ export function getMainPlayer(): rrwebPlayer {
 }
 
 export function disableInteractions(listeners: { [key: string]: (arg0: any) => void }) {
-  const iframe = document.querySelector("iframe");
+  const iframe = mainPlayer.getReplayer().iframe;
   mainPlayer.getReplayer().disableInteract();
   for (let l in listeners) iframe.contentWindow.removeEventListener(l, listeners[l]);
   iframe.removeAttribute("listener");
 }
 
 export function enableInteractions(listeners: { [key: string]: (arg0: any) => void }) {
-  const iframe = document.querySelector("iframe");
+  console.log("INTERACTIONS ENABLED");
+  const iframe = mainPlayer.getReplayer().iframe;
   mainPlayer.getReplayer().enableInteract();
   for (let l in listeners) iframe.contentWindow.addEventListener(l, listeners[l]);
   iframe.setAttribute("listener", "true");
@@ -59,8 +61,8 @@ export function generateReplayerOptions(): RRwebPlayerOptions {
       events: [],
       height: 480,
       triggerFocus: false,
-      pauseAnimation: true,
-      mouseTail: false,
+      pauseAnimation: false,
+      mouseTail: true,
       autoPlay: false,
     },
   };

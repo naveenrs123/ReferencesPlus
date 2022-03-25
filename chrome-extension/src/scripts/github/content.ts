@@ -1,8 +1,9 @@
 import { ExtensionMessage } from "../common/interfaces";
-import * as c from "./components";
+import * as c from "./components/util-components";
 import { mainCommentQuery } from "../common/constants";
-import { LeftButtons, SessionManagement } from "./composition";
 import { injectMainPlayer } from "./rrweb-utils";
+import { LeftButtons } from "./components/left-button";
+import { SessionManagement } from "./components/session-management";
 
 /**
  * Builds the contents of the player container for emulator interactions.
