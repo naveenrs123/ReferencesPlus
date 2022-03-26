@@ -21,10 +21,7 @@ function MainInterface() {
   buttonsSection.appendChild(sessionManagementSection);
 
   const player: HTMLDivElement = c.Player();
-
-  const comments: HTMLDivElement = document.createElement("div");
-  comments.id = "refg-comments";
-  comments.classList.add("p-2", "d-flex", "overflow-x-auto", "flex-items-center");
+  const comments: HTMLDivElement = c.Comments();
 
   const container = c.InterfaceContainer();
   container.appendChild(buttonsSection);
@@ -42,21 +39,27 @@ function makeEditableInterface(query: string): void {
   const btn = c.ShowInterfaceBtn(detailsParent);
   detailsParent.appendChild(btn);
 
-  const mainInterface = MainInterface();
-
   btn.addEventListener("click", () => {
-    let hidden: boolean = mainInterface.classList.toggle("d-none");
-    if (!hidden) {
+    const timelineActions = document.querySelector(".discussion-timeline-actions") as HTMLDivElement;
+    let mainInterface = timelineActions.querySelector("#refg-interface-container") as HTMLDivElement;
+    if (mainInterface == undefined) {
+      mainInterface = MainInterface();
+      const issueCommentBox = document.getElementById("issue-comment-box") as HTMLDivElement;
+      timelineActions.insertBefore(mainInterface, issueCommentBox);
+    }
+
+    if (mainInterface.classList.toggle("d-none")) {
+      mainInterface.classList.remove("refg-active");
+    } else {
       mainInterface.classList.add("refg-active");
       chrome.runtime.sendMessage<ExtensionMessage>({
         action: "[GITHUB] Ready to Receive",
         source: "github_content",
       });
-    } else {
-      mainInterface.classList.remove("refg-active");
     }
   });
 
+  const mainInterface = MainInterface();
   const timelineActions = document.querySelector(".discussion-timeline-actions") as HTMLDivElement;
   const issueCommentBox = document.getElementById("issue-comment-box") as HTMLDivElement;
   timelineActions.insertBefore(mainInterface, issueCommentBox);

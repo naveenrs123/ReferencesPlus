@@ -1,5 +1,5 @@
 import { hideElemClass, waitForPlayerClass, waitForSaveClass } from "../../common/constants";
-import { PlayerBtn } from "./util-components";
+import { Comments, Player, PlayerBtn } from "./util-components";
 import { getMainPlayer } from "../rrweb-utils";
 import { Comment } from "./comment";
 import { ButtonColor } from "../../common/interfaces";
@@ -11,14 +11,32 @@ export function LeftButtons() {
 
   const close: HTMLButtonElement = PlayerBtn("Close");
   close.addEventListener("click", () => {
-    const interfaceContainer = document.getElementById("refg-interface-container");
-    const oldModal = interfaceContainer.querySelector("#refg-unsaved-changes-modal");
-    if (oldModal) {
-      interfaceContainer.removeChild(oldModal);
+    const playerContainer = document.getElementById("refg-github-player");
+    const oldModal = playerContainer.querySelector("#refg-unsaved-changes-modal");
+    if (oldModal) playerContainer.removeChild(oldModal);
+    if (playerContainer.hasChildNodes()) {
+      playerContainer.appendChild(UnsavedChangesModal());
+    } else {
+      const interfaceContainer = document.getElementById("refg-interface-container");
+      interfaceContainer.parentElement.removeChild(interfaceContainer);
     }
-    interfaceContainer.appendChild(UnsavedChangesModal());
   });
   const reset: HTMLButtonElement = PlayerBtn("Reset");
+  reset.addEventListener("click", () => {
+    const player = document.getElementById("refg-github-player") as HTMLDivElement;
+    const comments = document.getElementById("refg-comments") as HTMLDivElement;
+    const waitForPlayerElems = document.querySelectorAll("." + waitForPlayerClass);
+    waitForPlayerElems.forEach((elem: Element) => {
+      elem.classList.add(hideElemClass);
+    });
+
+    const interfaceContainer = document.getElementById("refg-interface-container");
+    interfaceContainer.removeChild(player);
+    interfaceContainer.removeChild(comments);
+
+    interfaceContainer.appendChild(Player());
+    interfaceContainer.appendChild(Comments());
+  });
 
   closeResetContainer.appendChild(close);
   closeResetContainer.appendChild(reset);

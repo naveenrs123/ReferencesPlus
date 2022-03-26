@@ -4,12 +4,23 @@ import { ButtonColor } from "../../common/interfaces";
 export function Player() {
   const player = document.createElement("div") as HTMLDivElement;
   player.id = "refg-github-player";
-  player.classList.add("d-flex");
-  player.style.overflowY = "auto";
+  player.classList.add("d-flex", "position-relative");
   return player;
 }
 
-export function PlayerBtn(text: string, color: ButtonColor = ButtonColor.Default, toggleClass: string[] = [], id?: string) {
+export function Comments() {
+  const comments = document.createElement("div") as HTMLDivElement;
+  comments.id = "refg-comments";
+  comments.classList.add("p-2", "d-flex", "overflow-x-auto", "flex-items-center");
+  return comments;
+}
+
+export function PlayerBtn(
+  text: string,
+  color: ButtonColor = ButtonColor.Default,
+  toggleClass: string[] = [],
+  id?: string
+) {
   const btn = document.createElement("button") as HTMLButtonElement;
   if (id !== undefined) btn.id = id;
   btn.classList.add("m-2", "btn", ...toggleClass);

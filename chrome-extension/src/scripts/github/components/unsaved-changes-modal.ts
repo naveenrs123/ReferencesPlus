@@ -14,7 +14,15 @@ export function UnsavedChangesModal() {
   textContainer.appendChild(sub);
 
   const ok = PlayerBtn("OK", ButtonColor.Green);
+  ok.addEventListener("click", () => {
+    const interfaceContainer = document.getElementById("refg-interface-container");
+    interfaceContainer.parentElement.removeChild(interfaceContainer);
+  });
   const close = PlayerBtn("Close", ButtonColor.Red);
+  close.addEventListener("click", () => {
+    const interfaceContainer = document.getElementById("refg-interface-container");
+    interfaceContainer.parentElement.removeChild(interfaceContainer);
+  });
 
   const buttonContainer = document.createElement("div") as HTMLDivElement;
   buttonContainer.classList.add("d-flex", "flex-justify-center");
@@ -24,14 +32,19 @@ export function UnsavedChangesModal() {
   const container = document.createElement("div") as HTMLDivElement;
   container.id = "refg-unsaved-changes-modal";
   container.classList.add(
+    "p-4",
     "d-flex",
     "flex-column",
     "flex-justify-center",
     "flex-items-center",
-    "position-relative",
-    "top-0",
-    "left-0"
+    "position-absolute",
+    "color-bg-overlay",
+    "color-border-default"
   );
+
+  container.style.top = "50%";
+  container.style.left = "50%";
+  container.style.transform = "translate(-50%, -50%)";
   container.appendChild(textContainer);
   container.appendChild(buttonContainer);
 
