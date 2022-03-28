@@ -68,11 +68,11 @@ export function generateReplayerOptions(): RRwebPlayerOptions {
   };
 }
 
-export function injectMainPlayer(events: eventWithTime[]) {
+export function injectMainPlayer(events: eventWithTime[], idx: number) {
   mainPlayer = null;
   const activeInterface = document.querySelector(".refg-active");
   const oldPlayers = activeInterface.querySelectorAll(".rr-player");
-  const playerDiv = activeInterface.querySelector("#refg-github-player") as HTMLElement;
+  const playerDiv = activeInterface.querySelector(`#refg-github-player-${idx}`) as HTMLElement;
   oldPlayers.forEach((player: Element) => {
     if (playerDiv.contains(player)) playerDiv.removeChild(player);
   });

@@ -1,4 +1,4 @@
-import { ExtensionMessage } from "./common/interfaces";
+import { ExtensionMessage, GitHubTabState, TabState } from "./common/interfaces";
 
 // Regular expression for GitHub PRs URLs
 let matchUrl: RegExp = /https:\/\/github.com\/.+\/.+\/pull\/\d+/;
@@ -98,17 +98,25 @@ chrome.runtime.onMessage.addListener(
     m: ExtensionMessage,
     sender: chrome.runtime.MessageSender
   ) => {
+
     if (m.action == "recording stopped" && m.source == "content") {
       // replace with popupTabId for popup implementation.
-      chrome.storage.local.get(["githubTabId"], (result) => {
-        chrome.tabs.sendMessage<ExtensionMessage>(result.githubTabId, {
+      chrome.storage.local.get(["state"], ({state}: {state: TabState}) => {
+        chrome.tabs.sendMessage<ExtensionMessage>(state.tabId, {
           action: "[GITHUB] Send Log",
           source: "background",
+          idx: state.idx,
           events: m.events,
         });
       });
     } else if (m.action == "[GITHUB] Ready to Receive" && m.source == "github_content") {
-      chrome.storage.local.set({ githubTabId: sender.tab.id });
+      const tabState: GitHubTabState = {
+        state: {
+          tabId: sender.tab.id,
+          idx: m.idx
+        }
+      }
+      chrome.storage.local.set(tabState);
     }
   }
 );

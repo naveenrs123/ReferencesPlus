@@ -1,3 +1,4 @@
+import rrwebPlayer from "rrweb-player";
 import { eventWithTime } from "rrweb/typings/types";
 
 export interface HoverInfo {
@@ -13,6 +14,7 @@ export interface IDictionary<TValue> {
 export interface ExtensionMessage {
   action: string;
   source: string;
+  idx?: number;
   events?: eventWithTime[];
 }
 
@@ -21,4 +23,24 @@ export enum ButtonColor {
   Green,
   Red,
   Yellow,
+}
+
+export interface InterfaceState {
+  containerId: string;
+  hasUnsavedChanges?: boolean;
+  mainPlayer?: rrwebPlayer;
+  active?: boolean;
+}
+
+export interface StateMap {
+  [id: number]: InterfaceState;
+}
+
+export interface GitHubTabState {
+  state: TabState;
+}
+
+export interface TabState {
+  tabId: number;
+  idx: number;
 }

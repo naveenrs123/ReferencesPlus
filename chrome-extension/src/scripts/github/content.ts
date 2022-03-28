@@ -1,17 +1,19 @@
 import { ExtensionMessage } from "../common/interfaces";
-import * as c from "./components/util-components";
 import { mainCommentQuery } from "../common/constants";
 import { injectMainPlayer } from "./rrweb-utils";
 import { LeftButtons } from "./components/left-button";
 import { SessionManagement } from "./components/session-management";
+import { counter, stateMap, updateCounter } from "../common/helpers";
+import { Comments, InterfaceContainer, Player, ShowInterfaceBtn } from "./components/util-components";
 
 /**
  * Builds the contents of the player container for emulator interactions.
  * @param playerContainer The container to which the contents will be added.
  */
-function MainInterface() {
-  const closeResetSection: HTMLDivElement = LeftButtons();
-  const sessionManagementSection: HTMLDivElement = SessionManagement();
+function MainInterface(idx: number) {
+  const closeResetSection: HTMLDivElement = LeftButtons(idx);
+
+  const sessionManagementSection: HTMLDivElement = SessionManagement(idx);
 
   const buttonsSection: HTMLDivElement = document.createElement("div");
   buttonsSection.classList.add("d-flex");
@@ -20,10 +22,10 @@ function MainInterface() {
   buttonsSection.appendChild(closeResetSection);
   buttonsSection.appendChild(sessionManagementSection);
 
-  const player: HTMLDivElement = c.Player();
-  const comments: HTMLDivElement = c.Comments();
+  const player: HTMLDivElement = Player(idx);
+  const comments: HTMLDivElement = Comments(idx);
 
-  const container = c.InterfaceContainer();
+  const container = InterfaceContainer(idx);
   container.appendChild(buttonsSection);
   container.appendChild(player);
   container.appendChild(comments);
@@ -36,14 +38,24 @@ function MainInterface() {
 function makeEditableInterface(query: string): void {
   const details: HTMLDetailsElement = document.querySelector(query);
   const detailsParent: ParentNode = details.parentNode;
-  const btn = c.ShowInterfaceBtn(detailsParent);
+
+  const idx = counter;
+  updateCounter();
+  const btn = ShowInterfaceBtn(detailsParent, idx);
   detailsParent.appendChild(btn);
+
+  stateMap[idx] = {
+    hasUnsavedChanges: false,
+    containerId: `refg-interface-container-${idx}`,
+  };
 
   btn.addEventListener("click", () => {
     const timelineActions = document.querySelector(".discussion-timeline-actions") as HTMLDivElement;
-    let mainInterface = timelineActions.querySelector("#refg-interface-container") as HTMLDivElement;
+    let mainInterface = timelineActions.querySelector(
+      `#refg-interface-container-${idx}`
+    ) as HTMLDivElement;
     if (mainInterface == undefined) {
-      mainInterface = MainInterface();
+      mainInterface = MainInterface(idx);
       const issueCommentBox = document.getElementById("issue-comment-box") as HTMLDivElement;
       timelineActions.insertBefore(mainInterface, issueCommentBox);
     }
@@ -55,11 +67,12 @@ function makeEditableInterface(query: string): void {
       chrome.runtime.sendMessage<ExtensionMessage>({
         action: "[GITHUB] Ready to Receive",
         source: "github_content",
+        idx: idx,
       });
     }
   });
 
-  const mainInterface = MainInterface();
+  const mainInterface = MainInterface(idx);
   const timelineActions = document.querySelector(".discussion-timeline-actions") as HTMLDivElement;
   const issueCommentBox = document.getElementById("issue-comment-box") as HTMLDivElement;
   timelineActions.insertBefore(mainInterface, issueCommentBox);
@@ -71,7 +84,7 @@ function makeEditableInterface(query: string): void {
  */
 chrome.runtime.onMessage.addListener((m: ExtensionMessage) => {
   if (m.action == "[GITHUB] Send Log" && m.source == "background") {
-    injectMainPlayer(m.events);
+    injectMainPlayer(m.events, m.idx);
   }
 });
 

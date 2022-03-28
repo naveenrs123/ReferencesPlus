@@ -5,37 +5,37 @@ import { Comment } from "./comment";
 import { ButtonColor } from "../../common/interfaces";
 import { UnsavedChangesModal } from "./unsaved-changes-modal";
 
-export function LeftButtons() {
+export function LeftButtons(idx: number) {
   const closeResetContainer = document.createElement("div") as HTMLDivElement;
   closeResetContainer.classList.add("d-flex");
 
   const close: HTMLButtonElement = PlayerBtn("Close");
   close.addEventListener("click", () => {
-    const playerContainer = document.getElementById("refg-github-player");
-    const oldModal = playerContainer.querySelector("#refg-unsaved-changes-modal");
+    const playerContainer = document.getElementById(`refg-github-player-${idx}`);
+    const oldModal = playerContainer.querySelector(`#refg-unsaved-changes-modal-${idx}`);
     if (oldModal) playerContainer.removeChild(oldModal);
     if (playerContainer.hasChildNodes()) {
-      playerContainer.appendChild(UnsavedChangesModal());
+      playerContainer.appendChild(UnsavedChangesModal(idx));
     } else {
-      const interfaceContainer = document.getElementById("refg-interface-container");
+      const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
       interfaceContainer.parentElement.removeChild(interfaceContainer);
     }
   });
+
   const reset: HTMLButtonElement = PlayerBtn("Reset");
   reset.addEventListener("click", () => {
-    const player = document.getElementById("refg-github-player") as HTMLDivElement;
-    const comments = document.getElementById("refg-comments") as HTMLDivElement;
+    const player = document.getElementById(`refg-github-player-${idx}`) as HTMLDivElement;
+    const comments = document.getElementById(`refg-comments-${idx}`) as HTMLDivElement;
     const waitForPlayerElems = document.querySelectorAll("." + waitForPlayerClass);
     waitForPlayerElems.forEach((elem: Element) => {
       elem.classList.add(hideElemClass);
     });
 
-    const interfaceContainer = document.getElementById("refg-interface-container");
+    const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
     interfaceContainer.removeChild(player);
     interfaceContainer.removeChild(comments);
-
-    interfaceContainer.appendChild(Player());
-    interfaceContainer.appendChild(Comments());
+    interfaceContainer.appendChild(Player(idx));
+    interfaceContainer.appendChild(Comments(idx));
   });
 
   closeResetContainer.appendChild(close);
@@ -49,7 +49,7 @@ export function LeftButtons() {
     hideElemClass,
   ]);
   comment.addEventListener("click", () => {
-    const commentSection = document.getElementById("refg-comments") as HTMLDivElement;
+    const commentSection = document.getElementById(`refg-comments-${idx}`) as HTMLDivElement;
     commentSection.appendChild(Comment(getMainPlayer().getReplayer().getCurrentTime()));
   });
 

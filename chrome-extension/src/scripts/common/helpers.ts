@@ -1,5 +1,7 @@
-import { RRwebPlayerOptions } from "rrweb-player";
-import { ButtonColor } from "./interfaces";
+import { ButtonColor, StateMap } from "./interfaces";
+
+export let stateMap: StateMap = {};
+export let counter = 0;
 
 /**
  * Function that allows an element to be dragged across a page.
@@ -117,4 +119,8 @@ export function convertMsToTime(milliseconds: number) {
   hours = hours % 24;
 
   return `${padToNDigits(minutes)}:${padToNDigits(seconds)}:${padToNDigits(ms, 3)}`;
+}
+
+export function updateCounter() {
+  counter = counter == 999 ? 0 : counter + 1;
 }

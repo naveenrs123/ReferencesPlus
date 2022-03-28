@@ -1,16 +1,16 @@
 import { buttonColorToClass } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
 
-export function Player() {
+export function Player(idx: number) {
   const player = document.createElement("div") as HTMLDivElement;
-  player.id = "refg-github-player";
+  player.id = `refg-github-player-${idx}`;
   player.classList.add("d-flex", "position-relative");
   return player;
 }
 
-export function Comments() {
+export function Comments(idx: number) {
   const comments = document.createElement("div") as HTMLDivElement;
-  comments.id = "refg-comments";
+  comments.id = `refg-comments-${idx}`;
   comments.classList.add("p-2", "d-flex", "overflow-x-auto", "flex-items-center");
   return comments;
 }
@@ -55,11 +55,11 @@ export function TextInput(placeholder: string, toggleClass: string[] = [], id?: 
  * @param parent A parent node that will contain the emulator button as a child.
  * @returns The emulator button.
  */
-export function ShowInterfaceBtn(parent: ParentNode): HTMLButtonElement {
-  let btn = document.getElementById("refg-show-interface") as HTMLButtonElement;
+export function ShowInterfaceBtn(parent: ParentNode, idx: number): HTMLButtonElement {
+  let btn = document.getElementById(`refg-show-interface-${idx}`) as HTMLButtonElement;
   if (btn != null) parent.removeChild(btn);
   btn = document.createElement("button");
-  btn.id = "refg-show-interface";
+  btn.id = `refg-show-interface-${idx}`;
   btn.innerText = "X";
   btn.setAttribute("role", "button");
   btn.classList.add("toolbar-item", "details-reset", "btn-octicon");
@@ -70,9 +70,9 @@ export function ShowInterfaceBtn(parent: ParentNode): HTMLButtonElement {
  * Create a container div element that will contain emulator interactions.
  * @returns The created container div.
  */
-export function InterfaceContainer(): HTMLDivElement {
+export function InterfaceContainer(idx: number): HTMLDivElement {
   const container = document.createElement("div") as HTMLDivElement;
-  container.id = "refg-interface-container";
+  container.id = `refg-interface-container-${idx}`;
   container.classList.add("d-none");
   container.style.maxHeight = "1000px";
   container.style.margin = "10px 0px";

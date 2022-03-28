@@ -1,7 +1,7 @@
 import { ButtonColor } from "../../common/interfaces";
 import { PlayerBtn } from "./util-components";
 
-export function UnsavedChangesModal() {
+export function UnsavedChangesModal(idx: number) {
   const heading = document.createElement("h3") as HTMLHeadingElement;
   heading.innerText = "You have unsaved changes!";
 
@@ -15,12 +15,12 @@ export function UnsavedChangesModal() {
 
   const ok = PlayerBtn("OK", ButtonColor.Green);
   ok.addEventListener("click", () => {
-    const interfaceContainer = document.getElementById("refg-interface-container");
+    const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
     interfaceContainer.parentElement.removeChild(interfaceContainer);
   });
   const close = PlayerBtn("Close", ButtonColor.Red);
   close.addEventListener("click", () => {
-    const interfaceContainer = document.getElementById("refg-interface-container");
+    const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
     interfaceContainer.parentElement.removeChild(interfaceContainer);
   });
 
@@ -30,7 +30,7 @@ export function UnsavedChangesModal() {
   buttonContainer.appendChild(close);
 
   const container = document.createElement("div") as HTMLDivElement;
-  container.id = "refg-unsaved-changes-modal";
+  container.id = `refg-unsaved-changes-modal-${idx}`;
   container.classList.add(
     "p-4",
     "d-flex",
