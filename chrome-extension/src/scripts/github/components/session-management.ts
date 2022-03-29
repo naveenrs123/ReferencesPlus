@@ -1,3 +1,4 @@
+import { stateMap } from "../../common/helpers";
 import { ChangesSavedModal } from "./changes-saved-modal";
 import { SaveSessionModal } from "./save-session-modal";
 import { PlayerBtn, TextInput } from "./util-components";
@@ -16,24 +17,14 @@ export function SessionManagement(idx: number) {
   saveContainer.classList.add("d-flex");
   saveContainer.style.alignSelf = "flex-end";
   const saveAs = PlayerBtn("Save As");
-  saveAs.addEventListener("click", () => {
-    const playerContainer = document.getElementById(`refg-github-player-${idx}`);
-    const oldModal = playerContainer.querySelector(`#refg-save-session-modal-${idx}`);
-    if (oldModal) playerContainer.removeChild(oldModal);
-    if (playerContainer.hasChildNodes()) {
-      playerContainer.appendChild(SaveSessionModal(idx));
-    }
-  })
+  saveAs.addEventListener("click", (event: MouseEvent) => {
+    handleSaveAs(event, idx);
+  });
 
   const save = PlayerBtn("Save");
-  save.addEventListener("click", () => {
-    const playerContainer = document.getElementById(`refg-github-player-${idx}`);
-    const oldModal = playerContainer.querySelector(`#refg-save-session-modal-${idx}`);
-    if (oldModal) playerContainer.removeChild(oldModal);
-    if (playerContainer.hasChildNodes()) {
-      playerContainer.appendChild(ChangesSavedModal("website", "title", "12345", idx));
-    }
-  })
+  save.addEventListener("click", (event: MouseEvent) => {
+    handleSave(event, idx);
+  });
 
   saveContainer.appendChild(saveAs);
   saveContainer.appendChild(save);
@@ -55,4 +46,24 @@ export function SessionManagement(idx: number) {
   container.appendChild(saveContainer);
   container.appendChild(loadSessionContainer);
   return container;
+}
+
+function handleSaveAs(event: MouseEvent, idx: number) {
+  const playerContainer = document.getElementById(`refg-github-player-${idx}`);
+  const oldModal = playerContainer.querySelector(`#refg-save-session-modal-${idx}`);
+  if (oldModal) playerContainer.removeChild(oldModal);
+  if (!playerContainer.hasChildNodes() || !stateMap[idx].hasUnsavedChanges) return;
+  playerContainer.appendChild(SaveSessionModal(idx));
+}
+
+function handleSave(event: MouseEvent, idx: number) {
+  const playerContainer = document.getElementById(`refg-github-player-${idx}`);
+  const oldModal = playerContainer.querySelector(`#refg-save-session-modal-${idx}`);
+  if (oldModal) playerContainer.removeChild(oldModal);
+  if (!playerContainer.hasChildNodes() || !stateMap[idx].hasUnsavedChanges) return;
+  if (stateMap[idx].sessionDetails.title == "") {
+    playerContainer.appendChild(SaveSessionModal(idx));
+  } else {
+    playerContainer.appendChild(ChangesSavedModal(idx));
+  }
 }

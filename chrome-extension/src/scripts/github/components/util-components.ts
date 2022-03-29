@@ -23,7 +23,7 @@ export function PlayerBtn(
 ) {
   const btn = document.createElement("button") as HTMLButtonElement;
   if (id !== undefined) btn.id = id;
-  btn.classList.add("m-2", "btn", ...toggleClass);
+  btn.classList.add("m-2", "btn", buttonColorToClass(color), ...toggleClass);
   btn.innerText = text;
   return btn;
 }
@@ -32,11 +32,13 @@ export function MiniPlayerBtn(
   text: string,
   color: ButtonColor,
   toggleClass: string[] = [],
+  margins: boolean = true,
   id?: string
 ) {
   const btn = document.createElement("button") as HTMLButtonElement;
   if (id !== undefined) btn.id = id;
-  btn.classList.add("mx-2", "btn-sm", buttonColorToClass(color), ...toggleClass);
+  btn.classList.add("btn-sm", buttonColorToClass(color), ...toggleClass);
+  if (margins) btn.classList.add("mx-2")
   btn.innerText = text;
   return btn;
 }

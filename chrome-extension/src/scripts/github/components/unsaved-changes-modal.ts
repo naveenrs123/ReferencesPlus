@@ -1,4 +1,7 @@
+import { stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
+import { ChangesSavedModal } from "./changes-saved-modal";
+import { SaveSessionModal } from "./save-session-modal";
 import { PlayerBtn } from "./util-components";
 
 export function UnsavedChangesModal(idx: number) {
@@ -14,20 +17,23 @@ export function UnsavedChangesModal(idx: number) {
   textContainer.appendChild(sub);
 
   const ok = PlayerBtn("OK", ButtonColor.Green);
-  ok.addEventListener("click", () => {
-    const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
-    interfaceContainer.parentElement.removeChild(interfaceContainer);
+  ok.addEventListener("click", (event: MouseEvent) => {
+    handleOK(event, idx);
   });
   const close = PlayerBtn("Close", ButtonColor.Red);
-  close.addEventListener("click", () => {
-    const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
-    interfaceContainer.parentElement.removeChild(interfaceContainer);
+  close.addEventListener("click", (event: MouseEvent) => {
+    handleClose(event, idx);
+  });
+  const cancel = PlayerBtn("cancel", ButtonColor.Default);
+  cancel.addEventListener("click", (event: MouseEvent) => {
+    handleCancel(event, idx);
   });
 
   const buttonContainer = document.createElement("div") as HTMLDivElement;
   buttonContainer.classList.add("d-flex", "flex-justify-center");
   buttonContainer.appendChild(ok);
   buttonContainer.appendChild(close);
+  buttonContainer.appendChild(cancel);
 
   const container = document.createElement("div") as HTMLDivElement;
   container.id = `refg-unsaved-changes-modal-${idx}`;
@@ -49,4 +55,27 @@ export function UnsavedChangesModal(idx: number) {
   container.appendChild(buttonContainer);
 
   return container;
+}
+
+function handleOK(event: MouseEvent, idx: number) {
+  const playerContainer = document.getElementById(`refg-github-player-${idx}`);
+  const oldModal = document.getElementById(`refg-unsaved-changes-modal-${idx}`);
+  playerContainer.removeChild(oldModal);
+  if (stateMap[idx].sessionDetails.title == "") {
+    playerContainer.appendChild(SaveSessionModal(idx));
+  } else {
+    playerContainer.appendChild(ChangesSavedModal(idx));
+  }
+}
+
+function handleClose(event: MouseEvent, idx: number) {
+  const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
+  interfaceContainer.parentElement.removeChild(interfaceContainer);
+  stateMap[idx] = null;
+}
+
+function handleCancel(event: MouseEvent, idx: number) {
+  const playerContainer = document.getElementById(`refg-github-player-${idx}`);
+  const oldModal = document.getElementById(`refg-unsaved-changes-modal-${idx}`);
+  playerContainer.removeChild(oldModal);
 }

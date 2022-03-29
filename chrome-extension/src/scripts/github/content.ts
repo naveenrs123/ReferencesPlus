@@ -1,7 +1,7 @@
 import { ExtensionMessage } from "../common/interfaces";
 import { mainCommentQuery } from "../common/constants";
 import { injectMainPlayer } from "./rrweb-utils";
-import { LeftButtons } from "./components/left-button";
+import { LeftButtons } from "./components/left-buttons";
 import { SessionManagement } from "./components/session-management";
 import { counter, stateMap, updateCounter } from "../common/helpers";
 import { Comments, InterfaceContainer, Player, ShowInterfaceBtn } from "./components/util-components";
@@ -12,23 +12,24 @@ import { Comments, InterfaceContainer, Player, ShowInterfaceBtn } from "./compon
  */
 function MainInterface(idx: number) {
   const closeResetSection: HTMLDivElement = LeftButtons(idx);
-
   const sessionManagementSection: HTMLDivElement = SessionManagement(idx);
-
-  const buttonsSection: HTMLDivElement = document.createElement("div");
-  buttonsSection.classList.add("d-flex");
-  buttonsSection.style.justifyContent = "space-between";
-  buttonsSection.style.alignItems = "flex-start";
-  buttonsSection.appendChild(closeResetSection);
-  buttonsSection.appendChild(sessionManagementSection);
+  const mainMenu: HTMLDivElement = MainMenu(idx);
+  mainMenu.appendChild(closeResetSection);
+  mainMenu.appendChild(sessionManagementSection);
 
   const player: HTMLDivElement = Player(idx);
   const comments: HTMLDivElement = Comments(idx);
 
   const container = InterfaceContainer(idx);
-  container.appendChild(buttonsSection);
+  container.appendChild(mainMenu);
   container.appendChild(player);
   container.appendChild(comments);
+  return container;
+}
+
+function MainMenu(idx: number) {
+  const container = document.createElement("div");
+  container.classList.add("d-flex", "flex-justify-between");
   return container;
 }
 
@@ -44,23 +45,25 @@ function makeEditableInterface(query: string): void {
   const btn = ShowInterfaceBtn(detailsParent, idx);
   detailsParent.appendChild(btn);
 
-  stateMap[idx] = {
-    hasUnsavedChanges: false,
-    containerId: `refg-interface-container-${idx}`,
-  };
-
   btn.addEventListener("click", () => {
     const timelineActions = document.querySelector(".discussion-timeline-actions") as HTMLDivElement;
-    let mainInterface = timelineActions.querySelector(
-      `#refg-interface-container-${idx}`
-    ) as HTMLDivElement;
+    let mainInterface = timelineActions.querySelector(`#refg-interface-container-${idx}`) as HTMLDivElement;
     if (mainInterface == undefined) {
       mainInterface = MainInterface(idx);
       const issueCommentBox = document.getElementById("issue-comment-box") as HTMLDivElement;
       timelineActions.insertBefore(mainInterface, issueCommentBox);
+      stateMap[idx] = {
+        hasUnsavedChanges: false,
+        containerId: `refg-interface-container-${idx}`,
+        mainPlayer: null,
+        sessionDetails: null,
+      };
     }
 
-    if (mainInterface.classList.toggle("d-none")) {
+    const hidden = mainInterface.classList.toggle("d-none");
+    stateMap[idx].active = !hidden;
+
+    if (hidden) {
       mainInterface.classList.remove("refg-active");
     } else {
       mainInterface.classList.add("refg-active");
@@ -71,6 +74,14 @@ function makeEditableInterface(query: string): void {
       });
     }
   });
+
+  stateMap[idx] = {
+    hasUnsavedChanges: false,
+    containerId: `refg-interface-container-${idx}`,
+    active: false,
+    mainPlayer: null,
+    sessionDetails: null,
+  };
 
   const mainInterface = MainInterface(idx);
   const timelineActions = document.querySelector(".discussion-timeline-actions") as HTMLDivElement;

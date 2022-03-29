@@ -1,20 +1,22 @@
+import { stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
 import { PlayerBtn } from "./util-components";
 
-export function ChangesSavedModal(website: string, title: string, id: string, idx: number) {
+export function ChangesSavedModal(idx: number) {
   const heading = document.createElement("h3") as HTMLHeadingElement;
   heading.innerText = "Changes Saved";
-  heading.classList.add("my-2")
+  heading.classList.add("my-2");
+
+  const sessionDetails = stateMap[idx].sessionDetails;
 
   const websiteP = document.createElement("p") as HTMLParagraphElement;
-  websiteP.innerText = website;
+  websiteP.innerText = sessionDetails.website;
 
   const titleP = document.createElement("p") as HTMLParagraphElement;
-  titleP.innerText = `Title: ${title}`;
+  titleP.innerText = `Title: ${sessionDetails.title}`;
 
   const idP = document.createElement("p") as HTMLParagraphElement;
-  idP.innerText = `Title`;
-
+  idP.innerText = `Id: ${sessionDetails.id}`;
 
   const ok = PlayerBtn("OK", ButtonColor.Green);
   ok.addEventListener("click", () => {
@@ -39,11 +41,11 @@ export function ChangesSavedModal(website: string, title: string, id: string, id
   container.style.top = "50%";
   container.style.left = "50%";
   container.style.transform = "translate(-50%, -50%)";
-  container.appendChild(heading)
-  container.appendChild(websiteP)
-  container.appendChild(titleP)
-  container.appendChild(idP)
-  container.appendChild(ok)
+  container.appendChild(heading);
+  container.appendChild(websiteP);
+  container.appendChild(titleP);
+  container.appendChild(idP);
+  container.appendChild(ok);
 
   return container;
 }

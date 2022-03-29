@@ -1,17 +1,25 @@
-import { convertMsToTime } from "../../common/helpers";
+import { hideElemClass, waitForSaveClass } from "../../common/constants";
+import { convertMsToTime, stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
-import { getMainPlayer } from "../rrweb-utils";
 import { MiniPlayerBtn } from "./util-components";
 
-export function Comment(timestamp: number) {
+export function Comment(timestamp: number, idx: number) {
   const timestampLabel = document.createElement("label") as HTMLLabelElement;
   timestampLabel.innerText = convertMsToTime(timestamp < 0 ? 0 : timestamp);
-  timestampLabel.classList.add("mt-2", "Link--muted");
+  timestampLabel.classList.add("Link--muted");
   timestampLabel.setAttribute("data-timestamp", (timestamp < 0 ? 0 : timestamp).toString());
   timestampLabel.addEventListener("click", (event: MouseEvent) => {
     const time = parseInt(timestampLabel.getAttribute("data-timestamp"));
-    getMainPlayer().goto(time, false);
+    stateMap[idx].mainPlayer.goto(time, false);
   });
+
+  const copy = MiniPlayerBtn("Copy", ButtonColor.Yellow, [waitForSaveClass, hideElemClass]);
+
+  const topContainer = document.createElement("div") as HTMLDivElement;
+  topContainer.classList.add("d-flex", "flex-justify-center", "flex-items-center", "p-2");
+  topContainer.style.width = "100%";
+  topContainer.appendChild(timestampLabel);
+  topContainer.appendChild(copy);
 
   const commentTextArea = document.createElement("textarea") as HTMLTextAreaElement;
   commentTextArea.classList.add("m-2");
@@ -19,7 +27,7 @@ export function Comment(timestamp: number) {
   commentTextArea.style.width = "90%";
 
   const buttonsContainer = document.createElement("div") as HTMLDivElement;
-  buttonsContainer.classList.add("d-flex", "flex-justify-center");
+  buttonsContainer.classList.add("d-flex", "flex-justify-center", "mb-2");
 
   const save = MiniPlayerBtn("Save", ButtonColor.Green);
   const del = MiniPlayerBtn("Delete", ButtonColor.Red);
@@ -38,7 +46,7 @@ export function Comment(timestamp: number) {
   );
   container.style.height = "250px";
   container.style.width = "150px";
-  container.appendChild(timestampLabel);
+  container.appendChild(topContainer);
   container.appendChild(commentTextArea);
   container.appendChild(buttonsContainer);
 

@@ -30,6 +30,7 @@ export interface InterfaceState {
   hasUnsavedChanges?: boolean;
   mainPlayer?: rrwebPlayer;
   active?: boolean;
+  sessionDetails?: SessionDetails;
 }
 
 export interface StateMap {
@@ -43,4 +44,10 @@ export interface GitHubTabState {
 export interface TabState {
   tabId: number;
   idx: number;
+}
+
+export interface SessionDetails {
+  title: string;
+  website: string;
+  id: string;
 }
