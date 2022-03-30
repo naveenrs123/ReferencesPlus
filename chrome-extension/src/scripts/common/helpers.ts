@@ -1,6 +1,6 @@
 import { ButtonColor, StateMap } from "./interfaces";
 
-export let stateMap: StateMap = {};
+export const stateMap: StateMap = {};
 export let counter = 0;
 
 /**
@@ -11,10 +11,10 @@ export let counter = 0;
  * @param elmnt The element you want to make draggable.
  */
 export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
-  let pos1: number = 0;
-  let pos2: number = 0;
-  let pos3: number = 0;
-  let pos4: number = 0;
+  let pos1 = 0;
+  let pos2 = 0;
+  let pos3 = 0;
+  let pos4 = 0;
 
   if (dragElmnt) {
     // if present, the header is where you move the DIV from:
@@ -24,7 +24,7 @@ export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
     elmnt.onmousedown = dragMouseDown;
   }
 
-  function dragMouseDown(e: MouseEvent) {
+  function dragMouseDown(e: MouseEvent): void {
     e.preventDefault();
     // get the mouse cursor position at startup:
     pos3 = e.clientX;
@@ -34,7 +34,7 @@ export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
     document.onmousemove = elementDrag;
   }
 
-  function elementDrag(e: MouseEvent) {
+  function elementDrag(e: MouseEvent): void {
     e.preventDefault();
     // calculate the new cursor position:
     pos1 = pos3 - e.clientX;
@@ -42,11 +42,11 @@ export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
     pos3 = e.clientX;
     pos4 = e.clientY;
     // set the element's new position:
-    elmnt.style.top = elmnt.offsetTop - pos2 + "px";
-    elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
+    elmnt.style.top = `${elmnt.offsetTop - pos2}px`;
+    elmnt.style.left = `${elmnt.offsetLeft - pos1}px`;
   }
 
-  function closeDragElement() {
+  function closeDragElement(): void {
     // stop moving when mouse button is released:
     document.onmouseup = null;
     document.onmousemove = null;
@@ -59,13 +59,8 @@ export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
  *
  * @returns A HTML Div Element representing the header used for dragging.
  */
-export function buildButtonDiv(
-  id: string,
-  content: string,
-  color: string = "blue",
-  cursor: string = "auto"
-): HTMLDivElement {
-  let grab: HTMLDivElement = document.createElement("div");
+export function buildButtonDiv(id: string, content: string, color = "blue", cursor = "auto"): HTMLDivElement {
+  const grab: HTMLDivElement = document.createElement("div");
   grab.id = id;
   grab.style.backgroundColor = color;
   grab.style.cursor = cursor;
@@ -76,7 +71,7 @@ export function buildButtonDiv(
   grab.style.justifyContent = "center";
   grab.style.alignItems = "center";
 
-  let text: HTMLParagraphElement = document.createElement("p");
+  const text: HTMLParagraphElement = document.createElement("p");
   text.textContent = content;
   text.style.margin = "0";
   grab.appendChild(text);
@@ -84,14 +79,14 @@ export function buildButtonDiv(
   return grab;
 }
 
-export function shiftPosition(pos: number, elmntDimension: number, clientDimension: number) {
+export function shiftPosition(pos: number, elmntDimension: number, clientDimension: number): number {
   while (pos + elmntDimension >= clientDimension) {
     pos -= 25;
   }
   return pos;
 }
 
-export function buttonColorToClass(color: ButtonColor) {
+export function buttonColorToClass(color: ButtonColor): string {
   switch (color) {
     case ButtonColor.Green:
       return "color-bg-success";
@@ -104,23 +99,28 @@ export function buttonColorToClass(color: ButtonColor) {
   }
 }
 
-function padToNDigits(num: number, digits: number = 2) {
+function padToNDigits(num: number, digits = 2): string {
   return num.toString().padStart(digits, "0");
 }
 
-export function convertMsToTime(milliseconds: number) {
-  let ms = Math.floor(milliseconds % 1000);
+export function convertMsToTime(milliseconds: number): string {
+  const ms = Math.floor(milliseconds % 1000);
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
-  let hours = Math.floor(minutes / 60);
 
   seconds = seconds % 60;
   minutes = minutes % 60;
-  hours = hours % 24;
 
   return `${padToNDigits(minutes)}:${padToNDigits(seconds)}:${padToNDigits(ms, 3)}`;
 }
 
-export function updateCounter() {
+export function updateCounter(): void {
   counter = counter == 999 ? 0 : counter + 1;
+}
+
+export function findCodeCommentInsertionPoint(elem: HTMLElement): HTMLElement {
+  while (!elem.classList.contains("review-thread-reply")) {
+    elem = elem.parentElement;
+  }
+  return elem;
 }

@@ -3,8 +3,8 @@ import { convertMsToTime, stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
 import { MiniPlayerBtn } from "./util-components";
 
-export function Comment(timestamp: number, idx: number) {
-  const timestampLabel = document.createElement("label") as HTMLLabelElement;
+export function Comment(timestamp: number, idx: number): HTMLDivElement {
+  const timestampLabel = document.createElement("label");
   timestampLabel.innerText = convertMsToTime(timestamp < 0 ? 0 : timestamp);
   timestampLabel.classList.add("Link--muted");
   timestampLabel.setAttribute("data-timestamp", (timestamp < 0 ? 0 : timestamp).toString());
@@ -15,18 +15,18 @@ export function Comment(timestamp: number, idx: number) {
 
   const copy = MiniPlayerBtn("Copy", ButtonColor.Yellow, [waitForSaveClass, hideElemClass]);
 
-  const topContainer = document.createElement("div") as HTMLDivElement;
+  const topContainer = document.createElement("div");
   topContainer.classList.add("d-flex", "flex-justify-center", "flex-items-center", "p-2");
   topContainer.style.width = "100%";
   topContainer.appendChild(timestampLabel);
   topContainer.appendChild(copy);
 
-  const commentTextArea = document.createElement("textarea") as HTMLTextAreaElement;
+  const commentTextArea = document.createElement("textarea");
   commentTextArea.classList.add("m-2");
   commentTextArea.style.resize = "vertical";
   commentTextArea.style.width = "90%";
 
-  const buttonsContainer = document.createElement("div") as HTMLDivElement;
+  const buttonsContainer = document.createElement("div");
   buttonsContainer.classList.add("d-flex", "flex-justify-center", "mb-2");
 
   const save = MiniPlayerBtn("Save", ButtonColor.Green);
@@ -34,7 +34,7 @@ export function Comment(timestamp: number, idx: number) {
   buttonsContainer.appendChild(save);
   buttonsContainer.appendChild(del);
 
-  const container = document.createElement("div") as HTMLDivElement;
+  const container = document.createElement("div");
   container.classList.add(
     "d-flex",
     "mx-2",

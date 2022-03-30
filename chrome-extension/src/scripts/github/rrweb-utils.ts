@@ -5,7 +5,7 @@ import { INode } from "rrweb-snapshot";
 import { hideElemClass, waitForPlayerClass } from "../common/constants";
 import { stateMap } from "../common/helpers";
 
-function onPlayerStateChange(state: any, mainPlayer: rrwebPlayer) {
+function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer): void {
   console.log("PLAYER STATE: " + JSON.stringify(state));
   if (state.payload == "paused") {
     enableInteractions(mainPlayer);
@@ -18,15 +18,15 @@ function onPlayerStateChange(state: any, mainPlayer: rrwebPlayer) {
  * Prevents click events from firing when the replayer is active.
  * @param event A mouse event corresponding to a click.
  */
-function handleIframeClick(event: MouseEvent, mainPlayer: rrwebPlayer) {
+function handleIframeClick(event: MouseEvent, mainPlayer: rrwebPlayer): void {
   event.preventDefault();
   event.stopPropagation();
   const mirror: Mirror = mainPlayer.getMirror();
   const targetId: number = mirror.getId(event.target as INode);
-  navigator.clipboard.writeText(targetId.toString());
+  void navigator.clipboard.writeText(targetId.toString());
 }
 
-export function disableInteractions(mainPlayer: rrwebPlayer) {
+export function disableInteractions(mainPlayer: rrwebPlayer): void {
   const listeners: { [key: string]: (arg0: any) => void } = {
     mouseover: mouseOverBorders,
     mouseout: mouseOutBorders,
@@ -36,11 +36,11 @@ export function disableInteractions(mainPlayer: rrwebPlayer) {
   };
   const iframe = mainPlayer.getReplayer().iframe;
   mainPlayer.getReplayer().disableInteract();
-  for (let l in listeners) iframe.contentWindow.removeEventListener(l, listeners[l]);
+  for (const l in listeners) iframe.contentWindow.removeEventListener(l, listeners[l]);
   iframe.removeAttribute("listener");
 }
 
-export function enableInteractions(mainPlayer: rrwebPlayer) {
+export function enableInteractions(mainPlayer: rrwebPlayer): void {
   const listeners: { [key: string]: (arg0: any) => void } = {
     mouseover: mouseOverBorders,
     mouseout: mouseOutBorders,
@@ -50,7 +50,7 @@ export function enableInteractions(mainPlayer: rrwebPlayer) {
   };
   const iframe = mainPlayer.getReplayer().iframe;
   mainPlayer.getReplayer().enableInteract();
-  for (let l in listeners) iframe.contentWindow.addEventListener(l, listeners[l]);
+  for (const l in listeners) iframe.contentWindow.addEventListener(l, listeners[l]);
   iframe.setAttribute("listener", "true");
 }
 
@@ -69,12 +69,12 @@ export function generateReplayerOptions(playerDiv: HTMLDivElement, events: event
   };
 }
 
-export function injectMainPlayer(events: eventWithTime[], idx: number) {
+export function injectMainPlayer(events: eventWithTime[], idx: number): void {
   stateMap[idx].mainPlayer = null;
   const activeInterface = document.querySelector(".refg-active");
   const oldPlayers = activeInterface.querySelectorAll(".rr-player");
-  const playerDiv = activeInterface.querySelector(`#refg-github-player-${idx}`) as HTMLDivElement;
-  oldPlayers.forEach((player: Element) => {
+  const playerDiv: HTMLDivElement = activeInterface.querySelector(`#refg-github-player-${idx}`);
+  oldPlayers.forEach((player: HTMLDivElement) => {
     if (playerDiv.contains(player)) playerDiv.removeChild(player);
   });
 
@@ -92,7 +92,7 @@ export function injectMainPlayer(events: eventWithTime[], idx: number) {
     id: "",
   };
   stateMap[idx].mainPlayer = new rrwebPlayer(replayerOptions);
-  stateMap[idx].mainPlayer.addEventListener("ui-update-player-state", (state: any) => {
+  stateMap[idx].mainPlayer.addEventListener("ui-update-player-state", (state: { payload: string }) => {
     onPlayerStateChange(state, stateMap[idx].mainPlayer);
   });
 }

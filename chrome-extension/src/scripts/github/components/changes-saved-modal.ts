@@ -2,30 +2,28 @@ import { stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
 import { PlayerBtn } from "./util-components";
 
-export function ChangesSavedModal(idx: number) {
-  const heading = document.createElement("h3") as HTMLHeadingElement;
+export function ChangesSavedModal(idx: number): HTMLDivElement {
+  const heading = document.createElement("h3");
   heading.innerText = "Changes Saved";
   heading.classList.add("my-2");
 
   const sessionDetails = stateMap[idx].sessionDetails;
 
-  const websiteP = document.createElement("p") as HTMLParagraphElement;
+  const websiteP = document.createElement("p");
   websiteP.innerText = sessionDetails.website;
 
-  const titleP = document.createElement("p") as HTMLParagraphElement;
+  const titleP = document.createElement("p");
   titleP.innerText = `Title: ${sessionDetails.title}`;
 
-  const idP = document.createElement("p") as HTMLParagraphElement;
+  const idP = document.createElement("p");
   idP.innerText = `Id: ${sessionDetails.id}`;
 
   const ok = PlayerBtn("OK", ButtonColor.Green);
-  ok.addEventListener("click", () => {
-    const playerContainer = document.getElementById(`refg-github-player-${idx}`);
-    const oldModal = playerContainer.querySelector(`#refg-changes-saved-modal-${idx}`);
-    playerContainer.removeChild(oldModal);
+  ok.addEventListener("click", (event: MouseEvent) => {
+    handleOK(event, idx);
   });
 
-  const container = document.createElement("div") as HTMLDivElement;
+  const container = document.createElement("div");
   container.id = `refg-changes-saved-modal-${idx}`;
   container.classList.add(
     "p-4",
@@ -48,4 +46,10 @@ export function ChangesSavedModal(idx: number) {
   container.appendChild(ok);
 
   return container;
+}
+
+function handleOK(event: MouseEvent, idx: number): void {
+  const playerContainer = document.getElementById(`refg-github-player-${idx}`);
+  const oldModal = playerContainer.querySelector(`#refg-changes-saved-modal-${idx}`);
+  playerContainer.removeChild(oldModal);
 }

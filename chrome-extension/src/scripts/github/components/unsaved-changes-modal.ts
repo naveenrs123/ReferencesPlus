@@ -4,14 +4,14 @@ import { ChangesSavedModal } from "./changes-saved-modal";
 import { SaveSessionModal } from "./save-session-modal";
 import { PlayerBtn } from "./util-components";
 
-export function UnsavedChangesModal(idx: number) {
-  const heading = document.createElement("h3") as HTMLHeadingElement;
+export function UnsavedChangesModal(idx: number): HTMLDivElement {
+  const heading = document.createElement("h3");
   heading.innerText = "You have unsaved changes!";
 
-  const sub = document.createElement("p") as HTMLParagraphElement;
+  const sub = document.createElement("p");
   sub.innerText = "Do you want to save them?";
 
-  const textContainer = document.createElement("div") as HTMLDivElement;
+  const textContainer = document.createElement("div");
   textContainer.classList.add("d-flex", "flex-column", "flex-justify-center", "flex-items-center");
   textContainer.appendChild(heading);
   textContainer.appendChild(sub);
@@ -29,13 +29,13 @@ export function UnsavedChangesModal(idx: number) {
     handleCancel(event, idx);
   });
 
-  const buttonContainer = document.createElement("div") as HTMLDivElement;
+  const buttonContainer = document.createElement("div");
   buttonContainer.classList.add("d-flex", "flex-justify-center");
   buttonContainer.appendChild(ok);
   buttonContainer.appendChild(close);
   buttonContainer.appendChild(cancel);
 
-  const container = document.createElement("div") as HTMLDivElement;
+  const container = document.createElement("div");
   container.id = `refg-unsaved-changes-modal-${idx}`;
   container.classList.add(
     "p-4",
@@ -57,7 +57,7 @@ export function UnsavedChangesModal(idx: number) {
   return container;
 }
 
-function handleOK(event: MouseEvent, idx: number) {
+function handleOK(event: MouseEvent, idx: number): void {
   const playerContainer = document.getElementById(`refg-github-player-${idx}`);
   const oldModal = document.getElementById(`refg-unsaved-changes-modal-${idx}`);
   playerContainer.removeChild(oldModal);
@@ -68,13 +68,13 @@ function handleOK(event: MouseEvent, idx: number) {
   }
 }
 
-function handleClose(event: MouseEvent, idx: number) {
+function handleClose(event: MouseEvent, idx: number): void {
   const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
   interfaceContainer.parentElement.removeChild(interfaceContainer);
   stateMap[idx] = null;
 }
 
-function handleCancel(event: MouseEvent, idx: number) {
+function handleCancel(event: MouseEvent, idx: number): void {
   const playerContainer = document.getElementById(`refg-github-player-${idx}`);
   const oldModal = document.getElementById(`refg-unsaved-changes-modal-${idx}`);
   playerContainer.removeChild(oldModal);

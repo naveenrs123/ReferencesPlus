@@ -1,31 +1,38 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true,
-        "webextensions": true
-    },
-    "extends": "eslint:recommended",
-    "parserOptions": {
-        "ecmaVersion": 13,
-        "sourceType": "module"
-    },
-    "rules": {
-        "no-unused-vars": [
-            "warn",
-            {
-                "vars": "all",
-                "args": "after-used",
-                "ignoreRestSiblings": false
-            }
-        ],
-        "semi": [
-            "warn",
-            "always"
-        ]
-    },
-    "ignorePatterns": [
-        "**/scripts/external",
-        "**/webpack",
-        "dist"
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "webextensions": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": [
+      "chrome-extension/tsconfig.json"
     ]
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
+  "rules": {
+    "no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": false
+      }
+    ],
+    "semi": [
+      "warn",
+      "always"
+    ],
+    "@typescript-eslint/explicit-function-return-type": [
+      "error"
+    ]
+  }
 }

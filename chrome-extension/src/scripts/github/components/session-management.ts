@@ -3,17 +3,17 @@ import { ChangesSavedModal } from "./changes-saved-modal";
 import { SaveSessionModal } from "./save-session-modal";
 import { PlayerBtn, TextInput } from "./util-components";
 
-export function SessionManagement(idx: number) {
-  const container = document.createElement("div") as HTMLDivElement;
+export function SessionManagement(idx: number): HTMLDivElement {
+  const container = document.createElement("div");
   container.classList.add("d-flex");
   container.style.flexDirection = "column";
 
-  const sessionID = document.createElement("label") as HTMLLabelElement;
+  const sessionID = document.createElement("label");
   sessionID.innerText = "Session ID: N/A";
   sessionID.style.textAlign = "right";
   sessionID.classList.add("text-normal");
 
-  const saveContainer = document.createElement("div") as HTMLDivElement;
+  const saveContainer = document.createElement("div");
   saveContainer.classList.add("d-flex");
   saveContainer.style.alignSelf = "flex-end";
   const saveAs = PlayerBtn("Save As");
@@ -29,11 +29,11 @@ export function SessionManagement(idx: number) {
   saveContainer.appendChild(saveAs);
   saveContainer.appendChild(save);
 
-  const loadSessionContainer = document.createElement("div") as HTMLDivElement;
+  const loadSessionContainer = document.createElement("div");
   loadSessionContainer.classList.add("d-flex");
   loadSessionContainer.style.alignItems = "center";
 
-  const label = document.createElement("label") as HTMLLabelElement;
+  const label = document.createElement("label");
   label.htmlFor = "refg-load-session-input";
   label.innerText = "Load Session";
   label.classList.add("text-normal", "mx-2");
@@ -48,7 +48,7 @@ export function SessionManagement(idx: number) {
   return container;
 }
 
-function handleSaveAs(event: MouseEvent, idx: number) {
+function handleSaveAs(event: MouseEvent, idx: number): void {
   const playerContainer = document.getElementById(`refg-github-player-${idx}`);
   const oldModal = playerContainer.querySelector(`#refg-save-session-modal-${idx}`);
   if (oldModal) playerContainer.removeChild(oldModal);
@@ -56,7 +56,7 @@ function handleSaveAs(event: MouseEvent, idx: number) {
   playerContainer.appendChild(SaveSessionModal(idx));
 }
 
-function handleSave(event: MouseEvent, idx: number) {
+function handleSave(event: MouseEvent, idx: number): void {
   const playerContainer = document.getElementById(`refg-github-player-${idx}`);
   const oldModal = playerContainer.querySelector(`#refg-save-session-modal-${idx}`);
   if (oldModal) playerContainer.removeChild(oldModal);
