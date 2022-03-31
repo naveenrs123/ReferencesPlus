@@ -118,8 +118,8 @@ export function updateCounter(): void {
   counter = counter == 999 ? 0 : counter + 1;
 }
 
-export function findCodeCommentInsertionPoint(elem: HTMLElement): HTMLElement {
-  while (!elem.classList.contains("review-thread-reply")) {
+export function findAncestorWithClass(elem: HTMLElement, className: string): HTMLElement {
+  while (!elem.classList.contains(className)) {
     elem = elem.parentElement;
   }
   return elem;

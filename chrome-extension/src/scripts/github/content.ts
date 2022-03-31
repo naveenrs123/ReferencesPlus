@@ -3,7 +3,7 @@ import { codeCommentQuery, mainCommentQuery } from "../common/constants";
 import { injectMainPlayer } from "./rrweb-utils";
 import { LeftButtons } from "./components/left-buttons";
 import { SessionManagement } from "./components/session-management";
-import { counter, stateMap, updateCounter } from "../common/helpers";
+import { counter, findAncestorWithClass, stateMap, updateCounter } from "../common/helpers";
 import { Comments, InterfaceContainer, Player, ShowInterfaceBtn } from "./components/util-components";
 
 /**
@@ -35,19 +35,19 @@ function MainMenu(): HTMLDivElement {
 
 function makeCodeEditableInterface(): void {
   document.querySelectorAll(codeCommentQuery).forEach((elem: HTMLElement) => {
-    const detailsParent = elem.parentNode;
+    const detailsParent = elem.parentElement;
     const idx = counter;
     updateCounter();
     const btn = ShowInterfaceBtn(detailsParent, idx);
     detailsParent.appendChild(btn);
 
     btn.addEventListener("click", () => {
-      const timelineActions = document.querySelector(".discussion-timeline-actions");
-      let mainInterface = timelineActions.querySelector(`#refg-interface-container-${idx}`);
+      const insertPoint = findAncestorWithClass(detailsParent, "js-line-comments");
+      let mainInterface: HTMLElement = insertPoint.querySelector(`#refg-interface-container-${idx}`);
       if (mainInterface == undefined) {
         mainInterface = MainInterface(idx);
-        const issueCommentBox = document.getElementById("issue-comment-box") as HTMLDivElement;
-        timelineActions.insertBefore(mainInterface, issueCommentBox);
+        const reviewThreadReply = findAncestorWithClass(detailsParent, "review-thread-reply");
+        insertPoint.insertBefore(mainInterface, reviewThreadReply);
         stateMap[idx] = {
           hasUnsavedChanges: false,
           containerId: `refg-interface-container-${idx}`,
@@ -78,6 +78,10 @@ function makeCodeEditableInterface(): void {
       mainPlayer: null,
       sessionDetails: null,
     };
+    const insertPoint = findAncestorWithClass(detailsParent, "js-line-comments");
+    const mainInterface: HTMLElement = insertPoint.querySelector(`#refg-interface-container-${idx}`);
+    const reviewThreadReply = findAncestorWithClass(detailsParent, "review-thread-reply");
+    insertPoint.insertBefore(mainInterface, reviewThreadReply);
   });
 }
 
