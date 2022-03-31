@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import rrwebPlayer from "rrweb-player";
 import { eventWithTime } from "rrweb/typings/types";
 

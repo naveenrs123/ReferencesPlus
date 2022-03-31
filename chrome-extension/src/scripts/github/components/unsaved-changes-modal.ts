@@ -24,7 +24,7 @@ export function UnsavedChangesModal(idx: number): HTMLDivElement {
   close.addEventListener("click", (event: MouseEvent) => {
     handleClose(event, idx);
   });
-  const cancel = PlayerBtn("cancel", ButtonColor.Default);
+  const cancel = PlayerBtn("Cancel", ButtonColor.Default);
   cancel.addEventListener("click", (event: MouseEvent) => {
     handleCancel(event, idx);
   });

@@ -1,8 +1,8 @@
 import { ExtensionMessage } from "../common/interfaces";
 import { record } from "rrweb";
-import { eventWithTime } from "rrweb/typings/types";
+import { eventWithTime, listenerHandler } from "rrweb/typings/types";
 
-let stopFn: Function = null;
+let stopFn: listenerHandler = null;
 let events: eventWithTime[] = [];
 
 /**
@@ -11,12 +11,13 @@ let events: eventWithTime[] = [];
  */
 chrome.runtime.onMessage.addListener(function (m: ExtensionMessage) {
   if (m.action == "start recording" && m.source == "background") {
+    alert("Recording will begin after you click 'OK'.");
     recordInteractions();
   } else if (m.action == "stop recording" && m.source == "background") {
     stopRecording();
+    alert("Recording stopped.");
   }
 });
-
 
 function recordInteractions(): void {
   stopFn = record({
@@ -29,10 +30,8 @@ function recordInteractions(): void {
 function stopRecording(): void {
   if (stopFn && events.length > 2) {
     stopFn();
-    let eventCopy = events
+    const eventCopy = events;
     events = [];
-    chrome.runtime.sendMessage<ExtensionMessage>(
-      { action: "recording stopped", source: "content", events: eventCopy },
-    );
+    chrome.runtime.sendMessage<ExtensionMessage>({ action: "recording stopped", source: "content", events: eventCopy });
   }
 }

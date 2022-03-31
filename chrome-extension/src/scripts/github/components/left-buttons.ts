@@ -55,14 +55,16 @@ function handleClose(event: MouseEvent, idx: number): void {
 }
 
 function handleReset(event: MouseEvent, idx: number): void {
+  const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
   const player = document.getElementById(`refg-github-player-${idx}`) as HTMLDivElement;
   const comments = document.getElementById(`refg-comments-${idx}`) as HTMLDivElement;
-  const waitForPlayerElems = document.querySelectorAll("." + waitForPlayerClass);
-  waitForPlayerElems.forEach((elem: Element) => {
+  interfaceContainer.querySelectorAll("." + waitForPlayerClass).forEach((elem: Element) => {
     elem.classList.add(hideElemClass);
   });
 
-  const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
+  interfaceContainer.querySelectorAll("." + waitForSaveClass).forEach((elem: Element) => {
+    elem.classList.add(hideElemClass);
+  });
   interfaceContainer.removeChild(player);
   interfaceContainer.removeChild(comments);
   interfaceContainer.appendChild(Player(idx));

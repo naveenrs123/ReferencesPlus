@@ -72,14 +72,14 @@ export function ShowInterfaceBtn(parent: ParentNode, idx: number): HTMLButtonEle
  * Create a container div element that will contain emulator interactions.
  * @returns The created container div.
  */
-export function InterfaceContainer(idx: number): HTMLDivElement {
+export function InterfaceContainer(idx: number, isCodeComment: boolean): HTMLDivElement {
   const container = document.createElement("div");
   container.id = `refg-interface-container-${idx}`;
   container.classList.add("d-none");
   container.style.maxHeight = "1000px";
   container.style.margin = "10px 0px";
   container.style.zIndex = "20000";
-  container.style.paddingLeft = "56px";
+  container.style.padding = isCodeComment ? "10px" : "0 0 0 56px";
   container.setAttribute("role", "menu");
   return container;
 }

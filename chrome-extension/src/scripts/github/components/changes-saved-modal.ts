@@ -1,3 +1,4 @@
+import { hideElemClass, unsavedCommentClass, waitForSaveClass } from "../../common/constants";
 import { stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
 import { PlayerBtn } from "./util-components";
@@ -52,4 +53,9 @@ function handleOK(event: MouseEvent, idx: number): void {
   const playerContainer = document.getElementById(`refg-github-player-${idx}`);
   const oldModal = playerContainer.querySelector(`#refg-changes-saved-modal-${idx}`);
   playerContainer.removeChild(oldModal);
+  const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
+  interfaceContainer.querySelectorAll("." + waitForSaveClass).forEach((elem: HTMLElement) => {
+    if (elem.classList.contains(unsavedCommentClass)) return;
+    elem.classList.remove(hideElemClass);
+  });
 }

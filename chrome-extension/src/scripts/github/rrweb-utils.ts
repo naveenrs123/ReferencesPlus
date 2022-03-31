@@ -27,7 +27,8 @@ function handleIframeClick(event: MouseEvent, mainPlayer: rrwebPlayer): void {
 }
 
 export function disableInteractions(mainPlayer: rrwebPlayer): void {
-  const listeners: { [key: string]: (arg0: any) => void } = {
+  // eslint-disable-next-line no-unused-vars
+  const listeners: { [key: string]: (event: MouseEvent) => void } = {
     mouseover: mouseOverBorders,
     mouseout: mouseOutBorders,
     click: (event: MouseEvent) => {
@@ -41,7 +42,8 @@ export function disableInteractions(mainPlayer: rrwebPlayer): void {
 }
 
 export function enableInteractions(mainPlayer: rrwebPlayer): void {
-  const listeners: { [key: string]: (arg0: any) => void } = {
+  // eslint-disable-next-line no-unused-vars
+  const listeners: { [key: string]: (event: MouseEvent) => void } = {
     mouseover: mouseOverBorders,
     mouseout: mouseOutBorders,
     click: (event: MouseEvent) => {
@@ -70,6 +72,8 @@ export function generateReplayerOptions(playerDiv: HTMLDivElement, events: event
 }
 
 export function injectMainPlayer(events: eventWithTime[], idx: number): void {
+  if (!stateMap[idx].active) return; // cannot inject if player is not active.
+
   stateMap[idx].mainPlayer = null;
   const activeInterface = document.querySelector(".refg-active");
   const oldPlayers = activeInterface.querySelectorAll(".rr-player");

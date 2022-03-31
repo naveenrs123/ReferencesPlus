@@ -10,7 +10,7 @@ import { Comments, InterfaceContainer, Player, ShowInterfaceBtn } from "./compon
  * Builds the contents of the player container for emulator interactions.
  * @param playerContainer The container to which the contents will be added.
  */
-function MainInterface(idx: number): HTMLDivElement {
+function MainInterface(idx: number, isCodeComment = false): HTMLDivElement {
   const closeResetSection: HTMLDivElement = LeftButtons(idx);
   const sessionManagementSection: HTMLDivElement = SessionManagement(idx);
   const mainMenu: HTMLDivElement = MainMenu();
@@ -20,7 +20,7 @@ function MainInterface(idx: number): HTMLDivElement {
   const player: HTMLDivElement = Player(idx);
   const comments: HTMLDivElement = Comments(idx);
 
-  const container = InterfaceContainer(idx);
+  const container = InterfaceContainer(idx, isCodeComment);
   container.appendChild(mainMenu);
   container.appendChild(player);
   container.appendChild(comments);
@@ -35,17 +35,21 @@ function MainMenu(): HTMLDivElement {
 
 function makeCodeEditableInterface(): void {
   document.querySelectorAll(codeCommentQuery).forEach((elem: HTMLElement) => {
-    const detailsParent = elem.parentElement;
     const idx = counter;
+    let btn = document.getElementById(`refg-show-interface-${idx}`);
+    if (btn) return;
+
     updateCounter();
-    const btn = ShowInterfaceBtn(detailsParent, idx);
+    const detailsParent = elem.parentElement;
+    const insertPoint = findAncestorWithClass(detailsParent, "js-line-comments");
+    btn = ShowInterfaceBtn(detailsParent, idx);
     detailsParent.appendChild(btn);
 
     btn.addEventListener("click", () => {
       const insertPoint = findAncestorWithClass(detailsParent, "js-line-comments");
-      let mainInterface: HTMLElement = insertPoint.querySelector(`#refg-interface-container-${idx}`);
+      let mainInterface: Element = insertPoint.querySelector(`#refg-interface-container-${idx}`);
       if (mainInterface == undefined) {
-        mainInterface = MainInterface(idx);
+        mainInterface = MainInterface(idx, true);
         const reviewThreadReply = findAncestorWithClass(detailsParent, "review-thread-reply");
         insertPoint.insertBefore(mainInterface, reviewThreadReply);
         stateMap[idx] = {
@@ -78,9 +82,9 @@ function makeCodeEditableInterface(): void {
       mainPlayer: null,
       sessionDetails: null,
     };
-    const insertPoint = findAncestorWithClass(detailsParent, "js-line-comments");
-    const mainInterface: HTMLElement = insertPoint.querySelector(`#refg-interface-container-${idx}`);
-    const reviewThreadReply = findAncestorWithClass(detailsParent, "review-thread-reply");
+
+    const mainInterface: HTMLDivElement = MainInterface(idx, true);
+    const reviewThreadReply: HTMLElement = findAncestorWithClass(detailsParent, "review-thread-reply");
     insertPoint.insertBefore(mainInterface, reviewThreadReply);
   });
 }
@@ -152,3 +156,4 @@ chrome.runtime.onMessage.addListener((m: ExtensionMessage) => {
 });
 
 makeMainEditableInterface();
+makeCodeEditableInterface();
