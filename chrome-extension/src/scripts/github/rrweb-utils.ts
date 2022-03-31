@@ -23,7 +23,7 @@ function handleIframeClick(event: MouseEvent, mainPlayer: rrwebPlayer): void {
   event.stopPropagation();
   const mirror: Mirror = mainPlayer.getMirror();
   const targetId: number = mirror.getId(event.target as INode);
-  void navigator.clipboard.writeText(targetId.toString());
+  void navigator.clipboard.writeText("~[" + targetId.toString() + "]~");
 }
 
 export function disableInteractions(mainPlayer: rrwebPlayer): void {

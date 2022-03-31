@@ -52,3 +52,10 @@ export interface SessionDetails {
   website: string;
   id: string;
 }
+
+export interface SavedCommentData {
+  timestamp: number;
+  idx: number; // Associated with session
+  rawText: string // raw text from the textarea.
+  contents: HTMLParagraphElement; // A div containing the processed contents of the textarea.
+}
