@@ -2,8 +2,6 @@
 
 ## A Project to Improve Referencing Features in Github
 
-<br>
-
 ## **Backend Server**
 The backend server is written using Python and Flask because its easy to get a simple server running and Python provides easy access to various Data Science and ML Libraries that may be useful for future endeavours or developing other features.
 
@@ -24,7 +22,7 @@ This Chrome extension provides useful tools for emulation and the creation of ri
 
 The project is written in **TypeScript** and uses **Webpack** for bundling. External libraries such as **RRWeb** are used to provide additional functionality.
 
-For styling **SASS** is used with *.scss* stylesheets, and can be extended depending on how the project evolves.
+For styling **SASS** is used with `.scss` stylesheets, and can be extended depending on how the project evolves.
 
 ### **Setup**
 To setup the Chrome extension, perform the following steps:
@@ -38,3 +36,5 @@ To setup the Chrome extension, perform the following steps:
 Modify the `package.json` file with additional `npm` scripts as required.
 
 There is a `.prettierrc` file for formatting and a `tsconfig.json` file for linting and error checking.
+
+The main files are located in the `scripts/` folder, although experiments and other tests are located in `scripts-old/` folder.
