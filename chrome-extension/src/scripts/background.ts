@@ -1,12 +1,12 @@
 import { ExtensionMessage, GitHubTabState, TabState } from "./common/interfaces";
 
 // Regular expression for GitHub PRs URLs
-let matchUrl: RegExp = /https:\/\/github.com\/.+\/.+\/pull\/\d+/;
+const matchUrl = /https:\/\/github.com\/.+\/.+\/pull\/\d+/;
 
 /**
  * Create the Context Menu items required for the extension.
  */
-function createContextMenuItems() {
+function createContextMenuItems(): void {
   chrome.contextMenus.removeAll();
   chrome.contextMenus.create({
     checked: false,
@@ -25,100 +25,84 @@ function createContextMenuItems() {
 /**
  * Listener to insert relevant content scripts into a GitHub PR page.
  */
-chrome.webNavigation.onCompleted.addListener(
-  (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => {
-    if (details.frameId === 0) {
-      if (matchUrl.test(details.url)) {
-        chrome.scripting
-          .executeScript({
-            target: { tabId: details.tabId },
-            files: ["vendors-content.js", "content.js"],
-          })
-          .then(() => {
-            chrome.scripting.insertCSS({
-              target: { tabId: details.tabId },
-              files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
-            });
-          })
-          .then(() => insertContentScripts(details));
-      } else {
-        insertContentScripts(details);
-      }
-    }
+chrome.tabs.onUpdated.addListener((tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
+  if (changeInfo.status !== "complete") return;
+  console.log(changeInfo);
+  console.log(tab);
+  if (matchUrl.test(tab.url)) {
+    chrome.scripting
+      .executeScript({
+        target: { tabId: tabId },
+        files: ["vendors-content.js", "content.js"],
+      })
+      .then(() => {
+        return chrome.scripting.insertCSS({
+          target: { tabId: tabId },
+          files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
+        });
+      })
+      .then(() => insertContentScripts(tab))
+      .catch(() => {
+        console.log("ERROR");
+      });
+  } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(tab.url)) {
+    insertContentScripts(tab);
   }
-);
+});
 
 /**
  * Inserts the content scripts into the tab where a web navigation was just completed.
  *
  * @param details An object containing information related to webNavigation.
  */
-function insertContentScripts(details: chrome.webNavigation.WebNavigationFramedCallbackDetails) {
-  chrome.scripting.executeScript(
-    {
-      target: { tabId: details.tabId },
-      files: ["vendors-recorder.js", "recorder.js"],
-    },
-    () => {
-      chrome.tabs.get(details.tabId, (tab) => {
-        chrome.tabs.sendMessage<ExtensionMessage>(tab.id, {
-          action: "initial load",
-          source: "background",
-        });
-      });
-    }
-  );
+function insertContentScripts(tab: chrome.tabs.Tab): void {
+  void chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    files: ["vendors-recorder.js", "recorder.js"],
+  });
 }
 
 /**
  * An event listener to check for interactions with Context Menu items.
  */
-chrome.contextMenus.onClicked.addListener(
-  (info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) => {
-    if (info.menuItemId === "record-page-start") {
-      chrome.tabs.sendMessage<ExtensionMessage>(tab.id, {
-        action: "start recording",
-        source: "background",
-      });
-    } else if (info.menuItemId === "record-page-stop") {
-      chrome.tabs.sendMessage<ExtensionMessage>(tab.id, {
-        action: "stop recording",
-        source: "background",
-      });
-    }
+chrome.contextMenus.onClicked.addListener((info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) => {
+  if (info.menuItemId === "record-page-start") {
+    chrome.tabs.sendMessage<ExtensionMessage>(tab.id, {
+      action: "start recording",
+      source: "background",
+    });
+  } else if (info.menuItemId === "record-page-stop") {
+    chrome.tabs.sendMessage<ExtensionMessage>(tab.id, {
+      action: "stop recording",
+      source: "background",
+    });
   }
-);
+});
 
 /**
  * An event listener to respond to messages from different content scripts. All messages
  * provided must be in the form of an {@link ExtensionMessage}.
  */
-chrome.runtime.onMessage.addListener(
-  (
-    m: ExtensionMessage,
-    sender: chrome.runtime.MessageSender
-  ) => {
-
-    if (m.action == "recording stopped" && m.source == "content") {
-      // replace with popupTabId for popup implementation.
-      chrome.storage.local.get(["state"], ({state}: {state: TabState}) => {
-        chrome.tabs.sendMessage<ExtensionMessage>(state.tabId, {
-          action: "[GITHUB] Send Log",
-          source: "background",
-          idx: state.idx,
-          events: m.events,
-        });
+chrome.runtime.onMessage.addListener((m: ExtensionMessage, sender: chrome.runtime.MessageSender) => {
+  if (m.action == "recording stopped" && m.source == "content") {
+    // replace with popupTabId for popup implementation.
+    chrome.storage.local.get(["state"], ({ state }: { state: TabState }) => {
+      chrome.tabs.sendMessage<ExtensionMessage>(state.tabId, {
+        action: "[GITHUB] Send Log",
+        source: "background",
+        idx: state.idx,
+        events: m.events,
       });
-    } else if (m.action == "[GITHUB] Ready to Receive" && m.source == "github_content") {
-      const tabState: GitHubTabState = {
-        state: {
-          tabId: sender.tab.id,
-          idx: m.idx
-        }
-      }
-      chrome.storage.local.set(tabState);
-    }
+    });
+  } else if (m.action == "[GITHUB] Ready to Receive" && m.source == "github_content") {
+    const tabState: GitHubTabState = {
+      state: {
+        tabId: sender.tab.id,
+        idx: m.idx,
+      },
+    };
+    void chrome.storage.local.set(tabState);
   }
-);
+});
 
 createContextMenuItems();

@@ -75,6 +75,13 @@ function handleReset(event: MouseEvent, idx: number): void {
 
 function handleComment(event: MouseEvent, idx: number): void {
   const commentSection = document.getElementById(`refg-comments-${idx}`) as HTMLDivElement;
-  commentSection.appendChild(Comment(stateMap[idx].mainPlayer.getReplayer().getCurrentTime(), idx));
+  commentSection.appendChild(
+    Comment({
+      timestamp: stateMap[idx].mainPlayer.getReplayer().getCurrentTime(),
+      idx: idx,
+      rawText: "",
+      contents: null,
+    })
+  );
   stateMap[idx].hasUnsavedChanges = true;
 }

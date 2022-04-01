@@ -6,7 +6,6 @@ import { hideElemClass, waitForPlayerClass } from "../common/constants";
 import { stateMap } from "../common/helpers";
 
 function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer): void {
-  console.log("PLAYER STATE: " + JSON.stringify(state));
   if (state.payload == "paused") {
     enableInteractions(mainPlayer);
   } else {

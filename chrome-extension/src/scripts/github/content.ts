@@ -94,7 +94,7 @@ function makeCodeEditableInterface(): void {
  */
 function makeMainEditableInterface(): void {
   const details: HTMLDetailsElement = document.querySelector(mainCommentQuery);
-  const detailsParent: ParentNode = details.parentNode;
+  const detailsParent = details.parentElement;
 
   const idx = counter;
   updateCounter();
@@ -155,5 +155,7 @@ chrome.runtime.onMessage.addListener((m: ExtensionMessage) => {
   }
 });
 
-makeMainEditableInterface();
-makeCodeEditableInterface();
+setTimeout(() => {
+  makeMainEditableInterface();
+  makeCodeEditableInterface();
+}, 200);

@@ -11,8 +11,8 @@ let events: eventWithTime[] = [];
  */
 chrome.runtime.onMessage.addListener(function (m: ExtensionMessage) {
   if (m.action == "start recording" && m.source == "background") {
-    alert("Recording will begin after you click 'OK'.");
     recordInteractions();
+    alert("Recording started.");
   } else if (m.action == "stop recording" && m.source == "background") {
     stopRecording();
     alert("Recording stopped.");

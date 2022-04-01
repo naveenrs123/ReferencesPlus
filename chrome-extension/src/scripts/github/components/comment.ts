@@ -1,31 +1,29 @@
 import { Mirror } from "rrweb/typings/types";
-import { hideElemClass, unsavedCommentClass, waitForSaveClass } from "../../common/constants";
 import { convertMsToTime, stateMap } from "../../common/helpers";
 import { ButtonColor, SavedCommentData } from "../../common/interfaces";
 import { color } from "../borders";
+import { SavedComment } from "./saved-comment";
 import { MiniPlayerBtn } from "./util-components";
 
-export function Comment(timestamp: number, idx: number): HTMLDivElement {
+export function Comment(data: SavedCommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
-  timestampLabel.innerText = convertMsToTime(timestamp < 0 ? 0 : timestamp);
+  const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
+  timestampLabel.innerText = convertMsToTime(timestamp);
   timestampLabel.classList.add("Link--muted");
-  timestampLabel.setAttribute("data-timestamp", (timestamp < 0 ? 0 : timestamp).toString());
+  timestampLabel.setAttribute("data-timestamp", timestamp.toString());
   timestampLabel.addEventListener("click", () => {
     const time = parseInt(timestampLabel.getAttribute("data-timestamp"));
-    stateMap[idx].mainPlayer.goto(time, false);
+    stateMap[data.idx].mainPlayer.goto(time, false);
   });
-
-  // TODO: remove from comment component since we can't copy a comment that hasn't been saved.
-  const copy = MiniPlayerBtn("Copy", ButtonColor.Yellow, [waitForSaveClass, unsavedCommentClass, hideElemClass]);
 
   const topContainer = document.createElement("div");
   topContainer.classList.add("d-flex", "flex-justify-center", "flex-items-center", "p-2");
   topContainer.style.width = "100%";
   topContainer.appendChild(timestampLabel);
-  topContainer.appendChild(copy);
 
   const commentTextArea = document.createElement("textarea");
   commentTextArea.classList.add("m-2");
+  commentTextArea.value = data.rawText;
   commentTextArea.style.resize = "vertical";
   commentTextArea.style.width = "90%";
 
@@ -51,7 +49,12 @@ export function Comment(timestamp: number, idx: number): HTMLDivElement {
   container.style.width = "150px";
 
   save.addEventListener("click", (event: MouseEvent) => {
-    handleSave(event, { timestamp: timestamp, idx: idx, rawText: commentTextArea.value, contents: null });
+    handleSave(event, container, {
+      timestamp: data.timestamp,
+      idx: data.idx,
+      rawText: commentTextArea.value,
+      contents: null,
+    });
   });
   del.addEventListener("click", (event: MouseEvent) => {
     handleDel(event, container);
@@ -68,35 +71,49 @@ function handleDel(event: MouseEvent, container: HTMLDivElement): void {
   container.remove();
 }
 
-function handleSave(event: MouseEvent, savedData: SavedCommentData): void {
-  const matchRef = /(~[^~]+~)/g;
-  const plainText = savedData.rawText.split(matchRef);
-  const refs = savedData.rawText.match(matchRef);
+function handleSave(event: MouseEvent, container: HTMLDivElement, data: SavedCommentData): void {
+  // const matchRef = /(~[^~]+~)/g;
 
-  const splitArray: string[] = splitOnRefs(savedData.rawText);
+  const splitArray: string[] = splitOnRefs(data.rawText);
+  const spans: HTMLSpanElement[] = [];
 
-  const mirror: Mirror = stateMap[savedData.idx].mainPlayer.getMirror();
-
-  const refSpans: HTMLSpanElement[] = [];
-
-  refs.forEach((ref: string) => {
-    const nodeId = parseInt(ref.match(/d+/)[0]);
+  splitArray.forEach((text: string) => {
     const span: HTMLSpanElement = document.createElement("span");
-    span.classList.add("Link");
-    span.addEventListener("click", () => {
-      stateMap[savedData.idx].mainPlayer.goto(savedData.timestamp, false);
-      const focusedNode = mirror.getNode(nodeId) as unknown;
-      const focusedElem: HTMLElement = focusedNode as HTMLElement;
-      const border = focusedElem.style.border;
-      focusedElem.style.setProperty("border", `3px solid ${color}`, "important");
-      setTimeout(() => {
-        focusedElem.style.border = border;
-      }, 2000);
-    });
-    refSpans.push(span);
+    const matches = text.match(/~\[(\d+)\]~/); // match with a group to get the node id
+
+    console.log(text);
+    console.log(matches);
+    if (matches != null) {
+      span.classList.add("Link");
+      const nodeId = parseInt(matches[1]);
+      span.addEventListener("click", () => {
+        const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
+        stateMap[data.idx].mainPlayer.goto(timestamp, true);
+        stateMap[data.idx].mainPlayer.pause();
+        const focusedNode = stateMap[data.idx].mainPlayer.getMirror().getNode(nodeId) as unknown;
+        console.log(focusedNode);
+        const focusedElem: HTMLElement = focusedNode as HTMLElement;
+        console.log(focusedElem);
+        const border = focusedElem.style.border;
+        focusedElem.style.setProperty("border", `3px solid ${color}`, "important");
+        setTimeout(() => {
+          focusedElem.style.border = border;
+        }, 3000);
+      });
+    }
+    span.innerText = text;
+    spans.push(span);
   });
 
-  // TODO: Work on the logic for saving a comment and extracting the references.
+  data.contents = document.createElement("div");
+  data.contents.classList.add("p-2", "mb-2", "overflow-y-auto");
+  data.contents.style.maxHeight = "180px";
+  data.contents.style.wordBreak = "normal";
+  spans.forEach((span: HTMLSpanElement) => {
+    data.contents.appendChild(span);
+  });
+
+  container.replaceWith(SavedComment(data));
 }
 
 function splitOnRefs(splitString: string): string[] {
@@ -114,10 +131,14 @@ function splitOnRefs(splitString: string): string[] {
         matchingRef = false;
         splitArray.push(str);
         str = "";
+      } else {
+        str += c;
+        matchingRef = true;
       }
     } else {
       str += c;
     }
   }
+  splitArray.push(str);
   return splitArray;
 }
