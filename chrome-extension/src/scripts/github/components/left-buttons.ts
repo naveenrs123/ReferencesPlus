@@ -77,6 +77,7 @@ function handleComment(event: MouseEvent, idx: number): void {
   const commentSection = document.getElementById(`refg-comments-${idx}`) as HTMLDivElement;
   commentSection.appendChild(
     Comment({
+      comment_id: null, // give it a null comment id until it is saved.
       timestamp: stateMap[idx].mainPlayer.getReplayer().getCurrentTime(),
       idx: idx,
       rawText: "",

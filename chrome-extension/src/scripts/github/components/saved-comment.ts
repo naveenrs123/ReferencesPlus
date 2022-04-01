@@ -1,4 +1,4 @@
-import { hideElemClass, unsavedCommentClass, waitForSaveClass } from "../../common/constants";
+import { hideElemClass, waitForSaveClass } from "../../common/constants";
 import { convertMsToTime, stateMap } from "../../common/helpers";
 import { ButtonColor, CommentData } from "../../common/interfaces";
 import { Comment } from "./comment";

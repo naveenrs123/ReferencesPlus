@@ -49,6 +49,7 @@ export function Comment(data: CommentData): HTMLDivElement {
 
   save.addEventListener("click", (event: MouseEvent) => {
     const oldCommentId = data.comment_id;
+    if (!oldCommentId) updateCommentId();
     handleSave(event, container, {
       comment_id: oldCommentId ?? commentId,
       timestamp: data.timestamp,
@@ -56,8 +57,6 @@ export function Comment(data: CommentData): HTMLDivElement {
       rawText: commentTextArea.value,
       contents: null,
     });
-
-    if (!oldCommentId) updateCommentId();
   });
   del.addEventListener("click", (event: MouseEvent) => {
     handleDel(event, container);
@@ -111,6 +110,15 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentD
     data.contents.appendChild(span);
   });
 
+  const commentIndex = stateMap[data.idx].comments.findIndex((value: CommentData) => {
+    value.comment_id == data.comment_id;
+  });
+  if (commentIndex > -1) {
+    stateMap[data.idx].comments[commentIndex] = data;
+  } else {
+    stateMap[data.idx].comments.push(data);
+  }
+  console.log(stateMap);
   container.replaceWith(SavedComment(data));
 }
 
