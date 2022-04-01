@@ -53,11 +53,7 @@ export function SaveSessionModal(idx: number): HTMLDivElement {
 
 function handleSave(event: MouseEvent, idx: number): void {
   const input = document.getElementById(`refg-save-session-input-${idx}`) as HTMLInputElement;
-  stateMap[idx].sessionDetails = {
-    website: "website.com",
-    title: input.value,
-    id: "12345",
-  };
+  stateMap[idx].sessionDetails.title = input.value;
 
   const playerContainer = document.getElementById(`refg-github-player-${idx}`);
   const oldModal = document.getElementById(`refg-save-session-modal-${idx}`);

@@ -113,6 +113,7 @@ function makeMainEditableInterface(): void {
         containerId: `refg-interface-container-${idx}`,
         mainPlayer: null,
         sessionDetails: null,
+        comments: [],
       };
     }
 
@@ -137,6 +138,7 @@ function makeMainEditableInterface(): void {
     active: false,
     mainPlayer: null,
     sessionDetails: null,
+    comments: [],
   };
 
   const mainInterface = MainInterface(idx);
@@ -151,7 +153,7 @@ function makeMainEditableInterface(): void {
  */
 chrome.runtime.onMessage.addListener((m: ExtensionMessage) => {
   if (m.action == "[GITHUB] Send Log" && m.source == "background") {
-    injectMainPlayer(m.events, m.idx);
+    injectMainPlayer(m.events, m.idx, m.website);
   }
 });
 

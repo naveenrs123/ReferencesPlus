@@ -70,7 +70,7 @@ export function generateReplayerOptions(playerDiv: HTMLDivElement, events: event
   };
 }
 
-export function injectMainPlayer(events: eventWithTime[], idx: number): void {
+export function injectMainPlayer(events: eventWithTime[], idx: number, website: string): void {
   if (!stateMap[idx].active) return; // cannot inject if player is not active.
 
   stateMap[idx].mainPlayer = null;
@@ -91,7 +91,7 @@ export function injectMainPlayer(events: eventWithTime[], idx: number): void {
   stateMap[idx].hasUnsavedChanges = true;
   stateMap[idx].sessionDetails = {
     title: "",
-    website: "",
+    website: website,
     id: "",
   };
   stateMap[idx].mainPlayer = new rrwebPlayer(replayerOptions);

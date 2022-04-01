@@ -32,6 +32,11 @@ function stopRecording(): void {
     stopFn();
     const eventCopy = events;
     events = [];
-    chrome.runtime.sendMessage<ExtensionMessage>({ action: "recording stopped", source: "content", events: eventCopy });
+    chrome.runtime.sendMessage<ExtensionMessage>({
+      action: "recording stopped",
+      source: "content",
+      website: window.location.href,
+      events: eventCopy,
+    });
   }
 }

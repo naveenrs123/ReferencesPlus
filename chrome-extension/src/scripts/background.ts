@@ -27,8 +27,6 @@ function createContextMenuItems(): void {
  */
 chrome.tabs.onUpdated.addListener((tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
   if (changeInfo.status !== "complete") return;
-  console.log(changeInfo);
-  console.log(tab);
   if (matchUrl.test(tab.url)) {
     chrome.scripting
       .executeScript({
@@ -91,6 +89,7 @@ chrome.runtime.onMessage.addListener((m: ExtensionMessage, sender: chrome.runtim
         action: "[GITHUB] Send Log",
         source: "background",
         idx: state.idx,
+        website: m.website,
         events: m.events,
       });
     });

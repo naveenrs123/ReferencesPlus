@@ -1,10 +1,10 @@
 import { hideElemClass, unsavedCommentClass, waitForSaveClass } from "../../common/constants";
 import { convertMsToTime, stateMap } from "../../common/helpers";
-import { ButtonColor, SavedCommentData } from "../../common/interfaces";
+import { ButtonColor, CommentData } from "../../common/interfaces";
 import { Comment } from "./comment";
 import { MiniPlayerBtn } from "./util-components";
 
-export function SavedComment(data: SavedCommentData): HTMLDivElement {
+export function SavedComment(data: CommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
   const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
   timestampLabel.innerText = convertMsToTime(timestamp);
@@ -15,7 +15,7 @@ export function SavedComment(data: SavedCommentData): HTMLDivElement {
     stateMap[data.idx].mainPlayer.goto(time, false);
   });
 
-  const copy = MiniPlayerBtn("Copy", ButtonColor.Yellow, [waitForSaveClass, unsavedCommentClass, hideElemClass]);
+  const copy = MiniPlayerBtn("Copy", ButtonColor.Yellow, [waitForSaveClass, hideElemClass], false);
 
   const topContainer = document.createElement("div");
   topContainer.classList.add("d-flex", "flex-justify-center", "flex-items-center", "p-2");
@@ -62,6 +62,6 @@ function handleDel(event: MouseEvent, container: HTMLDivElement): void {
   container.remove();
 }
 
-function handleEdit(event: MouseEvent, data: SavedCommentData, container: HTMLDivElement): void {
+function handleEdit(event: MouseEvent, data: CommentData, container: HTMLDivElement): void {
   container.replaceWith(Comment(data));
 }

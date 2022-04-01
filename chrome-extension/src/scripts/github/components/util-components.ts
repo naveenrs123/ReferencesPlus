@@ -37,8 +37,7 @@ export function MiniPlayerBtn(
 ): HTMLButtonElement {
   const btn = document.createElement("button");
   if (id !== undefined) btn.id = id;
-  btn.classList.add("btn-sm", buttonColorToClass(color), ...toggleClass);
-  if (margins) btn.classList.add("mx-2");
+  btn.classList.add("btn-sm", margins? "mx-2" : "ml-2", buttonColorToClass(color), ...toggleClass);
   btn.innerText = text;
   return btn;
 }

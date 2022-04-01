@@ -16,6 +16,7 @@ export interface ExtensionMessage {
   action: string;
   source: string;
   idx?: number;
+  website?: string;
   events?: eventWithTime[];
 }
 
@@ -32,6 +33,7 @@ export interface InterfaceState {
   mainPlayer?: rrwebPlayer;
   active?: boolean;
   sessionDetails?: SessionDetails;
+  comments?: CommentData[];
 }
 
 export interface StateMap {
@@ -53,9 +55,11 @@ export interface SessionDetails {
   id: string;
 }
 
-export interface SavedCommentData {
+export interface CommentData {
+  comment_id: number;
   timestamp: number;
   idx: number; // Associated with session
   rawText: string; // raw text from the textarea.
   contents: HTMLDivElement; // A div containing the processed contents of the textarea.
+  saved?: boolean;
 }

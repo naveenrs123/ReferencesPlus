@@ -1,11 +1,10 @@
-import { Mirror } from "rrweb/typings/types";
-import { convertMsToTime, stateMap } from "../../common/helpers";
-import { ButtonColor, SavedCommentData } from "../../common/interfaces";
+import { commentId, convertMsToTime, stateMap, updateCommentId } from "../../common/helpers";
+import { ButtonColor, CommentData } from "../../common/interfaces";
 import { color } from "../borders";
 import { SavedComment } from "./saved-comment";
 import { MiniPlayerBtn } from "./util-components";
 
-export function Comment(data: SavedCommentData): HTMLDivElement {
+export function Comment(data: CommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
   const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
   timestampLabel.innerText = convertMsToTime(timestamp);
@@ -49,12 +48,16 @@ export function Comment(data: SavedCommentData): HTMLDivElement {
   container.style.width = "150px";
 
   save.addEventListener("click", (event: MouseEvent) => {
+    const oldCommentId = data.comment_id;
     handleSave(event, container, {
+      comment_id: oldCommentId ?? commentId,
       timestamp: data.timestamp,
       idx: data.idx,
       rawText: commentTextArea.value,
       contents: null,
     });
+
+    if (!oldCommentId) updateCommentId();
   });
   del.addEventListener("click", (event: MouseEvent) => {
     handleDel(event, container);
@@ -71,7 +74,7 @@ function handleDel(event: MouseEvent, container: HTMLDivElement): void {
   container.remove();
 }
 
-function handleSave(event: MouseEvent, container: HTMLDivElement, data: SavedCommentData): void {
+function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentData): void {
   // const matchRef = /(~[^~]+~)/g;
 
   const splitArray: string[] = splitOnRefs(data.rawText);
@@ -80,9 +83,6 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: SavedCom
   splitArray.forEach((text: string) => {
     const span: HTMLSpanElement = document.createElement("span");
     const matches = text.match(/~\[(\d+)\]~/); // match with a group to get the node id
-
-    console.log(text);
-    console.log(matches);
     if (matches != null) {
       span.classList.add("Link");
       const nodeId = parseInt(matches[1]);
@@ -91,9 +91,7 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: SavedCom
         stateMap[data.idx].mainPlayer.goto(timestamp, true);
         stateMap[data.idx].mainPlayer.pause();
         const focusedNode = stateMap[data.idx].mainPlayer.getMirror().getNode(nodeId) as unknown;
-        console.log(focusedNode);
         const focusedElem: HTMLElement = focusedNode as HTMLElement;
-        console.log(focusedElem);
         const border = focusedElem.style.border;
         focusedElem.style.setProperty("border", `3px solid ${color}`, "important");
         setTimeout(() => {

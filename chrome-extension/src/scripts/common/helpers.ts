@@ -2,6 +2,7 @@ import { ButtonColor, StateMap } from "./interfaces";
 
 export const stateMap: StateMap = {};
 export let counter = 0;
+export let commentId = 1;
 
 /**
  * Function that allows an element to be dragged across a page.
@@ -115,7 +116,7 @@ export function convertMsToTime(milliseconds: number): string {
 }
 
 export function updateCounter(): void {
-  counter = counter == 999 ? 0 : counter + 1;
+  counter++;
 }
 
 export function findAncestorWithClass(elem: HTMLElement, className: string): HTMLElement {
@@ -123,4 +124,8 @@ export function findAncestorWithClass(elem: HTMLElement, className: string): HTM
     elem = elem.parentElement;
   }
   return elem;
+}
+
+export function updateCommentId(): void {
+  commentId++;
 }
