@@ -92,7 +92,7 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
   stateMap[idx].sessionDetails = {
     title: "",
     website: website,
-    id: "",
+    id: -1,
   };
   stateMap[idx].mainPlayer = new rrwebPlayer(replayerOptions);
   stateMap[idx].mainPlayer.addEventListener("ui-update-player-state", (state: { payload: string }) => {

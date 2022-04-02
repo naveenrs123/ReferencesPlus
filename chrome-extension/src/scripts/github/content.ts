@@ -1,10 +1,20 @@
-import { ExtensionMessage } from "../common/interfaces";
+import { ExtensionMessage, PRDetails } from "../common/interfaces";
 import { codeCommentQuery, mainCommentQuery } from "../common/constants";
 import { injectMainPlayer } from "./rrweb-utils";
-import { LeftButtons } from "./components/left-buttons";
-import { SessionManagement } from "./components/session-management";
+import { LeftButtons } from "../components/sections/left-buttons";
+import { SessionManagement } from "../components/sections/session-management";
 import { counter, findAncestorWithClass, stateMap, updateCounter } from "../common/helpers";
-import { Comments, InterfaceContainer, Player, ShowInterfaceBtn } from "./components/util-components";
+import { Comments, InterfaceContainer, Player, ShowInterfaceBtn } from "../components/util-components";
+
+const matchUrl = /https:\/\/github.com\/(.+)\/(.+)\/pull\/(\d+)/;
+const matchesArr = window.location.href.match(matchUrl);
+const prDetails: PRDetails = {
+  userOrOrg: matchesArr[1],
+  repository: matchesArr[2],
+  prNumber: parseInt(matchesArr[3]),
+};
+
+console.log(prDetails);
 
 /**
  * Builds the contents of the player container for emulator interactions.
@@ -27,23 +37,30 @@ function MainInterface(idx: number, isCodeComment = false): HTMLDivElement {
   return container;
 }
 
+/**
+ * Builds the main menu container.
+ * @returns A div representing the main menu container.
+ */
 function MainMenu(): HTMLDivElement {
   const container = document.createElement("div");
   container.classList.add("d-flex", "flex-justify-between");
   return container;
 }
 
+/**
+ * Creates an editable interface for each code comment on the page.
+ */
 function makeCodeEditableInterface(): void {
   document.querySelectorAll(codeCommentQuery).forEach((elem: HTMLElement) => {
     const idx = counter;
-    let btn = document.getElementById(`refg-show-interface-${idx}`);
+    const detailsParent = elem.parentElement;
+    let btn = detailsParent.querySelector("[id^=refg-show-interface]");
     if (btn) return;
 
     updateCounter();
-    const detailsParent = elem.parentElement;
+
     const insertPoint = findAncestorWithClass(detailsParent, "js-line-comments");
     btn = ShowInterfaceBtn(detailsParent, idx);
-    detailsParent.appendChild(btn);
 
     btn.addEventListener("click", () => {
       const insertPoint = findAncestorWithClass(detailsParent, "js-line-comments");
@@ -57,6 +74,7 @@ function makeCodeEditableInterface(): void {
           containerId: `refg-interface-container-${idx}`,
           mainPlayer: null,
           sessionDetails: null,
+          comments: [],
         };
       }
 
@@ -75,12 +93,15 @@ function makeCodeEditableInterface(): void {
       }
     });
 
+    detailsParent.appendChild(btn);
+
     stateMap[idx] = {
       hasUnsavedChanges: false,
       containerId: `refg-interface-container-${idx}`,
       active: false,
       mainPlayer: null,
       sessionDetails: null,
+      comments: [],
     };
 
     const mainInterface: HTMLDivElement = MainInterface(idx, true);
@@ -90,16 +111,17 @@ function makeCodeEditableInterface(): void {
 }
 
 /**
- * Create the interface required to support UI references in the GitHub PR page.
+ * Creates an editable interface for the main comment box on the page.
  */
 function makeMainEditableInterface(): void {
+  // retrieve button insertion point
   const details: HTMLDetailsElement = document.querySelector(mainCommentQuery);
   const detailsParent = details.parentElement;
 
+  // Setup button to activate interface
   const idx = counter;
   updateCounter();
   const btn = ShowInterfaceBtn(detailsParent, idx);
-  detailsParent.appendChild(btn);
 
   btn.addEventListener("click", () => {
     const timelineActions = document.querySelector(".discussion-timeline-actions");
@@ -132,6 +154,8 @@ function makeMainEditableInterface(): void {
     }
   });
 
+  detailsParent.appendChild(btn);
+
   stateMap[idx] = {
     hasUnsavedChanges: false,
     containerId: `refg-interface-container-${idx}`,
@@ -157,6 +181,14 @@ chrome.runtime.onMessage.addListener((m: ExtensionMessage) => {
   }
 });
 
+window.addEventListener("click", (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (target.tagName == "BUTTON" && target.classList.contains("review-thread-reply-button")) {
+    makeCodeEditableInterface();
+  }
+});
+
+// Create the interface after a short delay.
 setTimeout(() => {
   makeMainEditableInterface();
   makeCodeEditableInterface();

@@ -1,20 +1,15 @@
 import { hideElemClass, waitForPlayerClass, waitForSaveClass } from "../../common/constants";
-import { Comments, Player, PlayerBtn } from "./util-components";
-import { Comment } from "./comment";
+import { Comments, Player, PlayerBtn } from "../util-components";
+import { Comment } from "../comments/comment";
 import { ButtonColor } from "../../common/interfaces";
-import { UnsavedChangesModal } from "./unsaved-changes-modal";
+import { UnsavedChangesModal } from "../modals/unsaved-changes-modal";
 import { stateMap } from "../../common/helpers";
 
 export function LeftButtons(idx: number): HTMLDivElement {
   const close: HTMLButtonElement = PlayerBtn("Close");
-  close.addEventListener("click", (event: MouseEvent) => {
-    handleClose(event, idx);
-  });
-
+  close.addEventListener("click", (event: MouseEvent) => handleClose(event, idx));
   const reset: HTMLButtonElement = PlayerBtn("Reset");
-  reset.addEventListener("click", (event: MouseEvent) => {
-    handleReset(event, idx);
-  });
+  reset.addEventListener("click", (event: MouseEvent) => handleReset(event, idx));
 
   const closeResetContainer = document.createElement("div");
   closeResetContainer.classList.add("d-flex");
@@ -22,11 +17,9 @@ export function LeftButtons(idx: number): HTMLDivElement {
   closeResetContainer.appendChild(reset);
 
   const comment: HTMLButtonElement = PlayerBtn("Comment", ButtonColor.Default, [waitForPlayerClass, hideElemClass]);
-  comment.addEventListener("click", (event: MouseEvent) => {
-    handleComment(event, idx);
-  });
-
+  comment.addEventListener("click", (event: MouseEvent) => handleComment(event, idx));
   const insertAll: HTMLButtonElement = PlayerBtn("Insert All", ButtonColor.Default, [waitForSaveClass, hideElemClass]);
+  insertAll.addEventListener("click", (event: MouseEvent) => handleInsertAll(event, idx));
 
   const commentContainer = document.createElement("div");
   commentContainer.classList.add("d-flex");
@@ -85,4 +78,9 @@ function handleComment(event: MouseEvent, idx: number): void {
     })
   );
   stateMap[idx].hasUnsavedChanges = true;
+}
+
+// TODO: Complete Function
+function handleInsertAll(event: MouseEvent, idx: number): void {
+  return;
 }

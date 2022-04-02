@@ -2,7 +2,7 @@ import { hideElemClass, waitForSaveClass } from "../../common/constants";
 import { convertMsToTime, stateMap } from "../../common/helpers";
 import { ButtonColor, CommentData } from "../../common/interfaces";
 import { Comment } from "./comment";
-import { MiniPlayerBtn } from "./util-components";
+import { MiniPlayerBtn } from "../util-components";
 
 export function SavedComment(data: CommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
@@ -16,6 +16,7 @@ export function SavedComment(data: CommentData): HTMLDivElement {
   });
 
   const copy = MiniPlayerBtn("Copy", ButtonColor.Yellow, [waitForSaveClass, hideElemClass], false);
+  copy.addEventListener("click", (event: MouseEvent) => handleCopy(event, data));
 
   const topContainer = document.createElement("div");
   topContainer.classList.add("d-flex", "flex-justify-center", "flex-items-center", "p-2");
@@ -64,4 +65,8 @@ function handleDel(event: MouseEvent, container: HTMLDivElement): void {
 
 function handleEdit(event: MouseEvent, data: CommentData, container: HTMLDivElement): void {
   container.replaceWith(Comment(data));
+}
+
+function handleCopy(event: MouseEvent, data: CommentData): void {
+  return;
 }

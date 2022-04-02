@@ -1,7 +1,7 @@
 import { stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
 import { ChangesSavedModal } from "./changes-saved-modal";
-import { PlayerBtn } from "./util-components";
+import { PlayerBtn } from "../util-components";
 
 export function SaveSessionModal(idx: number): HTMLDivElement {
   const heading = document.createElement("h3");
@@ -15,13 +15,9 @@ export function SaveSessionModal(idx: number): HTMLDivElement {
   input.classList.add("form-control", "m-2");
 
   const save = PlayerBtn("Save", ButtonColor.Green);
-  save.addEventListener("click", (event: MouseEvent) => {
-    handleSave(event, idx);
-  });
+  save.addEventListener("click", (event: MouseEvent) => handleSave(event, idx));
   const cancel = PlayerBtn("Cancel", ButtonColor.Red);
-  cancel.addEventListener("click", (event: MouseEvent) => {
-    handleCancel(event, idx);
-  });
+  cancel.addEventListener("click", (event: MouseEvent) => handleCancel(event, idx));
 
   const buttonContainer = document.createElement("div");
   buttonContainer.classList.add("d-flex", "flex-justify-center");
@@ -54,6 +50,7 @@ export function SaveSessionModal(idx: number): HTMLDivElement {
 function handleSave(event: MouseEvent, idx: number): void {
   const input = document.getElementById(`refg-save-session-input-${idx}`) as HTMLInputElement;
   stateMap[idx].sessionDetails.title = input.value;
+  stateMap[idx].sessionDetails.id = 12345;
 
   const playerContainer = document.getElementById(`refg-github-player-${idx}`);
   const oldModal = document.getElementById(`refg-save-session-modal-${idx}`);

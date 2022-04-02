@@ -1,7 +1,7 @@
 import { stateMap } from "../../common/helpers";
-import { ChangesSavedModal } from "./changes-saved-modal";
-import { SaveSessionModal } from "./save-session-modal";
-import { PlayerBtn, TextInput } from "./util-components";
+import { ChangesSavedModal } from "../modals/changes-saved-modal";
+import { SaveSessionModal } from "../modals/save-session-modal";
+import { PlayerBtn, TextInput } from "../util-components";
 
 export function SessionManagement(idx: number): HTMLDivElement {
   const container = document.createElement("div");
@@ -17,14 +17,10 @@ export function SessionManagement(idx: number): HTMLDivElement {
   saveContainer.classList.add("d-flex");
   saveContainer.style.alignSelf = "flex-end";
   const saveAs = PlayerBtn("Save As");
-  saveAs.addEventListener("click", (event: MouseEvent) => {
-    handleSaveAs(event, idx);
-  });
+  saveAs.addEventListener("click", (event: MouseEvent) => handleSaveAs(event, idx));
 
   const save = PlayerBtn("Save");
-  save.addEventListener("click", (event: MouseEvent) => {
-    handleSave(event, idx);
-  });
+  save.addEventListener("click", (event: MouseEvent) => handleSave(event, idx));
 
   saveContainer.appendChild(saveAs);
   saveContainer.appendChild(save);

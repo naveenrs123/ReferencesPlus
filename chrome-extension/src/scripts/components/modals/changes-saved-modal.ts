@@ -1,7 +1,7 @@
 import { hideElemClass, unsavedCommentClass, waitForSaveClass } from "../../common/constants";
 import { stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
-import { PlayerBtn } from "./util-components";
+import { PlayerBtn } from "../util-components";
 
 export function ChangesSavedModal(idx: number): HTMLDivElement {
   const heading = document.createElement("h3");
@@ -20,9 +20,7 @@ export function ChangesSavedModal(idx: number): HTMLDivElement {
   idP.innerText = `Id: ${sessionDetails.id}`;
 
   const ok = PlayerBtn("OK", ButtonColor.Green);
-  ok.addEventListener("click", (event: MouseEvent) => {
-    handleOK(event, idx);
-  });
+  ok.addEventListener("click", (event: MouseEvent) => handleOK(event, idx));
 
   const container = document.createElement("div");
   container.id = `refg-changes-saved-modal-${idx}`;

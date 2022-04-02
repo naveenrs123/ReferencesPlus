@@ -52,7 +52,7 @@ export interface TabState {
 export interface SessionDetails {
   title: string;
   website: string;
-  id: string;
+  id: number;
 }
 
 export interface CommentData {
@@ -62,4 +62,10 @@ export interface CommentData {
   rawText: string; // raw text from the textarea.
   contents: HTMLDivElement; // A div containing the processed contents of the textarea.
   saved?: boolean;
+}
+
+export interface PRDetails {
+  userOrOrg: string;
+  repository: string;
+  prNumber: number;
 }

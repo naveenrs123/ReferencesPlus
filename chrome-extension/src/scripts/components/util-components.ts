@@ -1,5 +1,5 @@
-import { buttonColorToClass } from "../../common/helpers";
-import { ButtonColor } from "../../common/interfaces";
+import { buttonColorToClass } from "../common/helpers";
+import { ButtonColor } from "../common/interfaces";
 
 export function Player(idx: number): HTMLDivElement {
   const player = document.createElement("div");

@@ -1,8 +1,8 @@
 import { commentId, convertMsToTime, stateMap, updateCommentId } from "../../common/helpers";
 import { ButtonColor, CommentData } from "../../common/interfaces";
-import { color } from "../borders";
+import { color } from "../../github/borders";
 import { SavedComment } from "./saved-comment";
-import { MiniPlayerBtn } from "./util-components";
+import { MiniPlayerBtn } from "../util-components";
 
 export function Comment(data: CommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
@@ -58,9 +58,7 @@ export function Comment(data: CommentData): HTMLDivElement {
       contents: null,
     });
   });
-  del.addEventListener("click", (event: MouseEvent) => {
-    handleDel(event, container);
-  });
+  del.addEventListener("click", (event: MouseEvent) => handleDel(event, container));
 
   container.appendChild(topContainer);
   container.appendChild(commentTextArea);

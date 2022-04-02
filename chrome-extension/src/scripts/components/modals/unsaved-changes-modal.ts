@@ -2,7 +2,7 @@ import { stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
 import { ChangesSavedModal } from "./changes-saved-modal";
 import { SaveSessionModal } from "./save-session-modal";
-import { PlayerBtn } from "./util-components";
+import { PlayerBtn } from "../util-components";
 
 export function UnsavedChangesModal(idx: number): HTMLDivElement {
   const heading = document.createElement("h3");
