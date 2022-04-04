@@ -30,14 +30,27 @@ export enum ButtonColor {
 export interface InterfaceState {
   containerId: string;
   hasUnsavedChanges?: boolean;
+  events?: eventWithTime[];
   mainPlayer?: rrwebPlayer;
   active?: boolean;
   sessionDetails?: SessionDetails;
   comments?: CommentData[];
+  nextCommentId?: number;
 }
 
 export interface StateMap {
   [id: number]: InterfaceState;
+}
+
+export interface InterfaceStateReq {
+  events: eventWithTime[];
+  sessionDetails?: SessionDetails;
+  comments?: CommentData[];
+  nextCommentId?: number;
+}
+
+export interface StateMapReq {
+  [id: number]: InterfaceStateReq;
 }
 
 export interface GitHubTabState {
@@ -52,7 +65,7 @@ export interface TabState {
 export interface SessionDetails {
   title: string;
   website: string;
-  id: number;
+  id: string;
 }
 
 export interface CommentData {
@@ -68,4 +81,8 @@ export interface PRDetails {
   userOrOrg: string;
   repository: string;
   prNumber: number;
+}
+
+export interface SaveResponse {
+  id: string;
 }

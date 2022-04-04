@@ -88,11 +88,12 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
     elem.classList.remove(hideElemClass);
   });
 
+  stateMap[idx].events = events;
   stateMap[idx].hasUnsavedChanges = true;
   stateMap[idx].sessionDetails = {
     title: "",
     website: website,
-    id: -1,
+    id: "",
   };
   stateMap[idx].mainPlayer = new rrwebPlayer(replayerOptions);
   stateMap[idx].mainPlayer.addEventListener("ui-update-player-state", (state: { payload: string }) => {

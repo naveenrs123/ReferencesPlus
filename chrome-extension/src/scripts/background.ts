@@ -39,26 +39,23 @@ chrome.tabs.onUpdated.addListener((tabId: number, changeInfo: chrome.tabs.TabCha
           files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
         });
       })
-      .then(() => insertContentScripts(tab))
+      .then(() => {
+        void chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["vendors-recorder.js", "recorder.js"],
+        });
+      })
       .catch(() => {
-        console.log("ERROR");
+        return
       });
   } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(tab.url)) {
-    insertContentScripts(tab);
+    // Don't insert into internal pages.
+    void chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ["vendors-recorder.js", "recorder.js"],
+    });
   }
 });
-
-/**
- * Inserts the content scripts into the tab where a web navigation was just completed.
- *
- * @param details An object containing information related to webNavigation.
- */
-function insertContentScripts(tab: chrome.tabs.Tab): void {
-  void chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    files: ["vendors-recorder.js", "recorder.js"],
-  });
-}
 
 /**
  * An event listener to check for interactions with Context Menu items.

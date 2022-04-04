@@ -1,5 +1,5 @@
-import { stateMap } from "../../common/helpers";
-import { ButtonColor } from "../../common/interfaces";
+import { prDetails, stateMap } from "../../common/helpers";
+import { ButtonColor, InterfaceStateReq, SaveResponse, StateMap, StateMapReq } from "../../common/interfaces";
 import { ChangesSavedModal } from "./changes-saved-modal";
 import { PlayerBtn } from "../util-components";
 
@@ -50,12 +50,39 @@ export function SaveSessionModal(idx: number): HTMLDivElement {
 function handleSave(event: MouseEvent, idx: number): void {
   const input = document.getElementById(`refg-save-session-input-${idx}`) as HTMLInputElement;
   stateMap[idx].sessionDetails.title = input.value;
-  stateMap[idx].sessionDetails.id = 12345;
 
-  const playerContainer = document.getElementById(`refg-github-player-${idx}`);
-  const oldModal = document.getElementById(`refg-save-session-modal-${idx}`);
-  playerContainer.removeChild(oldModal);
-  playerContainer.appendChild(ChangesSavedModal(idx));
+  const stateCopy: InterfaceStateReq = {
+    events: stateMap[idx].events,
+    sessionDetails: stateMap[idx].sessionDetails,
+    comments: stateMap[idx].comments,
+    nextCommentId: stateMap[idx].nextCommentId,
+  };
+
+  const stringifiedData = JSON.stringify({
+    prDetails: prDetails,
+    state: stateCopy,
+  });
+
+  fetch("http://127.0.0.1:5000/insertSession", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: stringifiedData,
+  })
+    .then((res: Response) => {
+      return res.json();
+    })
+    .then((data: SaveResponse) => {
+      stateMap[idx].sessionDetails.id = data.id;
+      const playerContainer = document.getElementById(`refg-github-player-${idx}`);
+      const oldModal = document.getElementById(`refg-save-session-modal-${idx}`);
+      playerContainer.removeChild(oldModal);
+      playerContainer.appendChild(ChangesSavedModal(idx));
+    })
+    .catch((err: Error) => {
+      return;
+    });
 }
 
 function handleCancel(event: MouseEvent, idx: number): void {

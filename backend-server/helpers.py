@@ -1,5 +1,25 @@
-from typing import Dict, List
+from typing import Dict, List, TypedDict, Type
 from urllib.request import urlopen
+
+class SessionDetails(TypedDict):
+    title: str
+    website: str
+    id: int
+
+class CommentData(TypedDict):
+    comment_id: int
+    timestamp: int
+    idx: int
+    rawText: str
+
+class InterfaceStateReq(TypedDict):
+    events: List[any]
+    sessionDetails: SessionDetails
+    comments: List[CommentData]
+
+class InsertSessionReq(TypedDict):
+    prDetails: str
+    state: InterfaceStateReq
 
 
 def raw_file_to_line_array(file_url) -> Dict[str, List[str]]:

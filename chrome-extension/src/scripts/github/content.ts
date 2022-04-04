@@ -1,20 +1,16 @@
-import { ExtensionMessage, PRDetails } from "../common/interfaces";
+import { ExtensionMessage } from "../common/interfaces";
 import { codeCommentQuery, mainCommentQuery } from "../common/constants";
 import { injectMainPlayer } from "./rrweb-utils";
 import { LeftButtons } from "../components/sections/left-buttons";
 import { SessionManagement } from "../components/sections/session-management";
-import { counter, findAncestorWithClass, stateMap, updateCounter } from "../common/helpers";
+import { counter, findAncestorWithClass, prDetails, stateMap, updateCounter } from "../common/helpers";
 import { Comments, InterfaceContainer, Player, ShowInterfaceBtn } from "../components/util-components";
 
 const matchUrl = /https:\/\/github.com\/(.+)\/(.+)\/pull\/(\d+)/;
 const matchesArr = window.location.href.match(matchUrl);
-const prDetails: PRDetails = {
-  userOrOrg: matchesArr[1],
-  repository: matchesArr[2],
-  prNumber: parseInt(matchesArr[3]),
-};
-
-console.log(prDetails);
+prDetails.userOrOrg = matchesArr[1];
+prDetails.repository = matchesArr[2];
+prDetails.prNumber = parseInt(matchesArr[3]);
 
 /**
  * Builds the contents of the player container for emulator interactions.
@@ -23,8 +19,14 @@ console.log(prDetails);
 function MainInterface(idx: number, isCodeComment = false): HTMLDivElement {
   const closeResetSection: HTMLDivElement = LeftButtons(idx);
   const sessionManagementSection: HTMLDivElement = SessionManagement(idx);
+
+  const sessionTitle: HTMLLabelElement = document.createElement("label");
+  sessionTitle.id = `refg-session-title-${idx}`;
+  sessionTitle.classList.add("m-2");
+
   const mainMenu: HTMLDivElement = MainMenu();
   mainMenu.appendChild(closeResetSection);
+  mainMenu.appendChild(sessionTitle);
   mainMenu.appendChild(sessionManagementSection);
 
   const player: HTMLDivElement = Player(idx);
@@ -75,6 +77,8 @@ function makeCodeEditableInterface(): void {
           mainPlayer: null,
           sessionDetails: null,
           comments: [],
+          events: [],
+          nextCommentId: 0,
         };
       }
 
@@ -102,6 +106,8 @@ function makeCodeEditableInterface(): void {
       mainPlayer: null,
       sessionDetails: null,
       comments: [],
+      events: [],
+      nextCommentId: 0,
     };
 
     const mainInterface: HTMLDivElement = MainInterface(idx, true);
@@ -136,6 +142,8 @@ function makeMainEditableInterface(): void {
         mainPlayer: null,
         sessionDetails: null,
         comments: [],
+        events: [],
+        nextCommentId: 0,
       };
     }
 
@@ -163,6 +171,8 @@ function makeMainEditableInterface(): void {
     mainPlayer: null,
     sessionDetails: null,
     comments: [],
+    events: [],
+    nextCommentId: 0,
   };
 
   const mainInterface = MainInterface(idx);

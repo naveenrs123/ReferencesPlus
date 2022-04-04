@@ -1,6 +1,11 @@
-import { ButtonColor, StateMap } from "./interfaces";
+import { ButtonColor, PRDetails, StateMap } from "./interfaces";
 
 export const stateMap: StateMap = {};
+export const prDetails: PRDetails = {
+  userOrOrg: "",
+  repository: "",
+  prNumber: -1,
+};
 export let counter = 0;
 export let commentId = 1;
 

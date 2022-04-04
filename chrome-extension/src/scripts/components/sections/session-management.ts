@@ -1,4 +1,5 @@
-import { stateMap } from "../../common/helpers";
+import { prDetails, stateMap } from "../../common/helpers";
+import { InterfaceStateReq, SaveResponse, StateMapReq } from "../../common/interfaces";
 import { ChangesSavedModal } from "../modals/changes-saved-modal";
 import { SaveSessionModal } from "../modals/save-session-modal";
 import { PlayerBtn, TextInput } from "../util-components";
@@ -9,6 +10,7 @@ export function SessionManagement(idx: number): HTMLDivElement {
   container.style.flexDirection = "column";
 
   const sessionID = document.createElement("label");
+  sessionID.id = `refg-session-label-${idx}`;
   sessionID.innerText = "Session ID: N/A";
   sessionID.style.textAlign = "right";
   sessionID.classList.add("text-normal");
@@ -57,9 +59,40 @@ function handleSave(event: MouseEvent, idx: number): void {
   const oldModal = playerContainer.querySelector(`#refg-save-session-modal-${idx}`);
   if (oldModal) playerContainer.removeChild(oldModal);
   if (!playerContainer.hasChildNodes() || !stateMap[idx].hasUnsavedChanges) return;
+
   if (stateMap[idx].sessionDetails.title == "") {
     playerContainer.appendChild(SaveSessionModal(idx));
   } else {
-    playerContainer.appendChild(ChangesSavedModal(idx));
+    const stateCopy: InterfaceStateReq = {
+      events: stateMap[idx].events,
+      sessionDetails: stateMap[idx].sessionDetails,
+      comments: stateMap[idx].comments,
+      nextCommentId: stateMap[idx].nextCommentId,
+    };
+
+    const stringifiedData = JSON.stringify({
+      prDetails: prDetails,
+      state: stateCopy,
+    });
+
+    const fetchParams = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: stringifiedData,
+    };
+
+    fetch("http://127.0.0.1:5000/insertSession", fetchParams)
+      .then((res: Response) => {
+        return res.json();
+      })
+      .then((data: SaveResponse) => {
+        stateMap[idx].sessionDetails.id = data.id;
+        playerContainer.appendChild(ChangesSavedModal(idx));
+      })
+      .catch((err: Error) => {
+        return;
+      });
   }
 }

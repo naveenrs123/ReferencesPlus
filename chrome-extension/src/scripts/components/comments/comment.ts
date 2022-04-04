@@ -9,10 +9,8 @@ export function Comment(data: CommentData): HTMLDivElement {
   const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
   timestampLabel.innerText = convertMsToTime(timestamp);
   timestampLabel.classList.add("Link--muted");
-  timestampLabel.setAttribute("data-timestamp", timestamp.toString());
   timestampLabel.addEventListener("click", () => {
-    const time = parseInt(timestampLabel.getAttribute("data-timestamp"));
-    stateMap[data.idx].mainPlayer.goto(time, false);
+    stateMap[data.idx].mainPlayer.goto(timestamp, false);
   });
 
   const topContainer = document.createElement("div");
@@ -48,10 +46,13 @@ export function Comment(data: CommentData): HTMLDivElement {
   container.style.width = "150px";
 
   save.addEventListener("click", (event: MouseEvent) => {
-    const oldCommentId = data.comment_id;
-    if (!oldCommentId) updateCommentId();
+    const nextCommentId = stateMap[data.idx].nextCommentId;
+    if (data.comment_id == null) {
+      stateMap[data.idx].nextCommentId++;
+    }
+
     handleSave(event, container, {
-      comment_id: oldCommentId ?? commentId,
+      comment_id: data.comment_id ?? nextCommentId,
       timestamp: data.timestamp,
       idx: data.idx,
       rawText: commentTextArea.value,
@@ -72,8 +73,6 @@ function handleDel(event: MouseEvent, container: HTMLDivElement): void {
 }
 
 function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentData): void {
-  // const matchRef = /(~[^~]+~)/g;
-
   const splitArray: string[] = splitOnRefs(data.rawText);
   const spans: HTMLSpanElement[] = [];
 
@@ -114,9 +113,10 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentD
   if (commentIndex > -1) {
     stateMap[data.idx].comments[commentIndex] = data;
   } else {
+    const oldMax = stateMap[data.idx].nextCommentId;
+    stateMap[data.idx].nextCommentId = data.comment_id > oldMax ? data.comment_id : oldMax;
     stateMap[data.idx].comments.push(data);
   }
-  console.log(stateMap);
   container.replaceWith(SavedComment(data));
 }
 

@@ -9,10 +9,8 @@ export function SavedComment(data: CommentData): HTMLDivElement {
   const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
   timestampLabel.innerText = convertMsToTime(timestamp);
   timestampLabel.classList.add("Link--muted");
-  timestampLabel.setAttribute("data-timestamp", timestamp.toString());
   timestampLabel.addEventListener("click", () => {
-    const time = parseInt(timestampLabel.getAttribute("data-timestamp"));
-    stateMap[data.idx].mainPlayer.goto(time, false);
+    stateMap[data.idx].mainPlayer.goto(timestamp, false);
   });
 
   const copy = MiniPlayerBtn("Copy", ButtonColor.Yellow, [waitForSaveClass, hideElemClass], false);
@@ -55,6 +53,8 @@ export function SavedComment(data: CommentData): HTMLDivElement {
   container.appendChild(topContainer);
   container.appendChild(data.contents);
   container.appendChild(buttonsContainer);
+
+  data.contents = null;
 
   return container;
 }

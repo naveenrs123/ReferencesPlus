@@ -43,7 +43,7 @@ def welcome():
     return render_template('index.html')
 
 
-@app.route("/mongo", methods=["GET"])
+@app.route("/mongohealth", methods=["GET"])
 def mongo():
     try:
         return jsonify(client.server_info())
@@ -52,6 +52,27 @@ def mongo():
         return "Failure :("
 
 
+@app.route("/insertSession", methods=["GET", "POST"])
+def insertSession():
+    if (request.get_json() != None):
+        json_data: hp.InsertSessionReq = request.get_json()
+        print(json_data.keys(), file=sys.stderr)
+        print(client.list_databases(), file=sys.stderr)
+
+        sessionsdb: Type[pymongo.database.Database] = client.get_database("sessions")
+
+        collectionName: str = json_data["prDetails"]["userOrOrg"] + json_data["prDetails"]["repository"]
+        print(collectionName, file=sys.stderr)
+
+        collection = sessionsdb.get_collection(collectionName)
+        result = collection.insert_one(json_data["state"]);
+        print(str(result.inserted_id), file=sys.stderr)
+        return jsonify({"id": str(result.inserted_id)})
+
+    return jsonify({"id": "12345"})
+
+
+# TEST ROUTE - NOT REQUIRED FOR UI REFERENCING
 @app.route("/auth/<user>", methods=["GET"])
 def auth(user):
     state: str = "".join(random.choice(string.ascii_letters)
@@ -72,6 +93,7 @@ def auth(user):
     return redirect(full_auth_url)
 
 
+# TEST ROUTE - NOT REQUIRED FOR UI REFERENCING
 @app.route("/auth_callback", methods=["GET", "POST"])
 def auth_callback():
     if "code" in request.args:
@@ -93,6 +115,7 @@ def auth_callback():
     return redirect("https://www.github.com")
 
 
+# TEST ROUTE - NOT REQUIRED FOR UI REFERENCING
 @app.route("/authenticated", methods=["GET"])
 def authenticated():
     authenticated: bool = False
@@ -103,6 +126,7 @@ def authenticated():
     return response
 
 
+# TEST ROUTE - NOT REQUIRED FOR UI REFERENCING
 @app.route("/func_parser", methods=["GET"])
 def func_parser():
     processor: Type[DataProcessor] = DataProcessor(
@@ -114,6 +138,7 @@ def func_parser():
     return jsonify(definitions)
 
 
+# TEST ROUTE - NOT REQUIRED FOR UI REFERENCING
 @app.route("/github", methods=["GET"])
 def github():
     if (session.get("access_token") != None):
