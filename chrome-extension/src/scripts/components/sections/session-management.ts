@@ -99,7 +99,6 @@ function handleSave(event: MouseEvent, idx: number): void {
 }
 
 let timeout: ReturnType<typeof setTimeout> = null;
-
 function handleInput(event: InputEvent, idx: number): void {
   clearTimeout(timeout);
   timeout = setTimeout(() => {

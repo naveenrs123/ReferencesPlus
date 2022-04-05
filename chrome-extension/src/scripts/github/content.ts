@@ -18,22 +18,28 @@ prDetails.prNumber = parseInt(matchesArr[3]);
  */
 function MainInterface(idx: number, isCodeComment = false): HTMLDivElement {
   const closeResetSection: HTMLDivElement = LeftButtons(idx);
+
+  // const mainMenu: HTMLDivElement = MainMenu();
+  // mainMenu.appendChild(closeResetSection);
+
+  /*
+  This section is commented out because session management is not required for the study.
+
   const sessionManagementSection: HTMLDivElement = SessionManagement(idx);
 
   const sessionTitle: HTMLLabelElement = document.createElement("label");
   sessionTitle.id = `refg-session-title-${idx}`;
   sessionTitle.classList.add("m-2");
-
-  const mainMenu: HTMLDivElement = MainMenu();
-  mainMenu.appendChild(closeResetSection);
   mainMenu.appendChild(sessionTitle);
+
   mainMenu.appendChild(sessionManagementSection);
+  */
 
   const player: HTMLDivElement = Player(idx);
   const comments: HTMLDivElement = Comments(idx);
 
   const container = InterfaceContainer(idx, isCodeComment);
-  container.appendChild(mainMenu);
+  container.appendChild(closeResetSection);
   container.appendChild(player);
   container.appendChild(comments);
   return container;

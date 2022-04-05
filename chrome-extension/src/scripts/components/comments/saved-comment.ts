@@ -1,4 +1,4 @@
-import { hideElemClass, waitForSaveClass } from "../../common/constants";
+import { waitForSaveClass } from "../../common/constants";
 import { convertMsToTime, stateMap } from "../../common/helpers";
 import { ButtonColor, CommentData } from "../../common/interfaces";
 import { Comment } from "./comment";
@@ -13,14 +13,10 @@ export function SavedComment(data: CommentData): HTMLDivElement {
     stateMap[data.idx].mainPlayer.goto(timestamp, false);
   });
 
-  const copy = MiniPlayerBtn("Copy", ButtonColor.Yellow, [waitForSaveClass, hideElemClass], false);
-  copy.addEventListener("click", (event: MouseEvent) => handleCopy(event, data));
-
   const topContainer = document.createElement("div");
   topContainer.classList.add("d-flex", "flex-justify-center", "flex-items-center", "p-2");
   topContainer.style.width = "100%";
   topContainer.appendChild(timestampLabel);
-  topContainer.appendChild(copy);
 
   const buttonsContainer = document.createElement("div");
   buttonsContainer.classList.add("d-flex", "flex-justify-center", "mb-2");
@@ -50,12 +46,33 @@ export function SavedComment(data: CommentData): HTMLDivElement {
     handleDel(event, container);
   });
 
+  const label: HTMLLabelElement = document.createElement("label");
+  label.classList.add("d-none", "m-2");
+  label.innerText = "Selected!";
+
+  const contents = data.contents;
+  data.contents.addEventListener("dblclick", (event: MouseEvent) => {
+    console.log("DBLCLICK EVENT!");
+    window.getSelection().selectAllChildren(contents);
+    const sessionId = stateMap[data.idx].sessionDetails.id;
+    navigator.clipboard
+      .writeText(`SESSION[${sessionId}]_C[${data.comment_id}]: ${data.rawText}\n`)
+      .then(() => {
+        label.classList.remove("d-none");
+        setTimeout(() => {
+          label.classList.add("d-none");
+        }, 1500);
+      })
+      .catch(() => {
+        return;
+      });
+  });
+
   container.appendChild(topContainer);
   container.appendChild(data.contents);
   container.appendChild(buttonsContainer);
-
+  container.appendChild(label);
   data.contents = null;
-
   return container;
 }
 

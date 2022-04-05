@@ -2,7 +2,7 @@ import rrwebPlayer, { RRwebPlayerOptions } from "rrweb-player";
 import { mouseOutBorders, mouseOverBorders } from "./borders";
 import { eventWithTime, Mirror } from "rrweb/typings/types";
 import { INode } from "rrweb-snapshot";
-import { hideElemClass, refBegin, refEnd, waitForPlayerClass } from "../common/constants";
+import { refBegin, refEnd, waitForPlayerClass } from "../common/constants";
 import { stateMap } from "../common/helpers";
 
 function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer): void {
@@ -85,7 +85,7 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
 
   const waitForPlayerElems = activeInterface.querySelectorAll("." + waitForPlayerClass);
   waitForPlayerElems.forEach((elem) => {
-    elem.classList.remove(hideElemClass);
+    elem.removeAttribute("aria-disabled");
   });
 
   stateMap[idx].events = events;

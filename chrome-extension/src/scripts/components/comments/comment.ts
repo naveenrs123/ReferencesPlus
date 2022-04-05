@@ -1,4 +1,4 @@
-import { convertMsToTime, stateMap } from "../../common/helpers";
+import { convertMsToTime, saveChanges, stateMap } from "../../common/helpers";
 import { ButtonColor, CommentData } from "../../common/interfaces";
 import { color } from "../../github/borders";
 import { SavedComment } from "./saved-comment";
@@ -103,7 +103,8 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentD
 
   data.contents = document.createElement("div");
   data.contents.classList.add("p-2", "mb-2", "overflow-y-auto");
-  data.contents.style.maxHeight = "180px";
+  data.contents.style.height = "180px";
+  data.contents.style.width = "130px";
   data.contents.style.wordBreak = "normal";
   spans.forEach((span: HTMLSpanElement) => {
     data.contents.appendChild(span);
@@ -119,7 +120,12 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentD
     stateMap[data.idx].nextCommentId = data.comment_id > oldMax ? data.comment_id : oldMax;
     stateMap[data.idx].comments.push(data);
   }
-  container.replaceWith(SavedComment(data));
+
+  saveChanges(data.idx)
+    .then(() => container.replaceWith(SavedComment(data)))
+    .catch(() => {
+      return;
+    });
 }
 
 function splitOnRefs(splitString: string): string[] {

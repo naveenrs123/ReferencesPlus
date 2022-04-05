@@ -1,4 +1,5 @@
-import { ButtonColor, PRDetails, StateMap } from "./interfaces";
+import { waitForSaveClass } from "./constants";
+import { ButtonColor, InterfaceStateReq, PRDetails, SaveResponse, StateMap } from "./interfaces";
 
 export const stateMap: StateMap = {};
 export const prDetails: PRDetails = {
@@ -133,4 +134,41 @@ export function findAncestorWithClass(elem: HTMLElement, className: string): HTM
 
 export function updateCommentId(): void {
   commentId++;
+}
+
+export function saveChanges(idx: number): Promise<void> {
+  const stateCopy: InterfaceStateReq = {
+    events: stateMap[idx].events,
+    sessionDetails: stateMap[idx].sessionDetails,
+    comments: stateMap[idx].comments,
+    nextCommentId: stateMap[idx].nextCommentId,
+  };
+
+  const stringifiedData = JSON.stringify({
+    prDetails: prDetails,
+    state: stateCopy,
+  });
+
+  const fetchParams = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: stringifiedData,
+  };
+
+  return fetch("http://127.0.0.1:5000/insertSession", fetchParams)
+    .then((res: Response) => {
+      return res.json();
+    })
+    .then((data: SaveResponse) => {
+      if (data.id != "") stateMap[idx].sessionDetails.id = data.id;
+      const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
+      interfaceContainer.querySelectorAll("." + waitForSaveClass).forEach((elem: HTMLElement) => {
+        elem.removeAttribute("aria-disabled");
+      });
+    })
+    .catch(() => {
+      return;
+    });
 }

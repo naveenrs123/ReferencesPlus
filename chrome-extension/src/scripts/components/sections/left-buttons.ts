@@ -1,4 +1,4 @@
-import { hideElemClass, waitForPlayerClass, waitForSaveClass } from "../../common/constants";
+import { waitForPlayerClass, waitForSaveClass } from "../../common/constants";
 import { Comments, Player, PlayerBtn } from "../util-components";
 import { Comment } from "../comments/comment";
 import { ButtonColor, CommentData } from "../../common/interfaces";
@@ -16,9 +16,9 @@ export function LeftButtons(idx: number): HTMLDivElement {
   closeResetContainer.appendChild(close);
   closeResetContainer.appendChild(reset);
 
-  const comment: HTMLButtonElement = PlayerBtn("Comment", ButtonColor.Default, [waitForPlayerClass, hideElemClass]);
+  const comment: HTMLButtonElement = PlayerBtn("Comment", ButtonColor.Default, [waitForPlayerClass], true);
   comment.addEventListener("click", (event: MouseEvent) => handleComment(event, idx));
-  const insertAll: HTMLButtonElement = PlayerBtn("Insert All", ButtonColor.Default, [waitForSaveClass, hideElemClass]);
+  const insertAll: HTMLButtonElement = PlayerBtn("Insert All", ButtonColor.Default, [waitForSaveClass], true);
   insertAll.addEventListener("click", (event: MouseEvent) => handleInsertAll(event, idx));
 
   const commentContainer = document.createElement("div");
@@ -27,7 +27,7 @@ export function LeftButtons(idx: number): HTMLDivElement {
   commentContainer.appendChild(insertAll);
 
   const leftButtonsContainer = document.createElement("div");
-  leftButtonsContainer.classList.add("d-flex", "flex-column", "flex-justify-between");
+  leftButtonsContainer.classList.add("d-flex", "flex-justify-between");
   leftButtonsContainer.appendChild(closeResetContainer);
   leftButtonsContainer.appendChild(commentContainer);
 
@@ -52,11 +52,11 @@ function handleReset(event: MouseEvent, idx: number): void {
   const player = document.getElementById(`refg-github-player-${idx}`) as HTMLDivElement;
   const comments = document.getElementById(`refg-comments-${idx}`) as HTMLDivElement;
   interfaceContainer.querySelectorAll("." + waitForPlayerClass).forEach((elem: Element) => {
-    elem.classList.add(hideElemClass);
+    elem.setAttribute("aria-dsiabled", "true");
   });
 
   interfaceContainer.querySelectorAll("." + waitForSaveClass).forEach((elem: Element) => {
-    elem.classList.add(hideElemClass);
+    elem.setAttribute("aria-dsiabled", "true");
   });
   interfaceContainer.removeChild(player);
   interfaceContainer.removeChild(comments);

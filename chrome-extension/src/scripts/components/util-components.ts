@@ -19,11 +19,14 @@ export function PlayerBtn(
   text: string,
   color: ButtonColor = ButtonColor.Default,
   toggleClass: string[] = [],
-  id?: string
+  disabled?: boolean,
+  id?: string,
 ): HTMLButtonElement {
   const btn = document.createElement("button");
   if (id !== undefined) btn.id = id;
   btn.classList.add("m-2", "btn", buttonColorToClass(color), ...toggleClass);
+  btn.setAttribute("type", "button");
+  if (disabled) btn.setAttribute("aria-disabled", "true");
   btn.innerText = text;
   return btn;
 }
@@ -33,11 +36,14 @@ export function MiniPlayerBtn(
   color: ButtonColor,
   toggleClass: string[] = [],
   margins = true,
-  id?: string
+  disabled?: boolean,
+  id?: string,
 ): HTMLButtonElement {
   const btn = document.createElement("button");
   if (id !== undefined) btn.id = id;
   btn.classList.add("btn-sm", margins? "mx-2" : "ml-2", buttonColorToClass(color), ...toggleClass);
+  btn.setAttribute("type", "button");
+  if (disabled) btn.setAttribute("aria-disabled", "true");
   btn.innerText = text;
   return btn;
 }
