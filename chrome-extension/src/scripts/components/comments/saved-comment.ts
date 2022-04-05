@@ -68,5 +68,6 @@ function handleEdit(event: MouseEvent, data: CommentData, container: HTMLDivElem
 }
 
 function handleCopy(event: MouseEvent, data: CommentData): void {
-  return;
+  const sessionId = stateMap[data.idx].sessionDetails.id;
+  void navigator.clipboard.writeText(`SESSION[${sessionId}]_C[${data.comment_id}]: ${data.rawText}\n`);
 }

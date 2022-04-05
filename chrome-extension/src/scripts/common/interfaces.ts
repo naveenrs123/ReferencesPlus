@@ -36,6 +36,7 @@ export interface InterfaceState {
   sessionDetails?: SessionDetails;
   comments?: CommentData[];
   nextCommentId?: number;
+  allowOverwrite?: boolean;
 }
 
 export interface StateMap {
@@ -85,4 +86,8 @@ export interface PRDetails {
 
 export interface SaveResponse {
   id: string;
+}
+
+export interface CheckUniqueResponse {
+  isUnique: boolean;
 }

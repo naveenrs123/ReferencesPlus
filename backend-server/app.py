@@ -23,6 +23,7 @@ import helpers as hp
 from function_parser.language_data import LANGUAGE_METADATA
 from function_parser.process import DataProcessor
 
+
 # endregion imports
 
 load_dotenv()
@@ -56,20 +57,66 @@ def mongo():
 def insertSession():
     if (request.get_json() != None):
         json_data: hp.InsertSessionReq = request.get_json()
-        print(json_data.keys(), file=sys.stderr)
-        print(client.list_databases(), file=sys.stderr)
 
-        sessionsdb: Type[pymongo.database.Database] = client.get_database("sessions")
+        sessionsdb: Type[pymongo.database.Database] = client.get_database(
+            "sessions")
 
-        collectionName: str = json_data["prDetails"]["userOrOrg"] + json_data["prDetails"]["repository"]
-        print(collectionName, file=sys.stderr)
+        collectionName: str = json_data["prDetails"]["userOrOrg"] + \
+            json_data["prDetails"]["repository"]
 
         collection = sessionsdb.get_collection(collectionName)
-        result = collection.insert_one(json_data["state"]);
-        print(str(result.inserted_id), file=sys.stderr)
-        return jsonify({"id": str(result.inserted_id)})
 
-    return jsonify({"id": "12345"})
+        result = collection.replace_one(
+            {"sessionDetails.title": json_data["state"]["sessionDetails"]["title"]}, json_data["state"], upsert=True)
+
+        id = ""
+        if result.upserted_id != None:
+            id = str(result.upserted_id)
+        else:
+            result = collection.find_one(
+                {"sessionDetails.title": json_data["state"]["sessionDetails"]["title"]})
+            id = str(result["_id"])
+
+        collection.update_one({"sessionDetails.title": json_data["state"]["sessionDetails"]["title"]}, {
+                              "$set": {"sessionDetails.id": id}})
+        return jsonify({"id": id})
+
+    return jsonify({"error": "Missing body."}), 400
+
+
+@app.route("/checkUnique/<title>", methods=["POST"])
+def checkUnique(title):
+    if (request.get_json() != None):
+        json_data = request.get_json()
+        sessions: Type[pymongo.database.Database] = client.get_database(
+            "sessions")
+        collectionName: str = json_data["prDetails"]["userOrOrg"] + \
+            json_data["prDetails"]["repository"]
+        collection = sessions.get_collection(collectionName)
+        isUnique = collection.count_documents(
+            {"sessionDetails.title": title}) == 0
+        return jsonify({"isUnique": isUnique})
+
+    return jsonify({"error": "Missing body."}), 400
+
+
+@app.route("/loadSession/<input>", methods=["POST"])
+def loadSession(input):
+    if (request.get_json() != None):
+        json_data = request.get_json()
+        sessions: Type[pymongo.database.Database] = client.get_database(
+            "sessions")
+        collectionName: str = json_data["userOrOrg"] + \
+            json_data["repository"]
+        collection = sessions.get_collection(collectionName)
+        docs = collection.find(
+            {"$or": [{"sessionDetails.title": {"$regex": "{}".format(input)}}, {"sessionDetails.id": {"$regex": "{}".format(input)}}]})
+        docsArray = []
+        for doc in docs:
+            docsArray.append(doc["sessionDetails"])
+        return jsonify(docsArray)
+
+    return jsonify({"error": "Missing body."}), 400
 
 
 # TEST ROUTE - NOT REQUIRED FOR UI REFERENCING
@@ -89,7 +136,6 @@ def auth(user):
     }
     encoded_params: str = urllib.parse.urlencode(params, safe=':/')
     full_auth_url: str = auth_url + "?" + encoded_params
-    print(full_auth_url, file=sys.stderr)
     return redirect(full_auth_url)
 
 

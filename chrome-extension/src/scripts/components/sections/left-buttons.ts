@@ -1,7 +1,7 @@
 import { hideElemClass, waitForPlayerClass, waitForSaveClass } from "../../common/constants";
 import { Comments, Player, PlayerBtn } from "../util-components";
 import { Comment } from "../comments/comment";
-import { ButtonColor } from "../../common/interfaces";
+import { ButtonColor, CommentData } from "../../common/interfaces";
 import { UnsavedChangesModal } from "../modals/unsaved-changes-modal";
 import { stateMap } from "../../common/helpers";
 
@@ -82,5 +82,10 @@ function handleComment(event: MouseEvent, idx: number): void {
 
 // TODO: Complete Function
 function handleInsertAll(event: MouseEvent, idx: number): void {
-  return;
+  const sessionId = stateMap[idx].sessionDetails.id;
+  let clipboardString = "";
+  stateMap[idx].comments.forEach((comment: CommentData) => {
+    clipboardString += `SESSION[${sessionId}]_C[${comment.comment_id}]: ${comment.rawText}\n`;
+  });
+  void navigator.clipboard.writeText(clipboardString);
 }

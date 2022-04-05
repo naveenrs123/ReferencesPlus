@@ -1,5 +1,5 @@
 import { prDetails, stateMap } from "../../common/helpers";
-import { InterfaceStateReq, SaveResponse, StateMapReq } from "../../common/interfaces";
+import { InterfaceStateReq, SaveResponse, SessionDetails } from "../../common/interfaces";
 import { ChangesSavedModal } from "../modals/changes-saved-modal";
 import { SaveSessionModal } from "../modals/save-session-modal";
 import { PlayerBtn, TextInput } from "../util-components";
@@ -37,6 +37,7 @@ export function SessionManagement(idx: number): HTMLDivElement {
   label.classList.add("text-normal", "mx-2");
 
   const input = TextInput("Enter title/id.", [], "refg-load-session-input");
+  input.addEventListener("input", (event: InputEvent) => handleInput(event, idx));
   loadSessionContainer.appendChild(label);
   loadSessionContainer.appendChild(input);
 
@@ -88,11 +89,35 @@ function handleSave(event: MouseEvent, idx: number): void {
         return res.json();
       })
       .then((data: SaveResponse) => {
-        stateMap[idx].sessionDetails.id = data.id;
+        if (data.id != "") stateMap[idx].sessionDetails.id = data.id;
         playerContainer.appendChild(ChangesSavedModal(idx));
       })
-      .catch((err: Error) => {
+      .catch(() => {
         return;
       });
   }
+}
+
+let timeout: ReturnType<typeof setTimeout> = null;
+
+function handleInput(event: InputEvent, idx: number): void {
+  clearTimeout(timeout);
+  timeout = setTimeout(() => {
+    const target = event.target as HTMLInputElement;
+    if (target.value == "") return;
+    fetch(`http://127.0.0.1:5000/loadSession/${target.value}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(prDetails),
+    })
+      .then((res: Response) => res.json())
+      .then((data: SessionDetails[]) => {
+        console.log(data);
+      })
+      .catch(() => {
+        return;
+      });
+  }, 500);
 }

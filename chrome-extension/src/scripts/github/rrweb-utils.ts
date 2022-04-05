@@ -2,7 +2,7 @@ import rrwebPlayer, { RRwebPlayerOptions } from "rrweb-player";
 import { mouseOutBorders, mouseOverBorders } from "./borders";
 import { eventWithTime, Mirror } from "rrweb/typings/types";
 import { INode } from "rrweb-snapshot";
-import { hideElemClass, waitForPlayerClass } from "../common/constants";
+import { hideElemClass, refBegin, refEnd, waitForPlayerClass } from "../common/constants";
 import { stateMap } from "../common/helpers";
 
 function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer): void {
@@ -22,7 +22,7 @@ function handleIframeClick(event: MouseEvent, mainPlayer: rrwebPlayer): void {
   event.stopPropagation();
   const mirror: Mirror = mainPlayer.getMirror();
   const targetId: number = mirror.getId(event.target as INode);
-  void navigator.clipboard.writeText("~[" + targetId.toString() + "]~");
+  void navigator.clipboard.writeText(refBegin + targetId.toString() + refEnd);
 }
 
 export function disableInteractions(mainPlayer: rrwebPlayer): void {

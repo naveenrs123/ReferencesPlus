@@ -1,8 +1,9 @@
-import { commentId, convertMsToTime, stateMap, updateCommentId } from "../../common/helpers";
+import { convertMsToTime, stateMap } from "../../common/helpers";
 import { ButtonColor, CommentData } from "../../common/interfaces";
 import { color } from "../../github/borders";
 import { SavedComment } from "./saved-comment";
 import { MiniPlayerBtn } from "../util-components";
+import { refSymbol } from "../../common/constants";
 
 export function Comment(data: CommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
@@ -78,7 +79,8 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentD
 
   splitArray.forEach((text: string) => {
     const span: HTMLSpanElement = document.createElement("span");
-    const matches = text.match(/~\[(\d+)\]~/); // match with a group to get the node id
+    const pattern = RegExp(`${refSymbol}\\[(\\d+)\\]${refSymbol}`, "i");
+    const matches = text.match(pattern); // match with a group to get the node id
     if (matches != null) {
       span.classList.add("Link");
       const nodeId = parseInt(matches[1]);
@@ -107,9 +109,9 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentD
     data.contents.appendChild(span);
   });
 
-  const commentIndex = stateMap[data.idx].comments.findIndex((value: CommentData) => {
-    value.comment_id == data.comment_id;
-  });
+  const commentIndex = stateMap[data.idx].comments.findIndex(
+    (value: CommentData) => value.comment_id == data.comment_id
+  );
   if (commentIndex > -1) {
     stateMap[data.idx].comments[commentIndex] = data;
   } else {
@@ -125,7 +127,7 @@ function splitOnRefs(splitString: string): string[] {
   let str = "";
   let matchingRef = false;
   for (const c of splitString) {
-    if (c == "~") {
+    if (c == refSymbol) {
       if (!matchingRef && str.length > 0) {
         splitArray.push(str);
         matchingRef = true;
