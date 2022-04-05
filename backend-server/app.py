@@ -66,10 +66,14 @@ def insertSession():
 
         collection = sessionsdb.get_collection(collectionName)
 
+        id = ""
+
+        """
+        This section is commented because proper session management is not required for the study.
+
         result = collection.replace_one(
             {"sessionDetails.title": json_data["state"]["sessionDetails"]["title"]}, json_data["state"], upsert=True)
 
-        id = ""
         if result.upserted_id != None:
             id = str(result.upserted_id)
         else:
@@ -79,6 +83,21 @@ def insertSession():
 
         collection.update_one({"sessionDetails.title": json_data["state"]["sessionDetails"]["title"]}, {
                               "$set": {"sessionDetails.id": id}})
+        """
+
+        # Replace this code below with the commented code above for proper session management.
+        result = collection.replace_one(
+            {"sessionDetails.id": json_data["state"]["sessionDetails"]["id"]}, json_data["state"], upsert=True)
+
+        if result.upserted_id != None:
+            id = str(result.upserted_id)
+            collection.update_one({"_id": id}, {
+                              "$set": {"sessionDetails.id": id}})
+        else:
+            result = collection.find_one(
+                {"sessionDetails.id": json_data["state"]["sessionDetails"]["id"]})
+            id = str(result["_id"])
+
         return jsonify({"id": id})
 
     return jsonify({"error": "Missing body."}), 400
