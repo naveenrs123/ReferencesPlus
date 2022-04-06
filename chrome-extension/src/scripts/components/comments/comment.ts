@@ -24,6 +24,7 @@ export function Comment(data: CommentData): HTMLDivElement {
   commentTextArea.value = data.rawText;
   commentTextArea.style.resize = "vertical";
   commentTextArea.style.width = "90%";
+  commentTextArea.style.height = "180px";
 
   const buttonsContainer = document.createElement("div");
   buttonsContainer.classList.add("d-flex", "flex-justify-center", "mb-2");
@@ -104,7 +105,7 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentD
   data.contents = document.createElement("div");
   data.contents.classList.add("p-2", "mb-2", "overflow-y-auto");
   data.contents.style.height = "180px";
-  data.contents.style.width = "130px";
+  data.contents.style.width = "90%";
   data.contents.style.wordBreak = "normal";
   spans.forEach((span: HTMLSpanElement) => {
     data.contents.appendChild(span);

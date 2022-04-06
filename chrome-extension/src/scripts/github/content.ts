@@ -38,9 +38,15 @@ function MainInterface(idx: number, isCodeComment = false): HTMLDivElement {
   const player: HTMLDivElement = Player(idx);
   const comments: HTMLDivElement = Comments(idx);
 
+  const label: HTMLLabelElement = document.createElement("label");
+  label.id = `refg-comment-info-${idx}`;
+  label.classList.add("d-none", "m-2", "text-center");
+  label.innerText = "Double click on comments to copy them. Click on 'Copy All' to copy all comments.";
+
   const container = InterfaceContainer(idx, isCodeComment);
-  container.appendChild(closeResetSection);
   container.appendChild(player);
+  container.appendChild(closeResetSection);
+  container.appendChild(label);
   container.appendChild(comments);
   return container;
 }
@@ -94,7 +100,7 @@ function makeCodeEditableInterface(): void {
       if (hidden) {
         mainInterface.classList.remove("refg-active");
       } else {
-        mainInterface.classList.add("refg-active");
+        mainInterface.classList.add("refg-active", "d-flex", "flex-column");
         chrome.runtime.sendMessage<ExtensionMessage>({
           action: "[GITHUB] Ready to Receive",
           source: "github_content",
@@ -159,7 +165,7 @@ function makeMainEditableInterface(): void {
     if (hidden) {
       mainInterface.classList.remove("refg-active");
     } else {
-      mainInterface.classList.add("refg-active");
+      mainInterface.classList.add("refg-active", "d-flex", "flex-column");
       chrome.runtime.sendMessage<ExtensionMessage>({
         action: "[GITHUB] Ready to Receive",
         source: "github_content",

@@ -4,7 +4,18 @@ import { ButtonColor } from "../common/interfaces";
 export function Player(idx: number): HTMLDivElement {
   const player = document.createElement("div");
   player.id = `refg-github-player-${idx}`;
-  player.classList.add("d-flex", "position-relative");
+  player.classList.add("position-relative");
+
+  const readyToReceive = document.createElement("p");
+  readyToReceive.style.width = "100%";
+  readyToReceive.innerText = "Ready to receive recording.";
+
+  const interactWithPlayer = document.createElement("p");
+  interactWithPlayer.style.width = "100%";
+  interactWithPlayer.innerText = "You can interact with the elements of the recording and comment on them.";
+
+  player.appendChild(readyToReceive);
+  player.appendChild(interactWithPlayer);
   return player;
 }
 
@@ -20,7 +31,7 @@ export function PlayerBtn(
   color: ButtonColor = ButtonColor.Default,
   toggleClass: string[] = [],
   disabled?: boolean,
-  id?: string,
+  id?: string
 ): HTMLButtonElement {
   const btn = document.createElement("button");
   if (id !== undefined) btn.id = id;
@@ -37,11 +48,11 @@ export function MiniPlayerBtn(
   toggleClass: string[] = [],
   margins = true,
   disabled?: boolean,
-  id?: string,
+  id?: string
 ): HTMLButtonElement {
   const btn = document.createElement("button");
   if (id !== undefined) btn.id = id;
-  btn.classList.add("btn-sm", margins? "mx-2" : "ml-2", buttonColorToClass(color), ...toggleClass);
+  btn.classList.add("btn-sm", margins ? "mx-2" : "ml-2", buttonColorToClass(color), ...toggleClass);
   btn.setAttribute("type", "button");
   if (disabled) btn.setAttribute("aria-disabled", "true");
   btn.innerText = text;

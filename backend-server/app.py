@@ -90,15 +90,16 @@ def insertSession():
             {"sessionDetails.id": json_data["state"]["sessionDetails"]["id"]}, json_data["state"], upsert=True)
 
         if result.upserted_id != None:
-            id = str(result.upserted_id)
-            collection.update_one({"_id": id}, {
-                              "$set": {"sessionDetails.id": id}})
+            id = result.upserted_id
         else:
             result = collection.find_one(
                 {"sessionDetails.id": json_data["state"]["sessionDetails"]["id"]})
-            id = str(result["_id"])
+            id = result["_id"]
 
-        return jsonify({"id": id})
+        collection.update_one({"_id": id}, {
+                              "$set": {"sessionDetails.id": str(id)}})
+
+        return jsonify({"id": str(id)})
 
     return jsonify({"error": "Missing body."}), 400
 

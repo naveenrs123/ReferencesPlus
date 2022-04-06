@@ -1,7 +1,7 @@
 import { waitForPlayerClass, waitForSaveClass } from "../../common/constants";
 import { Comments, Player, PlayerBtn } from "../util-components";
 import { Comment } from "../comments/comment";
-import { ButtonColor, CommentData } from "../../common/interfaces";
+import { ButtonColor, CommentData, ExtensionMessage } from "../../common/interfaces";
 import { UnsavedChangesModal } from "../modals/unsaved-changes-modal";
 import { stateMap } from "../../common/helpers";
 
@@ -18,13 +18,13 @@ export function LeftButtons(idx: number): HTMLDivElement {
 
   const comment: HTMLButtonElement = PlayerBtn("Comment", ButtonColor.Default, [waitForPlayerClass], true);
   comment.addEventListener("click", (event: MouseEvent) => handleComment(event, idx));
-  const insertAll: HTMLButtonElement = PlayerBtn("Insert All", ButtonColor.Default, [waitForSaveClass], true);
-  insertAll.addEventListener("click", (event: MouseEvent) => handleInsertAll(event, idx));
+  const copyAll: HTMLButtonElement = PlayerBtn("Copy All", ButtonColor.Default, [waitForSaveClass], true);
+  copyAll.addEventListener("click", (event: MouseEvent) => handleCopyAll(event, idx));
 
   const commentContainer = document.createElement("div");
   commentContainer.classList.add("d-flex");
   commentContainer.appendChild(comment);
-  commentContainer.appendChild(insertAll);
+  commentContainer.appendChild(copyAll);
 
   const leftButtonsContainer = document.createElement("div");
   leftButtonsContainer.classList.add("d-flex", "flex-justify-between");
@@ -52,18 +52,25 @@ function handleReset(event: MouseEvent, idx: number): void {
   const player = document.getElementById(`refg-github-player-${idx}`) as HTMLDivElement;
   const comments = document.getElementById(`refg-comments-${idx}`) as HTMLDivElement;
   interfaceContainer.querySelectorAll("." + waitForPlayerClass).forEach((elem: Element) => {
-    elem.setAttribute("aria-dsiabled", "true");
+    elem.setAttribute("aria-disabled", "true");
   });
 
   interfaceContainer.querySelectorAll("." + waitForSaveClass).forEach((elem: Element) => {
-    elem.setAttribute("aria-dsiabled", "true");
+    elem.setAttribute("aria-disabled", "true");
   });
-  interfaceContainer.removeChild(player);
-  interfaceContainer.removeChild(comments);
-  interfaceContainer.appendChild(Player(idx));
-  interfaceContainer.appendChild(Comments(idx));
+
+  const commentInfo = interfaceContainer.querySelector(`#refg-comment-info-${idx}`);
+  commentInfo.classList.add("d-none");
+
+  player.replaceWith(Player(idx));
+  comments.replaceWith(Comments(idx));
   stateMap[idx].hasUnsavedChanges = false;
   stateMap[idx].mainPlayer = null;
+  chrome.runtime.sendMessage<ExtensionMessage>({
+    action: "[GITHUB] Ready to Receive",
+    source: "github_content",
+    idx: idx,
+  });
 }
 
 function handleComment(event: MouseEvent, idx: number): void {
@@ -81,11 +88,23 @@ function handleComment(event: MouseEvent, idx: number): void {
 }
 
 // TODO: Complete Function
-function handleInsertAll(event: MouseEvent, idx: number): void {
+function handleCopyAll(event: MouseEvent, idx: number): void {
   const sessionId = stateMap[idx].sessionDetails.id;
   let clipboardString = "";
   stateMap[idx].comments.forEach((comment: CommentData) => {
     clipboardString += `SESSION[${sessionId}]_C[${comment.comment_id}]: ${comment.rawText}\n`;
   });
-  void navigator.clipboard.writeText(clipboardString);
+  navigator.clipboard
+    .writeText(clipboardString)
+    .then(() => {
+      const commentInfo = document.getElementById(`refg-comment-info-${idx}`);
+      const oldText = commentInfo.innerText;
+      commentInfo.innerText = "All comments copied!";
+      setTimeout(() => {
+        commentInfo.innerText = oldText;
+      }, 1000);
+    })
+    .catch(() => {
+      return;
+    });
 }

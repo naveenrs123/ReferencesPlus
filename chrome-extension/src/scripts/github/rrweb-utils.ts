@@ -38,6 +38,7 @@ export function disableInteractions(mainPlayer: rrwebPlayer): void {
   mainPlayer.getReplayer().disableInteract();
   for (const l in listeners) iframe.contentWindow.removeEventListener(l, listeners[l]);
   iframe.removeAttribute("listener");
+  iframe.contentDocument.querySelector("html").style.overflow = "";
 }
 
 export function enableInteractions(mainPlayer: rrwebPlayer): void {
@@ -53,6 +54,7 @@ export function enableInteractions(mainPlayer: rrwebPlayer): void {
   mainPlayer.getReplayer().enableInteract();
   for (const l in listeners) iframe.contentWindow.addEventListener(l, listeners[l]);
   iframe.setAttribute("listener", "true");
+  iframe.contentDocument.querySelector("html").style.overflow = "hidden";
 }
 
 export function generateReplayerOptions(playerDiv: HTMLDivElement, events: eventWithTime[]): RRwebPlayerOptions {
@@ -77,16 +79,16 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
   const activeInterface = document.querySelector(".refg-active");
   const oldPlayers = activeInterface.querySelectorAll(".rr-player");
   const playerDiv: HTMLDivElement = activeInterface.querySelector(`#refg-github-player-${idx}`);
-  oldPlayers.forEach((player: HTMLDivElement) => {
-    if (playerDiv.contains(player)) playerDiv.removeChild(player);
-  });
-
+  playerDiv.innerHTML = "";
   const replayerOptions: RRwebPlayerOptions = generateReplayerOptions(playerDiv, events);
 
   const waitForPlayerElems = activeInterface.querySelectorAll("." + waitForPlayerClass);
   waitForPlayerElems.forEach((elem) => {
     elem.removeAttribute("aria-disabled");
   });
+
+  const commentInfo = activeInterface.querySelector(`#refg-comment-info-${idx}`);
+  commentInfo.classList.remove("d-none");
 
   stateMap[idx].events = events;
   stateMap[idx].hasUnsavedChanges = true;

@@ -1,5 +1,5 @@
 import { waitForSaveClass } from "../../common/constants";
-import { convertMsToTime, stateMap } from "../../common/helpers";
+import { convertMsToTime, saveChanges, stateMap } from "../../common/helpers";
 import { ButtonColor, CommentData } from "../../common/interfaces";
 import { Comment } from "./comment";
 import { MiniPlayerBtn } from "../util-components";
@@ -13,9 +13,13 @@ export function SavedComment(data: CommentData): HTMLDivElement {
     stateMap[data.idx].mainPlayer.goto(timestamp, false);
   });
 
+  const commentIdLabel = document.createElement("label");
+  commentIdLabel.innerText = `(${data.comment_id.toString()})`;
+
   const topContainer = document.createElement("div");
-  topContainer.classList.add("d-flex", "flex-justify-center", "flex-items-center", "p-2");
+  topContainer.classList.add("d-flex", "flex-justify-between", "flex-items-center", "p-3");
   topContainer.style.width = "100%";
+  topContainer.appendChild(commentIdLabel);
   topContainer.appendChild(timestampLabel);
 
   const buttonsContainer = document.createElement("div");
@@ -43,7 +47,7 @@ export function SavedComment(data: CommentData): HTMLDivElement {
     handleEdit(event, data, container);
   });
   del.addEventListener("click", (event: MouseEvent) => {
-    handleDel(event, container);
+    handleDel(event, data, container);
   });
 
   const label: HTMLLabelElement = document.createElement("label");
@@ -76,8 +80,13 @@ export function SavedComment(data: CommentData): HTMLDivElement {
   return container;
 }
 
-function handleDel(event: MouseEvent, container: HTMLDivElement): void {
+function handleDel(event: MouseEvent, data: CommentData, container: HTMLDivElement): void {
   container.remove();
+  const index = stateMap[data.idx].comments.findIndex((value: CommentData) => value.comment_id == data.comment_id);
+  stateMap[data.idx].comments.splice(index, 1);
+  saveChanges(data.idx).catch(() => {
+    return;
+  });
 }
 
 function handleEdit(event: MouseEvent, data: CommentData, container: HTMLDivElement): void {
