@@ -1,4 +1,3 @@
-import { waitForSaveClass } from "../../common/constants";
 import { convertMsToTime, saveChanges, stateMap } from "../../common/helpers";
 import { ButtonColor, CommentData } from "../../common/interfaces";
 import { Comment } from "./comment";
@@ -55,7 +54,7 @@ export function SavedComment(data: CommentData): HTMLDivElement {
   label.innerText = "Selected!";
 
   const contents = data.contents;
-  data.contents.addEventListener("dblclick", (event: MouseEvent) => {
+  data.contents.addEventListener("dblclick", () => {
     console.log("DBLCLICK EVENT!");
     window.getSelection().selectAllChildren(contents);
     const sessionId = stateMap[data.idx].sessionDetails.id;
@@ -91,9 +90,4 @@ function handleDel(event: MouseEvent, data: CommentData, container: HTMLDivEleme
 
 function handleEdit(event: MouseEvent, data: CommentData, container: HTMLDivElement): void {
   container.replaceWith(Comment(data));
-}
-
-function handleCopy(event: MouseEvent, data: CommentData): void {
-  const sessionId = stateMap[data.idx].sessionDetails.id;
-  void navigator.clipboard.writeText(`SESSION[${sessionId}]_C[${data.comment_id}]: ${data.rawText}\n`);
 }

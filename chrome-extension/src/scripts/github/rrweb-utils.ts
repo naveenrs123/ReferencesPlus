@@ -77,7 +77,6 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
 
   stateMap[idx].mainPlayer = null;
   const activeInterface = document.querySelector(".refg-active");
-  const oldPlayers = activeInterface.querySelectorAll(".rr-player");
   const playerDiv: HTMLDivElement = activeInterface.querySelector(`#refg-github-player-${idx}`);
   playerDiv.innerHTML = "";
   const replayerOptions: RRwebPlayerOptions = generateReplayerOptions(playerDiv, events);

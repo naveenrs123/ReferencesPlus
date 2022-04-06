@@ -2,7 +2,7 @@ import { ExtensionMessage } from "../common/interfaces";
 import { codeCommentQuery, mainCommentQuery } from "../common/constants";
 import { injectMainPlayer } from "./rrweb-utils";
 import { LeftButtons } from "../components/sections/left-buttons";
-import { SessionManagement } from "../components/sections/session-management";
+//import { SessionManagement } from "../components/sections/session-management";
 import { counter, findAncestorWithClass, prDetails, stateMap, updateCounter } from "../common/helpers";
 import { Comments, InterfaceContainer, Player, ShowInterfaceBtn } from "../components/util-components";
 
@@ -55,11 +55,11 @@ function MainInterface(idx: number, isCodeComment = false): HTMLDivElement {
  * Builds the main menu container.
  * @returns A div representing the main menu container.
  */
-function MainMenu(): HTMLDivElement {
+/* function MainMenu(): HTMLDivElement {
   const container = document.createElement("div");
   container.classList.add("d-flex", "flex-justify-between");
   return container;
-}
+} */
 
 /**
  * Creates an editable interface for each code comment on the page.
