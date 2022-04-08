@@ -1,5 +1,5 @@
 import { prDetails, stateMap } from "../../common/helpers";
-import { InterfaceStateReq, SaveResponse, SessionDetails } from "../../common/interfaces";
+import { CoreState, SaveResponse, SessionDetails } from "../../common/interfaces";
 import { ChangesSavedModal } from "../modals/changes-saved-modal";
 import { SaveSessionModal } from "../modals/save-session-modal";
 import { PlayerBtn, TextInput } from "../util-components";
@@ -64,7 +64,7 @@ function handleSave(event: MouseEvent, idx: number): void {
   if (stateMap[idx].sessionDetails.title == "") {
     playerContainer.appendChild(SaveSessionModal(idx));
   } else {
-    const stateCopy: InterfaceStateReq = {
+    const stateCopy: CoreState = {
       events: stateMap[idx].events,
       sessionDetails: stateMap[idx].sessionDetails,
       comments: stateMap[idx].comments,

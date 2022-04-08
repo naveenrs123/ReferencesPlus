@@ -1,5 +1,5 @@
 import { prDetails, stateMap } from "../../common/helpers";
-import { ButtonColor, CheckUniqueResponse, InterfaceStateReq, SaveResponse } from "../../common/interfaces";
+import { ButtonColor, CheckUniqueResponse, CoreState, SaveResponse } from "../../common/interfaces";
 import { ChangesSavedModal } from "./changes-saved-modal";
 import { PlayerBtn } from "../util-components";
 
@@ -76,7 +76,7 @@ function handleSave(event: MouseEvent, idx: number): void {
         return Promise.reject("Attempt to save again.");
       } else {
         stateMap[idx].allowOverwrite = false;
-        const stateCopy: InterfaceStateReq = {
+        const stateCopy: CoreState = {
           events: stateMap[idx].events,
           sessionDetails: stateMap[idx].sessionDetails,
           comments: stateMap[idx].comments,

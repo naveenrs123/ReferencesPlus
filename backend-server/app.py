@@ -120,21 +120,22 @@ def checkUnique(title):
     return jsonify({"error": "Missing body."}), 400
 
 
-@app.route("/loadSession/<input>", methods=["POST"])
-def loadSession(input):
+@app.route("/loadSession/<sessionId>", methods=["POST"])
+def loadSession(sessionId):
     if (request.get_json() != None):
         json_data = request.get_json()
-        sessions: Type[pymongo.database.Database] = client.get_database(
-            "sessions")
-        collectionName: str = json_data["userOrOrg"] + \
-            json_data["repository"]
+        sessions = client.get_database("sessions")
+        collectionName = json_data["userOrOrg"] + json_data["repository"]
         collection = sessions.get_collection(collectionName)
-        docs = collection.find(
-            {"$or": [{"sessionDetails.title": {"$regex": "{}".format(input)}}, {"sessionDetails.id": {"$regex": "{}".format(input)}}]})
-        docsArray = []
-        for doc in docs:
-            docsArray.append(doc["sessionDetails"])
-        return jsonify(docsArray)
+        doc = collection.find_one({"sessionDetails.id": sessionId})
+
+        return_doc = {
+            "events": doc["events"],
+            "sessionDetails": doc["sessionDetails"],
+            "comments": doc["comments"],
+            "nextCommentId": doc["nextCommentId"]
+        }
+        return jsonify(return_doc)
 
     return jsonify({"error": "Missing body."}), 400
 

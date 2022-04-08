@@ -64,8 +64,11 @@ function handleReset(event: MouseEvent, idx: number): void {
 
   player.replaceWith(Player(idx));
   comments.replaceWith(Comments(idx));
+
+  stateMap[idx].sessionDetails = null;
   stateMap[idx].hasUnsavedChanges = false;
   stateMap[idx].mainPlayer = null;
+
   chrome.runtime.sendMessage<ExtensionMessage>({
     action: "[GITHUB] Ready to Receive",
     source: "github_content",
@@ -92,7 +95,10 @@ function handleCopyAll(event: MouseEvent, idx: number): void {
   const sessionId = stateMap[idx].sessionDetails.id;
   let clipboardString = "";
   stateMap[idx].comments.forEach((comment: CommentData) => {
-    clipboardString += `SESSION[${sessionId}]_C[${comment.comment_id}]: ${comment.rawText}\n`;
+    clipboardString += `SESSION[${sessionId}]_C[${comment.comment_id}]: [${comment.rawText.replace(
+      /(\r\n|\n|\r)/gm,
+      ""
+    )}]\n`;
   });
   navigator.clipboard
     .writeText(clipboardString)

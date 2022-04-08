@@ -27,42 +27,7 @@ export enum ButtonColor {
   Yellow,
 }
 
-export interface InterfaceState {
-  containerId: string;
-  hasUnsavedChanges?: boolean;
-  events?: eventWithTime[];
-  mainPlayer?: rrwebPlayer;
-  active?: boolean;
-  sessionDetails?: SessionDetails;
-  comments?: CommentData[];
-  nextCommentId?: number;
-  allowOverwrite?: boolean;
-}
-
-export interface StateMap {
-  [id: number]: InterfaceState;
-}
-
-export interface InterfaceStateReq {
-  events: eventWithTime[];
-  sessionDetails?: SessionDetails;
-  comments?: CommentData[];
-  nextCommentId?: number;
-}
-
-export interface StateMapReq {
-  [id: number]: InterfaceStateReq;
-}
-
-export interface GitHubTabState {
-  state: TabState;
-}
-
-export interface TabState {
-  tabId: number;
-  idx: number;
-}
-
+// INTERFACE STATE
 export interface SessionDetails {
   title: string;
   website: string;
@@ -78,6 +43,44 @@ export interface CommentData {
   saved?: boolean;
 }
 
+export interface CoreState {
+  events?: eventWithTime[];
+  sessionDetails?: SessionDetails;
+  comments?: CommentData[];
+  nextCommentId?: number;
+  mainPlayer?: rrwebPlayer;
+}
+
+export interface ReadOnlyInterface extends CoreState {
+  commentBody?: HTMLElement;
+  commentId?: number;
+}
+
+export interface EditableInterface extends CoreState {
+  containerId?: string;
+  hasUnsavedChanges?: boolean;
+  active?: boolean;
+  allowOverwrite?: boolean;
+}
+
+export interface EditableInterfacesMap {
+  [id: number]: EditableInterface;
+}
+
+export interface LoadedSessions {
+  [sessionId: string]: CoreState;
+}
+// INTERFACE STATE
+
+export interface GitHubTabState {
+  state: TabState;
+}
+
+export interface TabState {
+  tabId: number;
+  idx: number;
+}
+
 export interface PRDetails {
   userOrOrg: string;
   repository: string;
@@ -90,4 +93,21 @@ export interface SaveResponse {
 
 export interface CheckUniqueResponse {
   isUnique: boolean;
+}
+
+export interface SessionToCommentMap {
+  [sessionCommentString: string]: {
+    sessionId: string;
+    commentId: number;
+  };
+}
+
+export interface TextWithSessions {
+  textNode: Text;
+  sessionCommentsArr: string[];
+}
+
+export interface TaggedText {
+  text: string;
+  isSessionString: boolean;
 }

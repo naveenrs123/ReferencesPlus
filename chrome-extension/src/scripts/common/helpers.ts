@@ -1,7 +1,17 @@
 import { waitForSaveClass } from "./constants";
-import { ButtonColor, InterfaceStateReq, PRDetails, SaveResponse, StateMap } from "./interfaces";
+import {
+  ButtonColor,
+  CoreState,
+  PRDetails,
+  SaveResponse,
+  EditableInterfacesMap,
+  LoadedSessions,
+  ReadOnlyInterface,
+} from "./interfaces";
 
-export const stateMap: StateMap = {};
+export const stateMap: EditableInterfacesMap = {};
+export const loadedSessions: LoadedSessions = {};
+export const readOnlyInterfaces: ReadOnlyInterface[] = [];
 export const prDetails: PRDetails = {
   userOrOrg: "",
   repository: "",
@@ -125,7 +135,7 @@ export function updateCounter(): void {
   counter++;
 }
 
-export function findAncestorWithClass(elem: HTMLElement, className: string): HTMLElement {
+export function findAncestor(elem: HTMLElement, className: string): HTMLElement {
   while (!elem.classList.contains(className)) {
     elem = elem.parentElement;
   }
@@ -137,7 +147,7 @@ export function updateCommentId(): void {
 }
 
 export function saveChanges(idx: number): Promise<void> {
-  const stateCopy: InterfaceStateReq = {
+  const stateCopy: CoreState = {
     events: stateMap[idx].events,
     sessionDetails: stateMap[idx].sessionDetails,
     comments: stateMap[idx].comments,

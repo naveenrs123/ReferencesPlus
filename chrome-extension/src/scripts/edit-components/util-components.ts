@@ -1,9 +1,9 @@
 import { buttonColorToClass } from "../common/helpers";
 import { ButtonColor } from "../common/interfaces";
 
-export function Player(idx: number): HTMLDivElement {
+export function Player(idx: number, readOnly = false): HTMLDivElement {
   const player = document.createElement("div");
-  player.id = `refg-github-player-${idx}`;
+  player.id = readOnly ? `refg-github-player-${idx}` : `refg-github-player-r-${idx}`;
   player.classList.add("position-relative");
 
   const readyToReceive = document.createElement("p");
@@ -19,9 +19,9 @@ export function Player(idx: number): HTMLDivElement {
   return player;
 }
 
-export function Comments(idx: number): HTMLDivElement {
+export function Comments(idx: number, readOnly = false): HTMLDivElement {
   const comments = document.createElement("div");
-  comments.id = `refg-comments-${idx}`;
+  comments.id = readOnly ? `refg-comments-${idx}` : `refg-comments-r-${idx}`;
   comments.classList.add("p-2", "d-flex", "overflow-x-auto", "flex-items-center");
   return comments;
 }
@@ -73,11 +73,12 @@ export function TextInput(placeholder: string, toggleClass: string[] = [], id?: 
  * @param parent A parent node that will contain the emulator button as a child.
  * @returns The emulator button.
  */
-export function ShowInterfaceBtn(parent: ParentNode, idx: number): HTMLButtonElement {
-  let btn = document.getElementById(`refg-show-interface-${idx}`) as HTMLButtonElement;
+export function ShowInterfaceBtn(parent: ParentNode, idx: number, readOnly = false): HTMLButtonElement {
+  const id = readOnly ? `refg-show-interface-${idx}` : `refg-show-interface-r-${idx}`;
+  let btn = document.getElementById(id) as HTMLButtonElement;
   if (btn != null) parent.removeChild(btn);
   btn = document.createElement("button");
-  btn.id = `refg-show-interface-${idx}`;
+  btn.id = id;
   btn.innerText = "X";
   btn.setAttribute("role", "button");
   btn.classList.add("toolbar-item", "details-reset", "btn-octicon");
@@ -88,9 +89,9 @@ export function ShowInterfaceBtn(parent: ParentNode, idx: number): HTMLButtonEle
  * Create a container div element that will contain emulator interactions.
  * @returns The created container div.
  */
-export function InterfaceContainer(idx: number, isCodeComment: boolean): HTMLDivElement {
+export function InterfaceContainer(idx: number, isCodeComment = false, readOnly = false): HTMLDivElement {
   const container = document.createElement("div");
-  container.id = `refg-interface-container-${idx}`;
+  container.id = readOnly ? `refg-interface-container-${idx}` : `refg-interface-container-r-${idx}`;
   container.classList.add("d-none");
   container.style.maxHeight = "1000px";
   container.style.margin = "10px 0px";

@@ -11,3 +11,6 @@ export const mainCommentQuery = "markdown-toolbar[for='new_comment_field'] detai
 export const refSymbol = "%";
 export const refBegin = refSymbol + "[";
 export const refEnd = "]" + refSymbol;
+
+export const matchUrl = /https:\/\/github.com\/(.+)\/(.+)\/pull\/(\d+)/;
+export const sessionMatchPattern = /(SESSION\[(\w+)\]_C\[(\d+)\]:)\s*\[(?:(?!SESSION\[(\w+)\]_C\[(\d+)\]:).)+\]/g;

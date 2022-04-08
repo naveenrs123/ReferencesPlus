@@ -59,7 +59,7 @@ export function SavedComment(data: CommentData): HTMLDivElement {
     window.getSelection().selectAllChildren(contents);
     const sessionId = stateMap[data.idx].sessionDetails.id;
     navigator.clipboard
-      .writeText(`SESSION[${sessionId}]_C[${data.comment_id}]: ${data.rawText}\n`)
+      .writeText(`SESSION[${sessionId}]_C[${data.comment_id}]: [${data.rawText.replace(/(\r\n|\n|\r)/gm, "")}]\n`)
       .then(() => {
         label.classList.remove("d-none");
         setTimeout(() => {

@@ -3,7 +3,8 @@ import { mouseOutBorders, mouseOverBorders } from "./borders";
 import { eventWithTime, Mirror } from "rrweb/typings/types";
 import { INode } from "rrweb-snapshot";
 import { refBegin, refEnd, waitForPlayerClass } from "../common/constants";
-import { stateMap } from "../common/helpers";
+import { loadedSessions, readOnlyInterfaces, stateMap } from "../common/helpers";
+import { ReadOnlyInterface } from "../common/interfaces";
 
 function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer): void {
   if (state.payload == "paused") {
@@ -99,5 +100,35 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
   stateMap[idx].mainPlayer = new rrwebPlayer(replayerOptions);
   stateMap[idx].mainPlayer.addEventListener("ui-update-player-state", (state: { payload: string }) => {
     onPlayerStateChange(state, stateMap[idx].mainPlayer);
+  });
+}
+
+export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
+  const activeInterface = document.getElementById(`refg-interface-container-r-${idx}`);
+  const playerDiv: HTMLDivElement = activeInterface.querySelector(`#refg-github-player-r-${idx}`);
+  playerDiv.innerHTML = "";
+
+  const waitForPlayerElems = activeInterface.querySelectorAll("." + waitForPlayerClass);
+  waitForPlayerElems.forEach((elem) => {
+    elem.removeAttribute("aria-disabled");
+  });
+
+  const commentInfo = activeInterface.querySelector(`#refg-comment-info-r-${idx}`);
+  commentInfo.classList.remove("d-none");
+
+  const index = readOnlyInterfaces.findIndex((value: ReadOnlyInterface) => {
+    value.commentId == idx;
+  });
+
+  const loadedSession = loadedSessions[sessionId];
+  const replayerOptions: RRwebPlayerOptions = generateReplayerOptions(playerDiv, loadedSession.events);
+
+  readOnlyInterfaces[index].events = loadedSession.events;
+  readOnlyInterfaces[index].sessionDetails = loadedSession.sessionDetails;
+  readOnlyInterfaces[index].comments = loadedSession.comments;
+  readOnlyInterfaces[index].nextCommentId = loadedSession.nextCommentId;
+  readOnlyInterfaces[index].mainPlayer = new rrwebPlayer(replayerOptions);
+  readOnlyInterfaces[index].mainPlayer.addEventListener("ui-update-player-state", (state: { payload: string }) => {
+    onPlayerStateChange(state, readOnlyInterfaces[index].mainPlayer);
   });
 }
