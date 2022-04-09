@@ -1,3 +1,4 @@
+import { getFetchUrl } from "../../common/constants";
 import { prDetails, stateMap } from "../../common/helpers";
 import { CoreState, SaveResponse, SessionDetails } from "../../common/interfaces";
 import { ChangesSavedModal } from "../modals/changes-saved-modal";
@@ -84,7 +85,7 @@ function handleSave(event: MouseEvent, idx: number): void {
       body: stringifiedData,
     };
 
-    fetch("http://127.0.0.1:5000/insertSession", fetchParams)
+    fetch(`${getFetchUrl()}/insertSession`, fetchParams)
       .then((res: Response) => {
         return res.json();
       })
@@ -104,7 +105,7 @@ function handleInput(event: InputEvent, idx: number): void {
   timeout = setTimeout(() => {
     const target = event.target as HTMLInputElement;
     if (target.value == "") return;
-    fetch(`http://127.0.0.1:5000/loadSession/${target.value}`, {
+    fetch(`${getFetchUrl()}/loadSession/${target.value}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

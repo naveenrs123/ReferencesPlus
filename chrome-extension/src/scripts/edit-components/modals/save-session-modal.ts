@@ -2,6 +2,7 @@ import { prDetails, stateMap } from "../../common/helpers";
 import { ButtonColor, CheckUniqueResponse, CoreState, SaveResponse } from "../../common/interfaces";
 import { ChangesSavedModal } from "./changes-saved-modal";
 import { PlayerBtn } from "../util-components";
+import { getFetchUrl } from "../../common/constants";
 
 export function SaveSessionModal(idx: number): HTMLDivElement {
   const heading = document.createElement("h3");
@@ -57,7 +58,7 @@ function handleSave(event: MouseEvent, idx: number): void {
   const input = document.getElementById(`refg-save-session-input-${idx}`) as HTMLInputElement;
   stateMap[idx].sessionDetails.title = input.value;
 
-  fetch(`http://127.0.0.1:5000/checkUnique/${input.value}`, {
+  fetch(`${getFetchUrl()}/checkUnique/${input.value}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -88,7 +89,7 @@ function handleSave(event: MouseEvent, idx: number): void {
           state: stateCopy,
         });
 
-        return fetch("http://127.0.0.1:5000/insertSession", {
+        return fetch(`${getFetchUrl()}/insertSession`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

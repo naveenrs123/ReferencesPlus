@@ -1,4 +1,4 @@
-import { waitForSaveClass } from "./constants";
+import { getFetchUrl, waitForSaveClass } from "./constants";
 import {
   ButtonColor,
   CoreState,
@@ -167,7 +167,7 @@ export function saveChanges(idx: number): Promise<void> {
     body: stringifiedData,
   };
 
-  return fetch("http://127.0.0.1:5000/insertSession", fetchParams)
+  return fetch(`${getFetchUrl()}/insertSession`, fetchParams)
     .then((res: Response) => {
       return res.json();
     })

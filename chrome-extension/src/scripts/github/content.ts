@@ -267,7 +267,7 @@ function loadReferencedSessions(): void {
   const promiseArray: Promise<Response>[] = [];
   sessionIds.forEach((sessionId: string) => {
     promiseArray.push(
-      fetch(`http://127.0.0.1:5000/loadSession/${sessionId}`, {
+      fetch(`${constants.getFetchUrl()}/loadSession/${sessionId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

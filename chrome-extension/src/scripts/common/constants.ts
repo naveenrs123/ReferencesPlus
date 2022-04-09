@@ -13,4 +13,12 @@ export const refBegin = refSymbol + "[";
 export const refEnd = "]" + refSymbol;
 
 export const matchUrl = /https:\/\/github.com\/(.+)\/(.+)\/pull\/(\d+)/;
-export const sessionMatchPattern = /(SESSION\[(\w+)\]_C\[(\d+)\]:)\s*\[(?:(?!SESSION\[(\w+)\]_C\[(\d+)\]:).)+\]/g;
+export const sessionMatchPattern =
+  /(SESSION\[(\w+)\]_C\[(\d+)\]:)\s*\[(?:(?!SESSION\[(\w+)\]_C\[(\d+)\]:).)+\]/g;
+
+export const localUrl = "http://127.0.0.1:5000";
+export const globalUrl = "https://pr-referencing.azurewebsites.net";
+
+export function getFetchUrl(): string {
+  return globalUrl;
+}

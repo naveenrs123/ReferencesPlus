@@ -1,0 +1,1 @@
+eval "python function_parser/setup.py install;build_grammars"
