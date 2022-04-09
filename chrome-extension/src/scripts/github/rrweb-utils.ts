@@ -3,8 +3,14 @@ import { mouseOutBorders, mouseOverBorders } from "./borders";
 import { eventWithTime, Mirror } from "rrweb/typings/types";
 import { INode } from "rrweb-snapshot";
 import { refBegin, refEnd, waitForPlayerClass } from "../common/constants";
-import { loadedSessions, readOnlyInterfaces, stateMap } from "../common/helpers";
-import { ReadOnlyInterface } from "../common/interfaces";
+import {
+  commentId,
+  findAncestor,
+  loadedSessions,
+  readOnlyInterfaces,
+  stateMap,
+} from "../common/helpers";
+import { CommentData, ReadOnlyInterface } from "../common/interfaces";
 
 function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer): void {
   if (state.payload == "paused") {
@@ -58,7 +64,10 @@ export function enableInteractions(mainPlayer: rrwebPlayer): void {
   iframe.contentDocument.querySelector("html").style.overflow = "hidden";
 }
 
-export function generateReplayerOptions(playerDiv: HTMLDivElement, events: eventWithTime[]): RRwebPlayerOptions {
+export function generateReplayerOptions(
+  playerDiv: HTMLDivElement,
+  events: eventWithTime[]
+): RRwebPlayerOptions {
   return {
     target: playerDiv,
     props: {
@@ -98,37 +107,63 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
     id: "",
   };
   stateMap[idx].mainPlayer = new rrwebPlayer(replayerOptions);
-  stateMap[idx].mainPlayer.addEventListener("ui-update-player-state", (state: { payload: string }) => {
-    onPlayerStateChange(state, stateMap[idx].mainPlayer);
-  });
+  stateMap[idx].mainPlayer.addEventListener(
+    "ui-update-player-state",
+    (state: { payload: string }) => {
+      onPlayerStateChange(state, stateMap[idx].mainPlayer);
+    }
+  );
 }
 
 export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
-  const activeInterface = document.getElementById(`refg-interface-container-r-${idx}`);
-  const playerDiv: HTMLDivElement = activeInterface.querySelector(`#refg-github-player-r-${idx}`);
-  playerDiv.innerHTML = "";
-
-  const waitForPlayerElems = activeInterface.querySelectorAll("." + waitForPlayerClass);
-  waitForPlayerElems.forEach((elem) => {
-    elem.removeAttribute("aria-disabled");
+  const index = readOnlyInterfaces.findIndex((value: ReadOnlyInterface) => {
+    return value.githubCommentId == idx;
   });
+
+  const activeInterface = document.getElementById(`refg-interface-container-r-${idx}`);
+  const playerDiv: HTMLDivElement = document.querySelector(`#refg-github-player-r-${idx}`);
+  console.log(playerDiv);
+
+  playerDiv.innerHTML = "";
 
   const commentInfo = activeInterface.querySelector(`#refg-comment-info-r-${idx}`);
   commentInfo.classList.remove("d-none");
 
-  const index = readOnlyInterfaces.findIndex((value: ReadOnlyInterface) => {
-    value.commentId == idx;
-  });
-
   const loadedSession = loadedSessions[sessionId];
-  const replayerOptions: RRwebPlayerOptions = generateReplayerOptions(playerDiv, loadedSession.events);
+  const replayerOptions: RRwebPlayerOptions = generateReplayerOptions(
+    playerDiv,
+    loadedSession.events
+  );
 
   readOnlyInterfaces[index].events = loadedSession.events;
   readOnlyInterfaces[index].sessionDetails = loadedSession.sessionDetails;
   readOnlyInterfaces[index].comments = loadedSession.comments;
   readOnlyInterfaces[index].nextCommentId = loadedSession.nextCommentId;
   readOnlyInterfaces[index].mainPlayer = new rrwebPlayer(replayerOptions);
-  readOnlyInterfaces[index].mainPlayer.addEventListener("ui-update-player-state", (state: { payload: string }) => {
-    onPlayerStateChange(state, readOnlyInterfaces[index].mainPlayer);
-  });
+  readOnlyInterfaces[index].mainPlayer.addEventListener(
+    "ui-update-player-state",
+    (state: { payload: string }) => {
+      onPlayerStateChange(state, readOnlyInterfaces[index].mainPlayer);
+    }
+  );
+
+  const updateCount = 0;
+  readOnlyInterfaces[index].mainPlayer.addEventListener(
+    "ui-update-current-time",
+    (state: { payload: number }) => {
+      if (updateCount % 3 != 0) return;
+      for (const comment of readOnlyInterfaces[index].comments) {
+        const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
+        console.log(timestamp - state.payload);
+        const bound = Math.abs(timestamp - state.payload) < 500;
+        const commentContainer = findAncestor(comment.contents, "refg-comment");
+        console.log(commentContainer);
+        if (bound) {
+          commentContainer.style.setProperty("border", "3px solid red", "important");
+        } else {
+          commentContainer.style.border = "";
+        }
+      }
+    }
+  );
 }

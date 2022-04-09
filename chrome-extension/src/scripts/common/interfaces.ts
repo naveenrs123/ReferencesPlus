@@ -53,7 +53,7 @@ export interface CoreState {
 
 export interface ReadOnlyInterface extends CoreState {
   commentBody?: HTMLElement;
-  commentId?: number;
+  githubCommentId?: number;
 }
 
 export interface EditableInterface extends CoreState {

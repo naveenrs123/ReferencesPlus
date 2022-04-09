@@ -1,9 +1,10 @@
-import { ButtonColor } from "../../common/interfaces";
+import { readOnlyInterfaces } from "../../common/helpers";
+import { ButtonColor, CommentData, ReadOnlyInterface } from "../../common/interfaces";
 import { PlayerBtn } from "../../edit-components/util-components";
 
 export function LeftButtonsR(idx: number): HTMLDivElement {
   const copyAll: HTMLButtonElement = PlayerBtn("Copy All", ButtonColor.Default);
-  //copyAll.addEventListener("click", (event: MouseEvent) => handleCopyAll(event, idx));
+  copyAll.addEventListener("click", (event: MouseEvent) => handleCopyAll(event, idx));
 
   const commentContainer = document.createElement("div");
   commentContainer.classList.add("d-flex");
@@ -16,11 +17,14 @@ export function LeftButtonsR(idx: number): HTMLDivElement {
   return leftButtonsContainer;
 }
 
-// TODO: Complete Function
-/* function handleCopyAll(event: MouseEvent, idx: number): void {
-  const sessionId = stateMap[idx].sessionDetails.id;
+function handleCopyAll(event: MouseEvent, idx: number): void {
+  const index = readOnlyInterfaces.findIndex((value: ReadOnlyInterface) => {
+    return value.githubCommentId == idx;
+  });
+
+  const sessionId = readOnlyInterfaces[index].sessionDetails.id;
   let clipboardString = "";
-  stateMap[idx].comments.forEach((comment: CommentData) => {
+  readOnlyInterfaces[index].comments.forEach((comment: CommentData) => {
     clipboardString += `SESSION[${sessionId}]_C[${comment.comment_id}]: [${comment.rawText.replace(
       /(\r\n|\n|\r)/gm,
       ""
@@ -29,7 +33,7 @@ export function LeftButtonsR(idx: number): HTMLDivElement {
   navigator.clipboard
     .writeText(clipboardString)
     .then(() => {
-      const commentInfo = document.getElementById(`refg-comment-info-${idx}`);
+      const commentInfo = document.getElementById(`refg-comment-info-r-${idx}`);
       const oldText = commentInfo.innerText;
       commentInfo.innerText = "All comments copied!";
       setTimeout(() => {
@@ -39,4 +43,4 @@ export function LeftButtonsR(idx: number): HTMLDivElement {
     .catch(() => {
       return;
     });
-} */
+}

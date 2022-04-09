@@ -1,11 +1,12 @@
 import * as interfaces from "../common/interfaces";
 import * as constants from "../common/constants";
-import { injectMainPlayer } from "./rrweb-utils";
+import { injectMainPlayer, injectReadOnlyPlayer } from "./rrweb-utils";
 import { LeftButtons } from "../edit-components/sections/left-buttons";
 //import { SessionManagement } from "../edit-components/sections/session-management";
 import * as helpers from "../common/helpers";
 import * as utilComponents from "../edit-components/util-components";
 import { MainInterfaceR } from "../view-components/main-interface-r";
+import { CommentR, processComment } from "../view-components/comments/comment-r";
 
 const matchesArr = window.location.href.match(constants.matchUrl);
 helpers.prDetails.userOrOrg = matchesArr[1];
@@ -74,12 +75,21 @@ function makeReadonlyInterfaces(): void {
 
     const idx = helpers.counter;
     const mainInterface = MainInterfaceR(idx);
+    mainInterface.classList.add("d-none");
     helpers.updateCounter();
 
     const parent = elem.parentNode;
     const firstChild = parent.firstChild;
     parent.insertBefore(mainInterface, firstChild);
-    helpers.readOnlyInterfaces.push({ commentBody: elem, commentId: idx });
+    helpers.readOnlyInterfaces.push({
+      commentBody: elem,
+      githubCommentId: idx,
+      events: [],
+      sessionDetails: null,
+      comments: [],
+      nextCommentId: 0,
+      mainPlayer: null,
+    });
   });
 }
 
@@ -232,6 +242,12 @@ window.addEventListener("click", (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   if (target.tagName == "BUTTON" && target.classList.contains("review-thread-reply-button")) {
     makeCodeEditableInterface();
+  } else if (target.tagName == "BUTTON" && target.textContent.toLowerCase().includes("comment")) {
+    console.log("THIS IS THE RIGHT SPOT!");
+    setTimeout(() => {
+      makeReadonlyInterfaces();
+      loadReferencedSessions();
+    }, 2000);
   }
 });
 
@@ -269,25 +285,82 @@ function loadReferencedSessions(): void {
       for (const interfaceInfo of value) {
         helpers.loadedSessions[interfaceInfo.sessionDetails.id] = interfaceInfo;
       }
+
       console.log(helpers.loadedSessions);
-      console.log(sessionToCommentMap);
-      console.log(textNodes);
+
       for (const info of textNodes) {
         const { textNode, sessionCommentsArr }: interfaces.TextWithSessions = info;
         const commentBody = helpers.findAncestor(textNode.parentElement, "js-comment-body");
-
         const taggedText = buildSplitArr(textNode.textContent, sessionCommentsArr);
         const nodes: Node[] = [];
 
         taggedText.forEach((tag: interfaces.TaggedText) => {
           if (tag.isSessionString) {
+            const {sessionId, commentId} = sessionToCommentMap[tag.text];
+
             const button = document.createElement("button");
-            button.innerText = `View Comment ${sessionToCommentMap[tag.text].commentId}`;
+            button.innerText = `View In Interface`;
+            button.classList.add("m-2", "btn", "refg-view-interface");
+            button.addEventListener("click", () => {
+              const idx = helpers.readOnlyInterfaces.findIndex(
+                (value: interfaces.ReadOnlyInterface) => {
+                  return value.commentBody == commentBody;
+                }
+              );
+
+              const interfaceContainer = commentBody.parentElement.querySelector(
+                `#refg-interface-container-r-${helpers.readOnlyInterfaces[idx].githubCommentId}`
+              );
+              console.log(interfaceContainer);
+
+              //let hidden = false;
+              let active = false;
+              commentBody
+                .querySelectorAll(".refg-view-interface")
+                .forEach((btn: HTMLButtonElement) => {
+                  if (btn == button) {
+                    console.log("BTN MATCHED");
+                    active = btn.classList.toggle("btn-primary");
+                  } else {
+                    btn.classList.remove("btn-primary");
+                  }
+                });
+
+              if (active) {
+                interfaceContainer.classList.remove("d-none");
+                interfaceContainer.classList.add("refg-active", "d-flex", "flex-column");
+              } else {
+                interfaceContainer.classList.add("d-none");
+                interfaceContainer.classList.remove("refg-active");
+              }
+
+              window.getSelection().removeAllRanges();
+
+              console.log(sessionId);
+              injectReadOnlyPlayer(helpers.readOnlyInterfaces[idx].githubCommentId, sessionId);
+
+              const commentContainer = document.getElementById(
+                `refg-comments-r-${helpers.readOnlyInterfaces[idx].githubCommentId}`
+              );
+              commentContainer.innerHTML = "";
+              for (const data of helpers.readOnlyInterfaces[idx].comments) {
+                processComment(data, idx);
+                const comment = CommentR(data);
+                if (data.comment_id == commentId) {
+                  comment.style.setProperty("border", "3px solid red", "important");
+                  setTimeout(() => {
+                    comment.style.border = "";
+                  }, 2000);
+                }
+                commentContainer.appendChild(comment);
+              }
+            });
             nodes.push(button);
           } else {
             nodes.push(document.createTextNode(tag.text));
           }
         });
+        textNode.parentElement.replaceChildren(...nodes);
       }
     })
     .catch((err: Error) => {
