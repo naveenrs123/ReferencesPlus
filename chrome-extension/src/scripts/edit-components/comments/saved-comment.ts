@@ -74,7 +74,6 @@ export function SavedComment(data: CommentData): HTMLDivElement {
   container.appendChild(data.contents);
   container.appendChild(buttonsContainer);
   container.appendChild(label);
-  data.contents = null;
   return container;
 }
 

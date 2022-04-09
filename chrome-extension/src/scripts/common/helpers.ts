@@ -7,6 +7,7 @@ import {
   EditableInterfacesMap,
   LoadedSessions,
   ReadOnlyInterface,
+  CommentData,
 } from "./interfaces";
 
 export const stateMap: EditableInterfacesMap = {};
@@ -76,7 +77,12 @@ export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
  *
  * @returns A HTML Div Element representing the header used for dragging.
  */
-export function buildButtonDiv(id: string, content: string, color = "blue", cursor = "auto"): HTMLDivElement {
+export function buildButtonDiv(
+  id: string,
+  content: string,
+  color = "blue",
+  cursor = "auto"
+): HTMLDivElement {
   const grab: HTMLDivElement = document.createElement("div");
   grab.id = id;
   grab.style.backgroundColor = color;
@@ -96,7 +102,11 @@ export function buildButtonDiv(id: string, content: string, color = "blue", curs
   return grab;
 }
 
-export function shiftPosition(pos: number, elmntDimension: number, clientDimension: number): number {
+export function shiftPosition(
+  pos: number,
+  elmntDimension: number,
+  clientDimension: number
+): number {
   while (pos + elmntDimension >= clientDimension) {
     pos -= 25;
   }
@@ -147,10 +157,20 @@ export function updateCommentId(): void {
 }
 
 export function saveChanges(idx: number): Promise<void> {
+  const comments: CommentData[] = [];
+  stateMap[idx].comments.forEach((comment: CommentData) => {
+    comments.push({
+      comment_id: comment.comment_id,
+      timestamp: comment.timestamp,
+      idx: comment.idx,
+      rawText: comment.rawText,
+    });
+  });
+
   const stateCopy: CoreState = {
     events: stateMap[idx].events,
     sessionDetails: stateMap[idx].sessionDetails,
-    comments: stateMap[idx].comments,
+    comments: comments,
     nextCommentId: stateMap[idx].nextCommentId,
   };
 

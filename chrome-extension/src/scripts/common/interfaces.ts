@@ -39,7 +39,7 @@ export interface CommentData {
   timestamp: number;
   idx: number; // Associated with session
   rawText: string; // raw text from the textarea.
-  contents: HTMLDivElement; // A div containing the processed contents of the textarea.
+  contents?: HTMLDivElement; // A div containing the processed contents of the textarea.
   saved?: boolean;
 }
 

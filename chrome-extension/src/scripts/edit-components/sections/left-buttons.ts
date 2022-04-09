@@ -2,7 +2,6 @@ import { waitForPlayerClass, waitForSaveClass } from "../../common/constants";
 import { Comments, Player, PlayerBtn } from "../util-components";
 import { Comment } from "../comments/comment";
 import { ButtonColor, CommentData, ExtensionMessage } from "../../common/interfaces";
-import { UnsavedChangesModal } from "../modals/unsaved-changes-modal";
 import { stateMap } from "../../common/helpers";
 
 export function LeftButtons(idx: number): HTMLDivElement {
@@ -35,16 +34,15 @@ export function LeftButtons(idx: number): HTMLDivElement {
 }
 
 function handleClose(event: MouseEvent, idx: number): void {
-  const playerContainer = document.getElementById(`refg-github-player-${idx}`);
-  const oldModal = playerContainer.querySelector(`#refg-unsaved-changes-modal-${idx}`);
-  if (oldModal) playerContainer.removeChild(oldModal);
-  if (stateMap[idx].hasUnsavedChanges) {
-    playerContainer.appendChild(UnsavedChangesModal(idx));
-  } else {
-    const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
-    interfaceContainer.parentElement.removeChild(interfaceContainer);
-    stateMap[idx] = null;
-  }
+  // const playerContainer = document.getElementById(`refg-github-player-${idx}`);
+  // const oldModal = playerContainer.querySelector(`#refg-unsaved-changes-modal-${idx}`);
+  // if (oldModal) playerContainer.removeChild(oldModal);
+  // if (stateMap[idx].hasUnsavedChanges) {
+  //   playerContainer.appendChild(UnsavedChangesModal(idx));
+  // }
+  const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
+  interfaceContainer.parentElement.removeChild(interfaceContainer);
+  stateMap[idx] = null;
 }
 
 function handleReset(event: MouseEvent, idx: number): void {

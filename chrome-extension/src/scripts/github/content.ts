@@ -331,10 +331,9 @@ function loadReferencedSessions(): void {
 
               if (active) {
                 interfaceContainer.classList.remove("d-none");
-                interfaceContainer.classList.add("refg-active", "d-flex", "flex-column");
+                interfaceContainer.classList.add("d-flex", "flex-column");
               } else {
                 interfaceContainer.classList.add("d-none");
-                interfaceContainer.classList.remove("refg-active");
               }
 
               window.getSelection().removeAllRanges();

@@ -87,6 +87,7 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
 
   stateMap[idx].mainPlayer = null;
   const activeInterface = document.querySelector(".refg-active");
+  console.log(idx);
   const playerDiv: HTMLDivElement = activeInterface.querySelector(`#refg-github-player-${idx}`);
   playerDiv.innerHTML = "";
   const replayerOptions: RRwebPlayerOptions = generateReplayerOptions(playerDiv, events);
@@ -111,6 +112,24 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
     "ui-update-player-state",
     (state: { payload: string }) => {
       onPlayerStateChange(state, stateMap[idx].mainPlayer);
+    }
+  );
+
+  const updateCount = 0;
+  stateMap[idx].mainPlayer.addEventListener(
+    "ui-update-current-time",
+    (state: { payload: number }) => {
+      if (updateCount % 3 != 0) return;
+      for (const comment of stateMap[idx].comments) {
+        const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
+        const bound = Math.abs(timestamp - state.payload) < 500;
+        const commentContainer = findAncestor(comment.contents, "refg-comment");
+        if (bound) {
+          commentContainer.style.setProperty("border", "3px solid red", "important");
+        } else {
+          commentContainer.style.border = "";
+        }
+      }
     }
   );
 
