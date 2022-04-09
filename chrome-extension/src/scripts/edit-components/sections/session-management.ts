@@ -114,7 +114,7 @@ function handleInput(event: InputEvent, idx: number): void {
     })
       .then((res: Response) => res.json())
       .then((data: SessionDetails[]) => {
-        console.log(data);
+        return;
       })
       .catch(() => {
         return;

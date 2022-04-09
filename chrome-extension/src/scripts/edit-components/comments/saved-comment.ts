@@ -55,7 +55,6 @@ export function SavedComment(data: CommentData): HTMLDivElement {
 
   const contents = data.contents;
   data.contents.addEventListener("dblclick", () => {
-    console.log("DBLCLICK EVENT!");
     window.getSelection().selectAllChildren(contents);
     const sessionId = stateMap[data.idx].sessionDetails.id;
     navigator.clipboard

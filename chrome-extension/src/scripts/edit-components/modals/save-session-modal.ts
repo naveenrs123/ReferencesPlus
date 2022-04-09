@@ -102,7 +102,6 @@ function handleSave(event: MouseEvent, idx: number): void {
       return res.json();
     })
     .then((data: SaveResponse) => {
-      console.log(data.id);
       if (data.id != "") stateMap[idx].sessionDetails.id = data.id;
       const playerContainer = document.getElementById(`refg-github-player-${idx}`);
       const oldModal = document.getElementById(`refg-save-session-modal-${idx}`);

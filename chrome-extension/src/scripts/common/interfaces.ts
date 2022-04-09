@@ -103,7 +103,8 @@ export interface SessionToCommentMap {
 }
 
 export interface TextWithSessions {
-  textNode: Text;
+  textNode: Node;
+  parentElem: HTMLElement;
   sessionCommentsArr: string[];
 }
 

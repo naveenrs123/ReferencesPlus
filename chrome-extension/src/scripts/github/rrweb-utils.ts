@@ -4,13 +4,13 @@ import { eventWithTime, Mirror } from "rrweb/typings/types";
 import { INode } from "rrweb-snapshot";
 import { refBegin, refEnd, waitForPlayerClass } from "../common/constants";
 import {
-  commentId,
   findAncestor,
   loadedSessions,
   readOnlyInterfaces,
+  saveChanges,
   stateMap,
 } from "../common/helpers";
-import { CommentData, ReadOnlyInterface } from "../common/interfaces";
+import { ReadOnlyInterface } from "../common/interfaces";
 
 function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer): void {
   if (state.payload == "paused") {
@@ -113,6 +113,8 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
       onPlayerStateChange(state, stateMap[idx].mainPlayer);
     }
   );
+
+  void saveChanges(idx);
 }
 
 export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
@@ -122,8 +124,6 @@ export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
 
   const activeInterface = document.getElementById(`refg-interface-container-r-${idx}`);
   const playerDiv: HTMLDivElement = document.querySelector(`#refg-github-player-r-${idx}`);
-  console.log(playerDiv);
-
   playerDiv.innerHTML = "";
 
   const commentInfo = activeInterface.querySelector(`#refg-comment-info-r-${idx}`);
@@ -154,10 +154,8 @@ export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
       if (updateCount % 3 != 0) return;
       for (const comment of readOnlyInterfaces[index].comments) {
         const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
-        console.log(timestamp - state.payload);
         const bound = Math.abs(timestamp - state.payload) < 500;
         const commentContainer = findAncestor(comment.contents, "refg-comment");
-        console.log(commentContainer);
         if (bound) {
           commentContainer.style.setProperty("border", "3px solid red", "important");
         } else {
