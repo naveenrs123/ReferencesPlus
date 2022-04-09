@@ -1,1 +1,3 @@
-eval "python function_parser/setup.py install;build_grammars"
+#!/bin/bash
+
+eval "cd function_parser;python setup.py install;build_grammars;cd .."
