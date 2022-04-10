@@ -22,8 +22,24 @@ def welcome():
     """ Root path. """
     return render_template('index.html')
 
+@app.route("/tlx")
+def tlx():
+    """ tlx survey """
+    return render_template('tlx.html')
 
-@app.route("/insertSession", methods=["GET", "POST"])
+@app.route("/savetlx", methods=["POST"])
+def save_tlx():
+    """ Save tlx result. """
+    if request.json is not None:
+        json_data = request.get_json()
+        tlx_db = client.get_database("tlx")
+        tlx_col = tlx_db.get_collection("tlx")
+        tlx_col.insert_one(json_data)
+        return jsonify({"success": True})
+
+    return jsonify({"error": "Missing body"}), 400
+
+@app.route("/insertSession", methods=["POST"])
 def insert_session():
     """ Insert a new session or update an existing one. """
     if request.get_json() is not None:
