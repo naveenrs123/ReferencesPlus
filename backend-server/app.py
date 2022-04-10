@@ -5,7 +5,7 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, redirect
 from flask_cors import CORS
 from pymongo import MongoClient
 
@@ -20,7 +20,7 @@ client = MongoClient(os.environ.get("LOCAL_CONNECTION_STRING"))
 @app.route("/")
 def welcome():
     """ Root path. """
-    return render_template('index.html')
+    return redirect("/tlx")
 
 @app.route("/tlx")
 def tlx():
