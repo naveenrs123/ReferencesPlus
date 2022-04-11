@@ -25,6 +25,7 @@ function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer
  * @param event A mouse event corresponding to a click.
  */
 function handleIframeClick(event: MouseEvent, mainPlayer: rrwebPlayer): void {
+  event.preventDefault();
   event.stopPropagation();
   const mirror: Mirror = mainPlayer.getMirror();
   const targetId: number = mirror.getId(event.target as INode);

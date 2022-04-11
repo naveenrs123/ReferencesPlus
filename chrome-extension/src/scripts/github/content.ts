@@ -243,7 +243,6 @@ function makePRCodeInterface(): void {
 
 function makePrInterface(elem: HTMLElement, isCodeComment = true): void {
   if (!elem) return;
-  console.log("MAKING INTERFACE");
   const detailsParent = elem.parentElement;
 
   let btn = detailsParent.querySelector("[id^=refg-show-interface]");
@@ -263,13 +262,10 @@ function makePrInterface(elem: HTMLElement, isCodeComment = true): void {
       ? commentForm.parentElement
       : document.querySelector(".js-slash-command-surface");
 
-    console.log("TEST1");
     let mainInterface = makePrContainer.querySelector(`#refg-interface-container-${idx}`);
     if (mainInterface == undefined) {
       mainInterface = MainInterface(idx, true);
-      console.log("TEST2");
       makePrContainer.insertBefore(mainInterface, commentForm);
-      console.log("TEST3");
       helpers.stateMap[idx] = {
         hasUnsavedChanges: false,
         containerId: `refg-interface-container-${idx}`,
@@ -281,7 +277,6 @@ function makePrInterface(elem: HTMLElement, isCodeComment = true): void {
       };
     }
 
-    console.log("TEST4");
     const hidden = mainInterface.classList.toggle("d-none");
     helpers.stateMap[idx].active = !hidden;
 
@@ -289,13 +284,11 @@ function makePrInterface(elem: HTMLElement, isCodeComment = true): void {
       mainInterface.classList.remove("refg-active");
     } else {
       mainInterface.classList.add("refg-active", "d-flex", "flex-column");
-      console.log("TEST5");
       chrome.runtime.sendMessage<interfaces.ExtensionMessage>({
         action: "[GITHUB] Ready to Receive",
         source: "github_content",
         idx: idx,
       });
-      console.log("TEST6");
     }
   });
 
@@ -337,7 +330,6 @@ window.addEventListener("click", (event: MouseEvent) => {
   if (target.tagName == "BUTTON" && target.classList.contains("review-thread-reply-button")) {
     makeCodeEditableInterface();
   } else if (target.tagName == "BUTTON" && target.classList.contains("js-add-line-comment")) {
-    console.log("FOUND INTERFACE");
     makePRCodeInterface();
     //setTimeout(() => makePRCodeInterface(), 500);
   } else if (target.tagName == "BUTTON" && target.textContent.toLowerCase().includes("comment")) {
@@ -456,19 +448,21 @@ function loadReferencedSessions(): void {
               }
             });
             nodes.push(button);
-          } else if (/^(\r\n|\n|\r)$/gm.test(tag.text)) {
-            nodes.push(document.createElement("br"));
+          /* } else if (/^(\r\n|\n|\r)$/gm.test(tag.text)) {
+            nodes.push(document.createElement("br")); */
           } else {
             nodes.push(document.createTextNode(tag.text));
           }
         });
 
-        if (parents.includes(parentElem)) {
+        /* if (parents.includes(parentElem)) {
           parentElem.append(...nodes);
         } else {
-          parentElem.replaceChildren(...nodes);
+          parentElem.replaceChildren(...nodes)
           parents.push(parentElem);
-        }
+        } */
+        const textElement = textNode as Element;
+        textElement.replaceWith(...nodes);
       }
     })
     .catch(() => {
@@ -513,6 +507,7 @@ function buildSplitArr(textContent: string, sessionCommentsArr: string[]): inter
     splitArray.push({ text: str, isSessionString: true });
   });
   splitArray.push({ text: modified, isSessionString: false });
+  console.log(splitArray);
   return splitArray;
 }
 
