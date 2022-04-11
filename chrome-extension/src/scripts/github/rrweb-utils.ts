@@ -87,6 +87,7 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
   stateMap[idx].mainPlayer = null;
   const activeInterface = document.querySelector(".refg-active");
   const playerDiv: HTMLDivElement = activeInterface.querySelector(`#refg-github-player-${idx}`);
+  playerDiv.classList.remove("text-center", "p-2");
   playerDiv.innerHTML = "";
   const replayerOptions: RRwebPlayerOptions = generateReplayerOptions(playerDiv, events);
 
@@ -141,6 +142,7 @@ export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
 
   const activeInterface = document.getElementById(`refg-interface-container-r-${idx}`);
   const playerDiv: HTMLDivElement = document.querySelector(`#refg-github-player-r-${idx}`);
+  playerDiv.classList.remove("text-center", "p-2");
   playerDiv.innerHTML = "";
 
   const commentInfo = activeInterface.querySelector(`#refg-comment-info-r-${idx}`);

@@ -4,7 +4,7 @@ import { ButtonColor } from "../common/interfaces";
 export function Player(idx: number, readOnly = false): HTMLDivElement {
   const player = document.createElement("div");
   player.id = readOnly ? `refg-github-player-r-${idx}` : `refg-github-player-${idx}`;
-  player.classList.add("position-relative");
+  player.classList.add("position-relative", "text-center", "p-2");
   player.style.width = "100%";
 
   const readyToReceive = document.createElement("p");

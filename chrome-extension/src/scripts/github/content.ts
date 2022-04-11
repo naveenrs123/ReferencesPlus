@@ -172,10 +172,13 @@ function makeMainEditableInterface(): void {
   const details: HTMLDetailsElement = document.querySelector(constants.mainCommentQuery);
   const detailsParent = details.parentElement;
 
+  let btn = detailsParent.querySelector("[id^=refg-show-interface]");
+  if (btn) return;
+
   // Setup button to activate interface
   const idx = helpers.counter;
   helpers.updateCounter();
-  const btn = utilComponents.ShowInterfaceBtn(detailsParent, idx);
+  btn = utilComponents.ShowInterfaceBtn(detailsParent, idx);
 
   btn.addEventListener("click", (event: MouseEvent) => {
     event.preventDefault();
@@ -230,24 +233,43 @@ function makeMainEditableInterface(): void {
   timelineActions.insertBefore(mainInterface, issueCommentBox);
 }
 
-function makeMakePRInterface(): void {
-  // retrieve button insertion point
-  const details: HTMLDetailsElement = document.querySelector(constants.makePrQuery);
-  const detailsParent = details.parentElement;
+function makePRCodeInterface(): void {
+  document.querySelectorAll(constants.betaCodeCommentQuery).forEach((elem: HTMLElement) => {
+    makePrInterface(elem);
+  });
+
+  makePrInterface(document.querySelector(constants.makePrQuery), false);
+}
+
+function makePrInterface(elem: HTMLElement, isCodeComment = true): void {
+  if (!elem) return;
+  console.log("MAKING INTERFACE");
+  const detailsParent = elem.parentElement;
+
+  let btn = detailsParent.querySelector("[id^=refg-show-interface]");
+  if (btn) return;
 
   // Setup button to activate interface
   const idx = helpers.counter;
   helpers.updateCounter();
-  const btn = utilComponents.ShowInterfaceBtn(detailsParent, idx);
+  btn = utilComponents.ShowInterfaceBtn(detailsParent, idx);
 
   btn.addEventListener("click", (event: MouseEvent) => {
     event.preventDefault();
-    const makePrContainer = document.querySelector(".js-slash-command-surface");
+    const commentForm = isCodeComment
+      ? helpers.findAncestor(detailsParent, "js-inline-comment-form")
+      : document.querySelector(".js-previewable-comment-form");
+    const makePrContainer = isCodeComment
+      ? commentForm.parentElement
+      : document.querySelector(".js-slash-command-surface");
+
+    console.log("TEST1");
     let mainInterface = makePrContainer.querySelector(`#refg-interface-container-${idx}`);
     if (mainInterface == undefined) {
       mainInterface = MainInterface(idx, true);
-      const commentForm = document.querySelector(".js-previewable-comment-form");
+      console.log("TEST2");
       makePrContainer.insertBefore(mainInterface, commentForm);
+      console.log("TEST3");
       helpers.stateMap[idx] = {
         hasUnsavedChanges: false,
         containerId: `refg-interface-container-${idx}`,
@@ -259,6 +281,7 @@ function makeMakePRInterface(): void {
       };
     }
 
+    console.log("TEST4");
     const hidden = mainInterface.classList.toggle("d-none");
     helpers.stateMap[idx].active = !hidden;
 
@@ -266,11 +289,13 @@ function makeMakePRInterface(): void {
       mainInterface.classList.remove("refg-active");
     } else {
       mainInterface.classList.add("refg-active", "d-flex", "flex-column");
+      console.log("TEST5");
       chrome.runtime.sendMessage<interfaces.ExtensionMessage>({
         action: "[GITHUB] Ready to Receive",
         source: "github_content",
         idx: idx,
       });
+      console.log("TEST6");
     }
   });
 
@@ -288,8 +313,12 @@ function makeMakePRInterface(): void {
   };
 
   const mainInterface = MainInterface(idx, true);
-  const makePrContainer = document.querySelector(".js-slash-command-surface");
-  const commentForm = document.querySelector(".js-previewable-comment-form");
+  const commentForm = isCodeComment
+    ? helpers.findAncestor(detailsParent, "js-inline-comment-form")
+    : document.querySelector(".js-previewable-comment-form");
+  const makePrContainer = isCodeComment
+    ? commentForm.parentElement
+    : document.querySelector(".js-slash-command-surface");
   makePrContainer.insertBefore(mainInterface, commentForm);
 }
 
@@ -307,6 +336,10 @@ window.addEventListener("click", (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   if (target.tagName == "BUTTON" && target.classList.contains("review-thread-reply-button")) {
     makeCodeEditableInterface();
+  } else if (target.tagName == "BUTTON" && target.classList.contains("js-add-line-comment")) {
+    console.log("FOUND INTERFACE");
+    makePRCodeInterface();
+    //setTimeout(() => makePRCodeInterface(), 500);
   } else if (target.tagName == "BUTTON" && target.textContent.toLowerCase().includes("comment")) {
     setTimeout(() => {
       makeReadonlyInterfaces();
@@ -487,7 +520,13 @@ function buildSplitArr(textContent: string, sessionCommentsArr: string[]): inter
 setTimeout(() => {
   makeReadonlyInterfaces();
   if (document.querySelector(constants.mainCommentQuery)) makeMainEditableInterface();
-  if (document.querySelector(constants.makePrQuery)) makeMakePRInterface();
+  if (
+    document.querySelector(constants.makePrQuery) ||
+    document.querySelector(constants.betaCodeCommentQuery)
+  ) {
+    makePRCodeInterface();
+  }
+
   makeCodeEditableInterface();
   loadReferencedSessions();
 }, 200);
