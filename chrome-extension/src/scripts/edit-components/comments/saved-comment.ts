@@ -58,7 +58,12 @@ export function SavedComment(data: CommentData): HTMLDivElement {
     window.getSelection().selectAllChildren(contents);
     const sessionId = stateMap[data.idx].sessionDetails.id;
     navigator.clipboard
-      .writeText(`SESSION[${sessionId}]_C[${data.comment_id}]: [${data.rawText.replace(/(\r\n|\n|\r)/gm, "")}]\n`)
+      .writeText(
+        `SESSION[${sessionId}]_C[${data.comment_id}]: [${data.rawText.replace(
+          /(\r\n|\n|\r)/gm,
+          ""
+        )}]\n`
+      )
       .then(() => {
         label.classList.remove("d-none");
         setTimeout(() => {
@@ -79,7 +84,9 @@ export function SavedComment(data: CommentData): HTMLDivElement {
 
 function handleDel(event: MouseEvent, data: CommentData, container: HTMLDivElement): void {
   container.remove();
-  const index = stateMap[data.idx].comments.findIndex((value: CommentData) => value.comment_id == data.comment_id);
+  const index = stateMap[data.idx].comments.findIndex(
+    (value: CommentData) => value.comment_id == data.comment_id
+  );
   stateMap[data.idx].comments.splice(index, 1);
   saveChanges(data.idx).catch(() => {
     return;

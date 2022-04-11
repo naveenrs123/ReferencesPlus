@@ -15,9 +15,19 @@ export function LeftButtons(idx: number): HTMLDivElement {
   closeResetContainer.appendChild(close);
   closeResetContainer.appendChild(reset);
 
-  const comment: HTMLButtonElement = PlayerBtn("Comment", ButtonColor.Default, [waitForPlayerClass], true);
+  const comment: HTMLButtonElement = PlayerBtn(
+    "Comment",
+    ButtonColor.Default,
+    [waitForPlayerClass],
+    true
+  );
   comment.addEventListener("click", (event: MouseEvent) => handleComment(event, idx));
-  const copyAll: HTMLButtonElement = PlayerBtn("Copy All", ButtonColor.Default, [waitForSaveClass], true);
+  const copyAll: HTMLButtonElement = PlayerBtn(
+    "Copy All",
+    ButtonColor.Default,
+    [waitForSaveClass],
+    true
+  );
   copyAll.addEventListener("click", (event: MouseEvent) => handleCopyAll(event, idx));
 
   const commentContainer = document.createElement("div");

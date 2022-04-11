@@ -11,13 +11,12 @@ import { CommentR, processComment } from "../view-components/comments/comment-r"
 const matchesArr = window.location.href.match(constants.matchUrl);
 helpers.prDetails.userOrOrg = matchesArr[1];
 helpers.prDetails.repository = matchesArr[2];
-helpers.prDetails.prNumber = parseInt(matchesArr[3]);
 
 /**
  * Builds the contents of the player container for emulator interactions.
  * @param playerContainer The container to which the contents will be added.
  */
-function MainInterface(idx: number, isCodeComment = false): HTMLDivElement {
+function MainInterface(idx: number, isEvenlyPadded = false): HTMLDivElement {
   const closeResetSection: HTMLDivElement = LeftButtons(idx);
 
   // const mainMenu: HTMLDivElement = MainMenu();
@@ -45,7 +44,8 @@ function MainInterface(idx: number, isCodeComment = false): HTMLDivElement {
   label.innerText =
     "Double click on comments to copy them. Click on 'Copy All' to copy all comments.";
 
-  const container = utilComponents.InterfaceContainer(idx, isCodeComment);
+  const container = utilComponents.InterfaceContainer(idx, isEvenlyPadded, false);
+  container.addEventListener("click", (event: MouseEvent) => event.preventDefault());
   container.appendChild(player);
   container.appendChild(closeResetSection);
   container.appendChild(label);
@@ -108,7 +108,8 @@ function makeCodeEditableInterface(): void {
     const insertPoint = helpers.findAncestor(detailsParent, "js-line-comments");
     btn = utilComponents.ShowInterfaceBtn(detailsParent, idx);
 
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (event: MouseEvent) => {
+      event.preventDefault();
       const insertPoint = helpers.findAncestor(detailsParent, "js-line-comments");
       let mainInterface: Element = insertPoint.querySelector(`#refg-interface-container-${idx}`);
       if (mainInterface == undefined) {
@@ -176,7 +177,8 @@ function makeMainEditableInterface(): void {
   helpers.updateCounter();
   const btn = utilComponents.ShowInterfaceBtn(detailsParent, idx);
 
-  btn.addEventListener("click", () => {
+  btn.addEventListener("click", (event: MouseEvent) => {
+    event.preventDefault();
     const timelineActions = document.querySelector(".discussion-timeline-actions");
     let mainInterface = timelineActions.querySelector(`#refg-interface-container-${idx}`);
     if (mainInterface == undefined) {
@@ -226,6 +228,69 @@ function makeMainEditableInterface(): void {
   const timelineActions = document.querySelector(".discussion-timeline-actions");
   const issueCommentBox = document.getElementById("issue-comment-box") as HTMLDivElement;
   timelineActions.insertBefore(mainInterface, issueCommentBox);
+}
+
+function makeMakePRInterface(): void {
+  // retrieve button insertion point
+  const details: HTMLDetailsElement = document.querySelector(constants.makePrQuery);
+  const detailsParent = details.parentElement;
+
+  // Setup button to activate interface
+  const idx = helpers.counter;
+  helpers.updateCounter();
+  const btn = utilComponents.ShowInterfaceBtn(detailsParent, idx);
+
+  btn.addEventListener("click", (event: MouseEvent) => {
+    event.preventDefault();
+    const makePrContainer = document.querySelector(".js-slash-command-surface");
+    let mainInterface = makePrContainer.querySelector(`#refg-interface-container-${idx}`);
+    if (mainInterface == undefined) {
+      mainInterface = MainInterface(idx, true);
+      const commentForm = document.querySelector(".js-previewable-comment-form");
+      makePrContainer.insertBefore(mainInterface, commentForm);
+      helpers.stateMap[idx] = {
+        hasUnsavedChanges: false,
+        containerId: `refg-interface-container-${idx}`,
+        mainPlayer: null,
+        sessionDetails: null,
+        comments: [],
+        events: [],
+        nextCommentId: 0,
+      };
+    }
+
+    const hidden = mainInterface.classList.toggle("d-none");
+    helpers.stateMap[idx].active = !hidden;
+
+    if (hidden) {
+      mainInterface.classList.remove("refg-active");
+    } else {
+      mainInterface.classList.add("refg-active", "d-flex", "flex-column");
+      chrome.runtime.sendMessage<interfaces.ExtensionMessage>({
+        action: "[GITHUB] Ready to Receive",
+        source: "github_content",
+        idx: idx,
+      });
+    }
+  });
+
+  detailsParent.appendChild(btn);
+
+  helpers.stateMap[idx] = {
+    hasUnsavedChanges: false,
+    containerId: `refg-interface-container-${idx}`,
+    active: false,
+    mainPlayer: null,
+    sessionDetails: null,
+    comments: [],
+    events: [],
+    nextCommentId: 0,
+  };
+
+  const mainInterface = MainInterface(idx, true);
+  const makePrContainer = document.querySelector(".js-slash-command-surface");
+  const commentForm = document.querySelector(".js-previewable-comment-form");
+  makePrContainer.insertBefore(mainInterface, commentForm);
 }
 
 /**
@@ -306,7 +371,8 @@ function loadReferencedSessions(): void {
             const button = document.createElement("button");
             button.innerText = `View In Interface`;
             button.classList.add("m-2", "btn", "refg-view-interface");
-            button.addEventListener("click", () => {
+            button.addEventListener("click", (event: MouseEvent) => {
+              event.preventDefault();
               const idx = helpers.readOnlyInterfaces.findIndex(
                 (value: interfaces.ReadOnlyInterface) => {
                   return value.commentBody == commentBody;
@@ -420,7 +486,8 @@ function buildSplitArr(textContent: string, sessionCommentsArr: string[]): inter
 // Create the interface after a short delay.
 setTimeout(() => {
   makeReadonlyInterfaces();
-  makeMainEditableInterface();
+  if (document.querySelector(constants.mainCommentQuery)) makeMainEditableInterface();
+  if (document.querySelector(constants.makePrQuery)) makeMakePRInterface();
   makeCodeEditableInterface();
   loadReferencedSessions();
 }, 200);

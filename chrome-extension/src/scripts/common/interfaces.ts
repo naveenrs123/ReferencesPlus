@@ -84,7 +84,6 @@ export interface TabState {
 export interface PRDetails {
   userOrOrg: string;
   repository: string;
-  prNumber: number;
 }
 
 export interface SaveResponse {

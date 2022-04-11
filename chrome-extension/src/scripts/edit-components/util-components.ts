@@ -101,7 +101,7 @@ export function ShowInterfaceBtn(
  */
 export function InterfaceContainer(
   idx: number,
-  isCodeComment = false,
+  isEvenlyPadded = false,
   readOnly = false
 ): HTMLDivElement {
   const container = document.createElement("div");
@@ -110,7 +110,7 @@ export function InterfaceContainer(
   container.style.maxHeight = "1000px";
   container.style.margin = "10px 0px";
   container.style.zIndex = "20000";
-  if (isCodeComment) {
+  if (isEvenlyPadded) {
     container.style.padding = "10px";
   } else if (!readOnly) {
     container.style.padding = "0 0 0 56px";

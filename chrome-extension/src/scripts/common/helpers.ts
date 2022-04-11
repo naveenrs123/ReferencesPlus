@@ -16,7 +16,6 @@ export const readOnlyInterfaces: ReadOnlyInterface[] = [];
 export const prDetails: PRDetails = {
   userOrOrg: "",
   repository: "",
-  prNumber: -1,
 };
 export let counter = 0;
 export let commentId = 1;

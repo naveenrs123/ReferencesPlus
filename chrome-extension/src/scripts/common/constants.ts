@@ -7,12 +7,13 @@ export const unsavedCommentClass = "refg-unsaved-comment";
 // CSS Selector Queries
 export const codeCommentQuery = "markdown-toolbar[for*='new_inline_comment_discussion'] details";
 export const mainCommentQuery = "markdown-toolbar[for='new_comment_field'] details";
+export const makePrQuery = "markdown-toolbar[for='pull_request_body'] details";
 
 export const refSymbol = "%";
 export const refBegin = refSymbol + "[";
 export const refEnd = "]" + refSymbol;
 
-export const matchUrl = /https:\/\/github.com\/(.+)\/(.+)\/pull\/(\d+)/;
+export const matchUrl = /https:\/\/github.com\/(.+)\/(.+)\/(?:pull|compare)\/.*/;
 export const sessionMatchPattern =
   /(SESSION\[(\w+)\]_C\[(\d+)\]:)\s*\[(?:(?!SESSION\[(\w+)\]_C\[(\d+)\]:).)+\]/g;
 

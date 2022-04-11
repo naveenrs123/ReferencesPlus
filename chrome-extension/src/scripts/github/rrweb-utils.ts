@@ -25,7 +25,6 @@ function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer
  * @param event A mouse event corresponding to a click.
  */
 function handleIframeClick(event: MouseEvent, mainPlayer: rrwebPlayer): void {
-  event.preventDefault();
   event.stopPropagation();
   const mirror: Mirror = mainPlayer.getMirror();
   const targetId: number = mirror.getId(event.target as INode);
@@ -87,7 +86,6 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
 
   stateMap[idx].mainPlayer = null;
   const activeInterface = document.querySelector(".refg-active");
-  console.log(idx);
   const playerDiv: HTMLDivElement = activeInterface.querySelector(`#refg-github-player-${idx}`);
   playerDiv.innerHTML = "";
   const replayerOptions: RRwebPlayerOptions = generateReplayerOptions(playerDiv, events);

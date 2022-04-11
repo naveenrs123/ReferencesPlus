@@ -10,8 +10,8 @@ export function Comment(data: CommentData): HTMLDivElement {
   const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
   timestampLabel.innerText = convertMsToTime(timestamp);
   timestampLabel.classList.add("Link--muted");
-  timestampLabel.addEventListener("click", () => {
-    stateMap[data.idx].mainPlayer.goto(timestamp, false);
+  timestampLabel.addEventListener("click", (event: MouseEvent) => {
+        stateMap[data.idx].mainPlayer.goto(timestamp, false);
   });
 
   const topContainer = document.createElement("div");
@@ -48,7 +48,7 @@ export function Comment(data: CommentData): HTMLDivElement {
   container.style.width = "150px";
 
   save.addEventListener("click", (event: MouseEvent) => {
-    const nextCommentId = stateMap[data.idx].nextCommentId;
+        const nextCommentId = stateMap[data.idx].nextCommentId;
     if (data.comment_id == null) {
       stateMap[data.idx].nextCommentId++;
     }
@@ -71,7 +71,7 @@ export function Comment(data: CommentData): HTMLDivElement {
 }
 
 function handleDel(event: MouseEvent, container: HTMLDivElement): void {
-  container.remove();
+    container.remove();
 }
 
 function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentData): void {

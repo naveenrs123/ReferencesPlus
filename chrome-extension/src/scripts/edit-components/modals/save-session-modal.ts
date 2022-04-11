@@ -71,7 +71,8 @@ function handleSave(event: MouseEvent, idx: number): void {
     .then((data: CheckUniqueResponse) => {
       if (!data.isUnique && !stateMap[idx].allowOverwrite) {
         const errorMsg = document.getElementById(`refg-save-session-error-${idx}`);
-        errorMsg.innerText = "An existing document with this title has been detected, do you want to overwrite it?";
+        errorMsg.innerText =
+          "An existing document with this title has been detected, do you want to overwrite it?";
         errorMsg.classList.remove("d-none");
         stateMap[idx].allowOverwrite = true;
         return Promise.reject("Attempt to save again.");

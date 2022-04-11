@@ -1,7 +1,5 @@
+import { matchUrl } from "./common/constants";
 import { ExtensionMessage, GitHubTabState, TabState } from "./common/interfaces";
-
-// Regular expression for GitHub PRs URLs
-const matchUrl = /https:\/\/github.com\/.+\/.+\/pull\/\d+/;
 
 /**
  * Create the Context Menu items required for the extension.

@@ -7,7 +7,7 @@
     "service_worker": "background.js"
   },
   "permissions": ["storage", "identity", "tabs", "webNavigation", "contextMenus", "scripting"],
-  "host_permissions": ["https://*/*"],
+  "host_permissions": ["<all_urls>"],
   "action": {
     "default_icon": {
       "16": "static/favicon-16x16.png",

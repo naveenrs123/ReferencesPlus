@@ -56,9 +56,13 @@ function handleOK(event: MouseEvent, idx: number): void {
     if (elem.classList.contains(unsavedCommentClass)) return;
     elem.removeAttribute("aria-disabled");
   });
-  const sessionIdLabel: HTMLLabelElement = interfaceContainer.querySelector(`#refg-session-label-${idx}`);
+  const sessionIdLabel: HTMLLabelElement = interfaceContainer.querySelector(
+    `#refg-session-label-${idx}`
+  );
   sessionIdLabel.innerText = `Session ID: ${stateMap[idx].sessionDetails.id}`;
 
-  const sessionTitleLabel: HTMLLabelElement = interfaceContainer.querySelector(`#refg-session-title-${idx}`);
+  const sessionTitleLabel: HTMLLabelElement = interfaceContainer.querySelector(
+    `#refg-session-title-${idx}`
+  );
   sessionTitleLabel.innerText = stateMap[idx].sessionDetails.title;
 }
