@@ -100,7 +100,8 @@ def load_session(session_id):
 
         if doc is not None:
             return_doc = {
-                "events": doc["events"],
+                "events": None,
+                "stringEvents": doc["stringEvents"],
                 "sessionDetails": doc["sessionDetails"],
                 "comments": doc["comments"],
                 "nextCommentId": doc["nextCommentId"]

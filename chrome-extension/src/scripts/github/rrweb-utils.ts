@@ -148,7 +148,9 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
     }
   );
 
-  void saveChanges(idx);
+  saveChanges(idx).catch((err) => {
+    console.log(err);
+  });
 }
 
 export function injectReadOnlyPlayer(idx: number, sessionId: string): void {

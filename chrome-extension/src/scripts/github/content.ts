@@ -8,6 +8,7 @@ import * as utilComponents from "../edit-components/util-components";
 import { MainInterfaceR } from "../view-components/main-interface-r";
 import { CommentR, processComment } from "../view-components/comments/comment-r";
 import { color } from "./borders";
+import { eventWithTime } from "rrweb/typings/types";
 
 const matchesArr = window.location.href.match(constants.matchUrl);
 helpers.prDetails.userOrOrg = matchesArr[1];
@@ -375,6 +376,9 @@ function loadReferencedSessions(): void {
       for (const interfaceInfo of value) {
         if ("sessionDetails" in interfaceInfo) {
           helpers.loadedSessions[interfaceInfo.sessionDetails.id] = interfaceInfo;
+          helpers.loadedSessions[interfaceInfo.sessionDetails.id].events = JSON.parse(
+            interfaceInfo.stringEvents
+          ) as eventWithTime[];
         }
       }
 
@@ -443,7 +447,7 @@ function loadReferencedSessions(): void {
                   comment.style.setProperty("border", ` 3px solid ${color}`, "important");
                   setTimeout(() => {
                     comment.style.border = "";
-                  }, 2000);
+                  }, 2500);
                 }
                 commentContainer.appendChild(comment);
               }

@@ -3,7 +3,7 @@ import { ButtonColor, CommentData } from "../../common/interfaces";
 import { color } from "../../github/borders";
 import { SavedComment } from "./saved-comment";
 import { MiniPlayerBtn } from "../util-components";
-import { refSymbol } from "../../common/constants";
+import { refSymbol, waitForSaveClass } from "../../common/constants";
 
 export function Comment(data: CommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
@@ -11,7 +11,7 @@ export function Comment(data: CommentData): HTMLDivElement {
   timestampLabel.innerText = convertMsToTime(timestamp);
   timestampLabel.classList.add("Link--muted");
   timestampLabel.addEventListener("click", (event: MouseEvent) => {
-        stateMap[data.idx].mainPlayer.goto(timestamp, false);
+    stateMap[data.idx].mainPlayer.goto(timestamp, false);
   });
 
   const topContainer = document.createElement("div");
@@ -48,7 +48,7 @@ export function Comment(data: CommentData): HTMLDivElement {
   container.style.width = "150px";
 
   save.addEventListener("click", (event: MouseEvent) => {
-        const nextCommentId = stateMap[data.idx].nextCommentId;
+    const nextCommentId = stateMap[data.idx].nextCommentId;
     if (data.comment_id == null) {
       stateMap[data.idx].nextCommentId++;
     }
@@ -71,7 +71,7 @@ export function Comment(data: CommentData): HTMLDivElement {
 }
 
 function handleDel(event: MouseEvent, container: HTMLDivElement): void {
-    container.remove();
+  container.remove();
 }
 
 function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentData): void {
@@ -126,9 +126,11 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentD
   }
 
   saveChanges(data.idx)
-    .then(() => container.replaceWith(SavedComment(data)))
-    .catch(() => {
-      return;
+    .then(() => {
+      container.replaceWith(SavedComment(data));
+    })
+    .catch((err) => {
+      console.log(err);
     });
 }
 

@@ -167,7 +167,7 @@ export function saveChanges(idx: number): Promise<void> {
   });
 
   const stateCopy: CoreState = {
-    events: stateMap[idx].events,
+    stringEvents: JSON.stringify(stateMap[idx].events),
     sessionDetails: stateMap[idx].sessionDetails,
     comments: comments,
     nextCommentId: stateMap[idx].nextCommentId,

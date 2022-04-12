@@ -110,8 +110,8 @@ function handleDel(event: MouseEvent, data: CommentData, container: HTMLDivEleme
     (value: CommentData) => value.comment_id == data.comment_id
   );
   stateMap[data.idx].comments.splice(index, 1);
-  saveChanges(data.idx).catch(() => {
-    return;
+  saveChanges(data.idx).catch((err) => {
+    console.log(err);
   });
 }
 

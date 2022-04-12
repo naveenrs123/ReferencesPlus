@@ -45,6 +45,7 @@ export interface CommentData {
 
 export interface CoreState {
   events?: eventWithTime[];
+  stringEvents?: string;
   sessionDetails?: SessionDetails;
   comments?: CommentData[];
   nextCommentId?: number;
