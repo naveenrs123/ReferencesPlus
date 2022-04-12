@@ -1,5 +1,5 @@
 import rrwebPlayer, { RRwebPlayerOptions } from "rrweb-player";
-import { mouseOutBorders, mouseOverBorders } from "./borders";
+import { color, mouseOutBorders, mouseOverBorders } from "./borders";
 import { eventWithTime, Mirror } from "rrweb/typings/types";
 import { INode } from "rrweb-snapshot";
 import { refBegin, refEnd, waitForPlayerClass } from "../common/constants";
@@ -29,7 +29,22 @@ function handleIframeClick(event: MouseEvent, mainPlayer: rrwebPlayer): void {
   event.stopPropagation();
   const mirror: Mirror = mainPlayer.getMirror();
   const targetId: number = mirror.getId(event.target as INode);
-  void navigator.clipboard.writeText(refBegin + targetId.toString() + refEnd);
+  navigator.clipboard
+    .writeText(refBegin + targetId.toString() + refEnd)
+    .then(() => {
+      const target = event.target as HTMLElement;
+      const border = target.style.border;
+      const outline = target.style.outline;
+      target.style.setProperty("border", `3px solid #299b03`, "important");
+      target.style.setProperty("outline", `3px solid #299b03`, "important");
+      setTimeout(() => {
+        target.style.border = "";
+        target.style.outline = "";
+      }, 500);
+    })
+    .catch(() => {
+      return;
+    });
 }
 
 export function disableInteractions(mainPlayer: rrwebPlayer): void {
@@ -122,10 +137,10 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
       if (updateCount % 3 != 0) return;
       for (const comment of stateMap[idx].comments) {
         const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
-        const bound = Math.abs(timestamp - state.payload) < 500;
+        const bound = Math.abs(timestamp - state.payload) < 750;
         const commentContainer = findAncestor(comment.contents, "refg-comment");
         if (bound) {
-          commentContainer.style.setProperty("border", "3px solid red", "important");
+          commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
         } else {
           commentContainer.style.border = "";
         }
@@ -163,6 +178,10 @@ export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
   readOnlyInterfaces[index].mainPlayer.addEventListener(
     "ui-update-player-state",
     (state: { payload: string }) => {
+      for (const comment of readOnlyInterfaces[index].comments) {
+        const commentContainer = findAncestor(comment.contents, "refg-comment");
+        commentContainer.style.border = "";
+      }
       onPlayerStateChange(state, readOnlyInterfaces[index].mainPlayer);
     }
   );
@@ -174,10 +193,10 @@ export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
       if (updateCount % 3 != 0) return;
       for (const comment of readOnlyInterfaces[index].comments) {
         const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
-        const bound = Math.abs(timestamp - state.payload) < 500;
+        const bound = Math.abs(timestamp - state.payload) < 750;
         const commentContainer = findAncestor(comment.contents, "refg-comment");
         if (bound) {
-          commentContainer.style.setProperty("border", "3px solid red", "important");
+          commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
         } else {
           commentContainer.style.border = "";
         }

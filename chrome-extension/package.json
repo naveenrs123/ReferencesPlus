@@ -12,8 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@primer/css": "^19.0.0",
-    "@primer/primitives": "^7.1.0",
     "@types/chrome": "^0.0.177",
     "buffer": "^6.0.3",
     "rrweb": "^1.1.1",
@@ -22,6 +20,7 @@
     "ts-ebml": "^2.0.2"
   },
   "devDependencies": {
+    "@primer/octicons": "^17.0.0",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
     "clean-webpack-plugin": "^4.0.0",

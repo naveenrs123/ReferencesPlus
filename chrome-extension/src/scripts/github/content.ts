@@ -7,6 +7,7 @@ import * as helpers from "../common/helpers";
 import * as utilComponents from "../edit-components/util-components";
 import { MainInterfaceR } from "../view-components/main-interface-r";
 import { CommentR, processComment } from "../view-components/comments/comment-r";
+import { color } from "./borders";
 
 const matchesArr = window.location.href.match(constants.matchUrl);
 helpers.prDetails.userOrOrg = matchesArr[1];
@@ -80,7 +81,7 @@ function makeReadonlyInterfaces(): void {
 
     const parent = elem.parentNode;
     const firstChild = parent.firstChild;
-    parent.insertBefore(mainInterface, firstChild);
+    parent.appendChild(mainInterface);
     helpers.readOnlyInterfaces.push({
       commentBody: elem,
       githubCommentId: idx,
@@ -394,7 +395,7 @@ function loadReferencedSessions(): void {
             }
 
             const button = document.createElement("button");
-            button.innerText = `View In Interface`;
+            button.innerText = `View Context`;
             button.classList.add("m-2", "btn", "refg-view-interface");
             button.addEventListener("click", (event: MouseEvent) => {
               event.preventDefault();
@@ -439,16 +440,21 @@ function loadReferencedSessions(): void {
                 processComment(data, idx);
                 const comment = CommentR(data);
                 if (data.comment_id == commentId) {
-                  comment.style.setProperty("border", "3px solid red", "important");
+                  comment.style.setProperty("border", ` 3px solid ${color}`, "important");
                   setTimeout(() => {
                     comment.style.border = "";
                   }, 2000);
                 }
                 commentContainer.appendChild(comment);
               }
+
+              const commentTimestamp =
+                helpers.readOnlyInterfaces[idx].comments[commentId].timestamp;
+              const timestamp = commentTimestamp <= 50 ? 50 : commentTimestamp;
+              helpers.readOnlyInterfaces[idx].mainPlayer.goto(timestamp, false);
             });
             nodes.push(button);
-          /* } else if (/^(\r\n|\n|\r)$/gm.test(tag.text)) {
+            /* } else if (/^(\r\n|\n|\r)$/gm.test(tag.text)) {
             nodes.push(document.createElement("br")); */
           } else {
             nodes.push(document.createTextNode(tag.text));

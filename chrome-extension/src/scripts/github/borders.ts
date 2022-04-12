@@ -1,5 +1,6 @@
 let borderTmt: NodeJS.Timeout;
 let border: string;
+let outline: string;
 
 export const color = "red";
 
@@ -10,7 +11,9 @@ export const color = "red";
 export function borderActions(event: MouseEvent): void {
   const target = event.target as HTMLElement;
   border = target.style.border;
+  outline = target.style.outline;
   target.style.setProperty("border", `3px solid ${color}`, "important");
+  target.style.setProperty("outline", `3px solid ${color}`, "important");
 }
 
 /**
@@ -20,7 +23,8 @@ export function borderActions(event: MouseEvent): void {
 export function mouseOutBorders(event: MouseEvent): void {
   clearTimeout(borderTmt);
   const target = event.target as HTMLElement;
-  target.style.border = border;
+  target.style.border = border == `3px solid #299b03` ? "" : border;
+  target.style.outline = outline == `3px solid #299b03` ? "" : outline;
 }
 
 /**

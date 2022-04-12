@@ -31,6 +31,8 @@
     ],
     "@typescript-eslint/explicit-function-return-type": [
       "error"
-    ]
-  }
+    ],
+    "@typescript-eslint/no-unsafe-assignment": "warn"
+  },
+  "ignorePatterns": "webpack"
 }

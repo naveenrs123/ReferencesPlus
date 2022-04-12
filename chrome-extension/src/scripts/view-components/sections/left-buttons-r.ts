@@ -11,7 +11,7 @@ export function LeftButtonsR(idx: number): HTMLDivElement {
   commentContainer.appendChild(copyAll);
 
   const leftButtonsContainer = document.createElement("div");
-  leftButtonsContainer.classList.add("d-flex", "flex-justify-between");
+  leftButtonsContainer.classList.add("d-flex", "flex-justify-center", "mt-2");
   leftButtonsContainer.appendChild(commentContainer);
 
   return leftButtonsContainer;

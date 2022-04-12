@@ -36,7 +36,7 @@ export function LeftButtons(idx: number): HTMLDivElement {
   commentContainer.appendChild(copyAll);
 
   const leftButtonsContainer = document.createElement("div");
-  leftButtonsContainer.classList.add("d-flex", "flex-justify-between");
+  leftButtonsContainer.classList.add("d-flex", "flex-justify-between", "mt-2");
   leftButtonsContainer.appendChild(closeResetContainer);
   leftButtonsContainer.appendChild(commentContainer);
 

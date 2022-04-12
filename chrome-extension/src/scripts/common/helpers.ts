@@ -130,14 +130,14 @@ function padToNDigits(num: number, digits = 2): string {
 }
 
 export function convertMsToTime(milliseconds: number): string {
-  const ms = Math.floor(milliseconds % 1000);
+  //const ms = Math.floor(milliseconds % 1000);
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
 
   seconds = seconds % 60;
   minutes = minutes % 60;
 
-  return `${padToNDigits(minutes)}:${padToNDigits(seconds)}:${padToNDigits(ms, 3)}`;
+  return `${padToNDigits(minutes)}:${padToNDigits(seconds)}`;
 }
 
 export function updateCounter(): void {

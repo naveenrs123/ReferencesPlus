@@ -92,9 +92,12 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentD
         const focusedNode = stateMap[data.idx].mainPlayer.getMirror().getNode(nodeId) as unknown;
         const focusedElem: HTMLElement = focusedNode as HTMLElement;
         const border = focusedElem.style.border;
+        const outline = focusedElem.style.outline;
         focusedElem.style.setProperty("border", `3px solid ${color}`, "important");
+        focusedElem.style.setProperty("outline", `3px solid ${color}`, "important");
         setTimeout(() => {
           focusedElem.style.border = border;
+          focusedElem.style.outline = outline;
         }, 3000);
       });
     }
