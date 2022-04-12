@@ -116,7 +116,7 @@ function handleCopyAll(event: MouseEvent, idx: number): void {
       commentInfo.innerText = "All comments copied!";
       setTimeout(() => {
         commentInfo.innerText = oldText;
-      }, 1000);
+      }, 1500);
     })
     .catch(() => {
       return;

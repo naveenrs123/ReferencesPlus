@@ -64,25 +64,194 @@ function MainInterface(idx: number, isEvenlyPadded = false): HTMLDivElement {
   container.classList.add("d-flex", "flex-justify-between");
   return container;
 } */
+function findSessions(
+  elem: Node,
+  sessionIds: Set<string>,
+  sessionToCommentMap: interfaces.SessionToCommentMap,
+  textNodes: interfaces.TextWithSessions[]
+): void {
+  if (elem.nodeName == "#text") {
+    const matches: IterableIterator<RegExpMatchArray> = elem.textContent.matchAll(
+      constants.sessionMatchPattern
+    );
+    const sessionCommentsArr: string[] = [];
+    for (const match of matches) {
+      const sessionId: string = match[2];
+      const commentId: number = parseInt(match[3]);
+      sessionIds.add(sessionId);
+      sessionToCommentMap[match[1]] = { sessionId: sessionId, commentId: commentId };
+      sessionCommentsArr.push(match[1]);
+    }
+    if (sessionCommentsArr.length == 0) return;
+    textNodes.push({
+      textNode: elem,
+      parentElem: elem.parentElement,
+      sessionCommentsArr: sessionCommentsArr,
+    });
+  } else {
+    elem.childNodes.forEach((child: Node) =>
+      findSessions(child as HTMLElement, sessionIds, sessionToCommentMap, textNodes)
+    );
+  }
+}
+
+function buildSplitArr(textContent: string, sessionCommentsArr: string[]): interfaces.TaggedText[] {
+  const splitArray: interfaces.TaggedText[] = [];
+
+  let modified = textContent;
+  sessionCommentsArr.forEach((str: string) => {
+    const splits: string[] = modified.split(str, 2);
+    if (splits[0].length > 0) {
+      splitArray.push({ text: splits[0], isSessionString: false });
+    }
+    modified = splits[1];
+    splitArray.push({ text: str, isSessionString: true });
+  });
+  splitArray.push({ text: modified, isSessionString: false });
+  return splitArray;
+}
+
+function loadReferencedSessions(commentBody?: HTMLElement, idx?: number): void {
+  const sessionIds: Set<string> = new Set();
+  const sessionToCommentMap: interfaces.SessionToCommentMap = {};
+  const textNodes: interfaces.TextWithSessions[] = [];
+  findSessions(commentBody, sessionIds, sessionToCommentMap, textNodes);
+
+  const promiseArray: Promise<Response>[] = [];
+  sessionIds.forEach((sessionId: string) => {
+    promiseArray.push(
+      fetch(`${constants.getFetchUrl()}/loadSession/${sessionId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(helpers.prDetails),
+      })
+    );
+  });
+
+  Promise.all(promiseArray)
+    .then((resArray: Response[]) => {
+      return Promise.all(resArray.map((res: Response) => res.json()));
+    })
+    .then((value: interfaces.CoreState[]) => {
+      for (const interfaceInfo of value) {
+        if ("sessionDetails" in interfaceInfo) {
+          helpers.loadedSessions[interfaceInfo.sessionDetails.id] = interfaceInfo;
+          helpers.loadedSessions[interfaceInfo.sessionDetails.id].events = JSON.parse(
+            interfaceInfo.stringEvents
+          ) as eventWithTime[];
+        }
+      }
+
+      console.log(textNodes);
+      for (const info of textNodes) {
+        const { textNode, parentElem, sessionCommentsArr }: interfaces.TextWithSessions = info;
+        const commentBody = helpers.findAncestor(parentElem, "js-comment-body");
+        const taggedText = buildSplitArr(textNode.textContent, sessionCommentsArr);
+        const nodes: Node[] = [];
+
+        taggedText.forEach((tag: interfaces.TaggedText) => {
+          if (tag.isSessionString) {
+            const { sessionId, commentId } = sessionToCommentMap[tag.text];
+
+            if (!(sessionId in helpers.loadedSessions)) {
+              nodes.push(document.createTextNode(tag.text));
+              return;
+            }
+
+            const button = document.createElement("button");
+            button.innerText = `View Context`;
+            button.classList.remove("btn-primary");
+            button.classList.add("m-2", "btn", "refg-view-interface");
+            button.addEventListener("click", (event: MouseEvent) => {
+              event.preventDefault();
+
+              const interfaceContainer = commentBody.parentElement.querySelector(
+                `#refg-interface-container-r-${helpers.readOnlyInterfaces[idx].githubCommentId}`
+              );
+
+              let active = false;
+              commentBody
+                .querySelectorAll(".refg-view-interface")
+                .forEach((btn: HTMLButtonElement) => {
+                  if (btn == button) {
+                    active = btn.classList.toggle("btn-primary");
+                  } else {
+                    btn.classList.remove("btn-primary");
+                  }
+                });
+
+              if (active) {
+                interfaceContainer.classList.remove("d-none");
+                interfaceContainer.classList.add("d-flex", "flex-column");
+              } else {
+                interfaceContainer.classList.add("d-none");
+              }
+
+              window.getSelection().removeAllRanges();
+
+              injectReadOnlyPlayer(helpers.readOnlyInterfaces[idx].githubCommentId, sessionId);
+
+              const commentTimestamp =
+                helpers.readOnlyInterfaces[idx].comments[commentId].timestamp;
+              const timestamp = commentTimestamp <= 50 ? 50 : commentTimestamp;
+              helpers.readOnlyInterfaces[idx].mainPlayer.goto(timestamp, false);
+
+              const commentContainer = document.getElementById(
+                `refg-comments-r-${helpers.readOnlyInterfaces[idx].githubCommentId}`
+              );
+              commentContainer.innerHTML = "";
+
+              for (const data of helpers.readOnlyInterfaces[idx].comments) {
+                processComment(data, idx);
+                const comment = CommentR(data);
+                if (data.comment_id == commentId) {
+                  comment.style.setProperty("border", ` 3px solid green`, "important");
+                  setTimeout(() => {
+                    comment.style.border = "";
+                  }, 4000);
+                }
+                commentContainer.appendChild(comment);
+              }
+            });
+            nodes.push(button);
+          } else {
+            nodes.push(document.createTextNode(tag.text));
+          }
+        });
+
+        const textElement = textNode as Element;
+        textElement.replaceWith(...nodes);
+      }
+    })
+    .catch(() => {
+      return;
+    });
+}
 
 function makeReadonlyInterfaces(): void {
-  document.querySelectorAll(".js-comment-body").forEach((elem: HTMLElement) => {
+  document.querySelectorAll('[class*="js-comment-body"]').forEach((elem: HTMLElement) => {
     const interfaceIndex = helpers.readOnlyInterfaces.findIndex(
       (value: interfaces.ReadOnlyInterface) => {
         return value.commentBody == elem;
       }
     );
 
-    if (interfaceIndex > -1) return;
+    if (interfaceIndex > -1) helpers.readOnlyInterfaces.splice(interfaceIndex, 1);
 
     const idx = helpers.counter;
-    const mainInterface = MainInterfaceR(idx);
-    mainInterface.classList.add("d-none");
-    helpers.updateCounter();
+    let mainInterface = elem.parentNode.querySelector(`[id^=refg-interface-container-r]`);
+    if (!mainInterface) {
+      mainInterface = MainInterfaceR(idx);
+      mainInterface.classList.add("d-none");
+      helpers.updateCounter();
 
-    const parent = elem.parentNode;
-    const firstChild = parent.firstChild;
-    parent.appendChild(mainInterface);
+      const parent = elem.parentNode;
+      parent.appendChild(mainInterface);
+    } else {
+      mainInterface.replaceWith(MainInterfaceR(idx));
+    }
     helpers.readOnlyInterfaces.push({
       commentBody: elem,
       githubCommentId: idx,
@@ -92,6 +261,8 @@ function makeReadonlyInterfaces(): void {
       nextCommentId: 0,
       mainPlayer: null,
     });
+
+    loadReferencedSessions(elem, idx);
   });
 }
 
@@ -328,6 +499,7 @@ chrome.runtime.onMessage.addListener((m: interfaces.ExtensionMessage) => {
 });
 
 window.addEventListener("click", (event: MouseEvent) => {
+  event.stopPropagation();
   const target = event.target as HTMLElement;
   if (target.tagName == "BUTTON" && target.classList.contains("review-thread-reply-button")) {
     makeCodeEditableInterface();
@@ -337,191 +509,10 @@ window.addEventListener("click", (event: MouseEvent) => {
   } else if (target.tagName == "BUTTON" && target.textContent.toLowerCase().includes("comment")) {
     setTimeout(() => {
       makeReadonlyInterfaces();
-      loadReferencedSessions();
-    }, 2000);
+    }, 1000);
   }
 });
 
-const sessionIds: Set<string> = new Set();
-let sessionToCommentMap: interfaces.SessionToCommentMap = {};
-let textNodes: interfaces.TextWithSessions[] = [];
-
-function loadReferencedSessions(): void {
-  sessionIds.clear();
-  sessionToCommentMap = {};
-  textNodes = [];
-
-  document.querySelectorAll(".comment-body").forEach((body: HTMLElement) => {
-    findSessions(body);
-  });
-
-  const promiseArray: Promise<Response>[] = [];
-  sessionIds.forEach((sessionId: string) => {
-    promiseArray.push(
-      fetch(`${constants.getFetchUrl()}/loadSession/${sessionId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(helpers.prDetails),
-      })
-    );
-  });
-
-  Promise.all(promiseArray)
-    .then((resArray: Response[]) => {
-      return Promise.all(resArray.map((res: Response) => res.json()));
-    })
-    .then((value: interfaces.CoreState[]) => {
-      for (const interfaceInfo of value) {
-        if ("sessionDetails" in interfaceInfo) {
-          helpers.loadedSessions[interfaceInfo.sessionDetails.id] = interfaceInfo;
-          helpers.loadedSessions[interfaceInfo.sessionDetails.id].events = JSON.parse(
-            interfaceInfo.stringEvents
-          ) as eventWithTime[];
-        }
-      }
-
-      const parents: HTMLElement[] = [];
-      for (const info of textNodes) {
-        const { textNode, parentElem, sessionCommentsArr }: interfaces.TextWithSessions = info;
-        const commentBody = helpers.findAncestor(parentElem, "js-comment-body");
-        const taggedText = buildSplitArr(textNode.textContent, sessionCommentsArr);
-        const nodes: Node[] = [];
-
-        taggedText.forEach((tag: interfaces.TaggedText) => {
-          if (tag.isSessionString) {
-            const { sessionId, commentId } = sessionToCommentMap[tag.text];
-
-            if (!(sessionId in helpers.loadedSessions)) {
-              nodes.push(document.createTextNode(tag.text));
-              return;
-            }
-
-            const button = document.createElement("button");
-            button.innerText = `View Context`;
-            button.classList.add("m-2", "btn", "refg-view-interface");
-            button.addEventListener("click", (event: MouseEvent) => {
-              event.preventDefault();
-              const idx = helpers.readOnlyInterfaces.findIndex(
-                (value: interfaces.ReadOnlyInterface) => {
-                  return value.commentBody == commentBody;
-                }
-              );
-
-              const interfaceContainer = commentBody.parentElement.querySelector(
-                `#refg-interface-container-r-${helpers.readOnlyInterfaces[idx].githubCommentId}`
-              );
-
-              //let hidden = false;
-              let active = false;
-              commentBody
-                .querySelectorAll(".refg-view-interface")
-                .forEach((btn: HTMLButtonElement) => {
-                  if (btn == button) {
-                    active = btn.classList.toggle("btn-primary");
-                  } else {
-                    btn.classList.remove("btn-primary");
-                  }
-                });
-
-              if (active) {
-                interfaceContainer.classList.remove("d-none");
-                interfaceContainer.classList.add("d-flex", "flex-column");
-              } else {
-                interfaceContainer.classList.add("d-none");
-              }
-
-              window.getSelection().removeAllRanges();
-
-              injectReadOnlyPlayer(helpers.readOnlyInterfaces[idx].githubCommentId, sessionId);
-
-              const commentContainer = document.getElementById(
-                `refg-comments-r-${helpers.readOnlyInterfaces[idx].githubCommentId}`
-              );
-              commentContainer.innerHTML = "";
-              for (const data of helpers.readOnlyInterfaces[idx].comments) {
-                processComment(data, idx);
-                const comment = CommentR(data);
-                if (data.comment_id == commentId) {
-                  comment.style.setProperty("border", ` 3px solid ${color}`, "important");
-                  setTimeout(() => {
-                    comment.style.border = "";
-                  }, 2500);
-                }
-                commentContainer.appendChild(comment);
-              }
-
-              const commentTimestamp =
-                helpers.readOnlyInterfaces[idx].comments[commentId].timestamp;
-              const timestamp = commentTimestamp <= 50 ? 50 : commentTimestamp;
-              helpers.readOnlyInterfaces[idx].mainPlayer.goto(timestamp, false);
-            });
-            nodes.push(button);
-            /* } else if (/^(\r\n|\n|\r)$/gm.test(tag.text)) {
-            nodes.push(document.createElement("br")); */
-          } else {
-            nodes.push(document.createTextNode(tag.text));
-          }
-        });
-
-        /* if (parents.includes(parentElem)) {
-          parentElem.append(...nodes);
-        } else {
-          parentElem.replaceChildren(...nodes)
-          parents.push(parentElem);
-        } */
-        const textElement = textNode as Element;
-        textElement.replaceWith(...nodes);
-      }
-    })
-    .catch(() => {
-      return;
-    });
-}
-
-function findSessions(elem: Node): void {
-  if (elem.nodeName == "#text") {
-    const matches: IterableIterator<RegExpMatchArray> = elem.textContent.matchAll(
-      constants.sessionMatchPattern
-    );
-    const sessionCommentsArr: string[] = [];
-    for (const match of matches) {
-      const sessionId: string = match[2];
-      const commentId: number = parseInt(match[3]);
-      sessionIds.add(sessionId);
-      sessionToCommentMap[match[1]] = { sessionId: sessionId, commentId: commentId };
-      sessionCommentsArr.push(match[1]);
-    }
-    if (sessionCommentsArr.length == 0) return;
-    textNodes.push({
-      textNode: elem,
-      parentElem: elem.parentElement,
-      sessionCommentsArr: sessionCommentsArr,
-    });
-  } else {
-    elem.childNodes.forEach((child: Node) => findSessions(child as HTMLElement));
-  }
-}
-
-function buildSplitArr(textContent: string, sessionCommentsArr: string[]): interfaces.TaggedText[] {
-  const splitArray: interfaces.TaggedText[] = [];
-
-  let modified = textContent;
-  sessionCommentsArr.forEach((str: string) => {
-    const splits: string[] = modified.split(str, 2);
-    if (splits[0].length > 0) {
-      splitArray.push({ text: splits[0], isSessionString: false });
-    }
-    modified = splits[1];
-    splitArray.push({ text: str, isSessionString: true });
-  });
-  splitArray.push({ text: modified, isSessionString: false });
-  console.log(splitArray);
-  return splitArray;
-}
-
-// Create the interface after a short delay.
 setTimeout(() => {
   makeReadonlyInterfaces();
   if (document.querySelector(constants.mainCommentQuery)) makeMainEditableInterface();
@@ -531,7 +522,7 @@ setTimeout(() => {
   ) {
     makePRCodeInterface();
   }
-
   makeCodeEditableInterface();
-  loadReferencedSessions();
-}, 200);
+}, 500);
+
+// Create the interface after a short delay.

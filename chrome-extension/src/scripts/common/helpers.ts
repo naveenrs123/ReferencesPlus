@@ -10,9 +10,22 @@ import {
   CommentData,
 } from "./interfaces";
 
-export const stateMap: EditableInterfacesMap = {};
-export const loadedSessions: LoadedSessions = {};
-export const readOnlyInterfaces: ReadOnlyInterface[] = [];
+export let stateMap: EditableInterfacesMap = {};
+export let loadedSessions: LoadedSessions = {};
+export let readOnlyInterfaces: ReadOnlyInterface[] = [];
+
+export function clearReadOnlyInterfaces(): void {
+  readOnlyInterfaces = [];
+}
+
+export function clearLoadedSessions(): void {
+  loadedSessions = {};
+}
+
+export function clearStateMap(): void {
+  stateMap = {};
+}
+
 export const prDetails: PRDetails = {
   userOrOrg: "",
   repository: "",

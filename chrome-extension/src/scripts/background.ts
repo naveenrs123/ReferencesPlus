@@ -25,34 +25,35 @@ function createContextMenuItems(): void {
  */
 chrome.tabs.onUpdated.addListener(
   (tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-    if (changeInfo.status !== "complete") return;
-    if (matchUrl.test(tab.url)) {
-      chrome.scripting
-        .executeScript({
-          target: { tabId: tabId },
-          files: ["vendors-content.js", "content.js"],
-        })
-        .then(() => {
-          return chrome.scripting.insertCSS({
+    if (changeInfo.status == "complete") {
+      if (matchUrl.test(tab.url)) {
+        chrome.scripting
+          .executeScript({
             target: { tabId: tabId },
-            files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
+            files: ["vendors-content.js", "content.js"],
+          })
+          .then(() => {
+            return chrome.scripting.insertCSS({
+              target: { tabId: tabId },
+              files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
+            });
+          })
+          .then(() => {
+            void chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              files: ["vendors-recorder.js", "recorder.js"],
+            });
+          })
+          .catch(() => {
+            return;
           });
-        })
-        .then(() => {
-          void chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ["vendors-recorder.js", "recorder.js"],
-          });
-        })
-        .catch(() => {
-          return;
+      } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(tab.url)) {
+        // Don't insert into internal pages.
+        void chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["vendors-recorder.js", "recorder.js"],
         });
-    } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(tab.url)) {
-      // Don't insert into internal pages.
-      void chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ["vendors-recorder.js", "recorder.js"],
-      });
+      }
     }
   }
 );
@@ -83,7 +84,6 @@ chrome.contextMenus.onClicked.addListener(
 chrome.runtime.onMessage.addListener(
   (m: ExtensionMessage, sender: chrome.runtime.MessageSender) => {
     if (m.action == "recording stopped" && m.source == "content") {
-      // replace with popupTabId for popup implementation.
       chrome.storage.local.get(["state"], ({ state }: { state: TabState }) => {
         chrome.tabs.sendMessage<ExtensionMessage>(state.tabId, {
           action: "[GITHUB] Send Log",

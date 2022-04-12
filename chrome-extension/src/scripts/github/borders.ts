@@ -23,8 +23,10 @@ export function borderActions(event: MouseEvent): void {
 export function mouseOutBorders(event: MouseEvent): void {
   clearTimeout(borderTmt);
   const target = event.target as HTMLElement;
-  target.style.border = border == `3px solid #299b03` ? "" : border;
-  target.style.outline = outline == `3px solid #299b03` ? "" : outline;
+  target.style.border = border;
+  target.style.outline = outline;
+  border = "";
+  outline = "";
 }
 
 /**

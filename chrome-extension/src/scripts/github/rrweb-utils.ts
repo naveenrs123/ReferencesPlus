@@ -180,10 +180,6 @@ export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
   readOnlyInterfaces[index].mainPlayer.addEventListener(
     "ui-update-player-state",
     (state: { payload: string }) => {
-      for (const comment of readOnlyInterfaces[index].comments) {
-        const commentContainer = findAncestor(comment.contents, "refg-comment");
-        commentContainer.style.border = "";
-      }
       onPlayerStateChange(state, readOnlyInterfaces[index].mainPlayer);
     }
   );
@@ -197,7 +193,9 @@ export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
         const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
         const bound = Math.abs(timestamp - state.payload) < 750;
         const commentContainer = findAncestor(comment.contents, "refg-comment");
-        if (bound) {
+        if (commentContainer.style.border == "3px solid green") {
+          continue;
+        } else if (bound) {
           commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
         } else {
           commentContainer.style.border = "";
