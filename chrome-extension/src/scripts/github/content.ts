@@ -162,7 +162,6 @@ function loadReferencedSessions(commentBody?: HTMLElement, idx?: number): void {
 
             const button = document.createElement("button");
             button.innerText = `View Context`;
-            button.classList.remove("btn-primary");
             button.classList.add("m-2", "btn", "refg-view-interface");
             button.addEventListener("click", (event: MouseEvent) => {
               event.preventDefault();
