@@ -99,9 +99,10 @@ export function generateReplayerOptions(
 }
 
 export function injectMainPlayer(events: eventWithTime[], idx: number, website: string): void {
-  if (!stateMap[idx].active) return; // cannot inject if player is not active.
+  const state = stateMap[idx];
+  if (!state.active) return; // cannot inject if player is not active.
 
-  stateMap[idx].mainPlayer = null;
+  state.mainPlayer = null;
   const activeInterface = document.querySelector(".refg-active");
   const playerDiv: HTMLDivElement = activeInterface.querySelector(`#refg-github-player-${idx}`);
   playerDiv.classList.remove("text-center", "p-2");
@@ -116,38 +117,32 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
   const commentInfo = activeInterface.querySelector(`#refg-comment-info-${idx}`);
   commentInfo.classList.remove("d-none");
 
-  stateMap[idx].events = events;
-  stateMap[idx].hasUnsavedChanges = true;
-  stateMap[idx].sessionDetails = {
+  state.events = events;
+  state.hasUnsavedChanges = true;
+  state.sessionDetails = {
     title: "",
     website: website,
     id: "",
   };
-  stateMap[idx].mainPlayer = new rrwebPlayer(replayerOptions);
-  stateMap[idx].mainPlayer.addEventListener(
-    "ui-update-player-state",
-    (state: { payload: string }) => {
-      onPlayerStateChange(state, stateMap[idx].mainPlayer);
-    }
-  );
+  state.mainPlayer = new rrwebPlayer(replayerOptions);
+  state.mainPlayer.addEventListener("ui-update-player-state", (playerState: { payload: string }) => {
+    onPlayerStateChange(playerState, state.mainPlayer);
+  });
 
   const updateCount = 0;
-  stateMap[idx].mainPlayer.addEventListener(
-    "ui-update-current-time",
-    (state: { payload: number }) => {
-      if (updateCount % 3 != 0) return;
-      for (const comment of stateMap[idx].comments) {
-        const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
-        const bound = Math.abs(timestamp - state.payload) < 750;
-        const commentContainer = findAncestor(comment.contents, "refg-comment");
-        if (bound) {
-          commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
-        } else {
-          commentContainer.style.border = "";
-        }
+  state.mainPlayer.addEventListener("ui-update-current-time", (playerState: { payload: number }) => {
+    if (updateCount % 3 != 0) return;
+    for (const comment of state.comments) {
+      const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
+      const bound = Math.abs(timestamp - playerState.payload) < 750;
+      const commentContainer = findAncestor(comment.contents, "refg-comment");
+      if (bound) {
+        commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
+      } else {
+        commentContainer.style.border = "";
       }
     }
-  );
+  });
 
   saveChanges(idx)
     .then((saveRes: SaveResponse) => {
@@ -177,35 +172,31 @@ export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
     loadedSession.events
   );
 
-  readOnlyInterfaces[index].events = loadedSession.events;
-  readOnlyInterfaces[index].sessionDetails = loadedSession.sessionDetails;
-  readOnlyInterfaces[index].comments = loadedSession.comments;
-  readOnlyInterfaces[index].nextCommentId = loadedSession.nextCommentId;
-  readOnlyInterfaces[index].mainPlayer = new rrwebPlayer(replayerOptions);
-  readOnlyInterfaces[index].mainPlayer.addEventListener(
-    "ui-update-player-state",
-    (state: { payload: string }) => {
-      onPlayerStateChange(state, readOnlyInterfaces[index].mainPlayer);
-    }
-  );
+  const state = readOnlyInterfaces[index];
+  state.events = loadedSession.events;
+  state.sessionDetails = loadedSession.sessionDetails;
+  state.comments = loadedSession.comments;
+  state.nextCommentId = loadedSession.nextCommentId;
+  state.mainPlayer = new rrwebPlayer(replayerOptions);
+  state.mainPlayer.addEventListener("ui-update-player-state", (playerState: { payload: string }) => {
+    onPlayerStateChange(playerState, state.mainPlayer);
+  });
 
   const updateCount = 0;
-  readOnlyInterfaces[index].mainPlayer.addEventListener(
-    "ui-update-current-time",
-    (state: { payload: number }) => {
-      if (updateCount % 3 != 0) return;
-      for (const comment of readOnlyInterfaces[index].comments) {
-        const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
-        const bound = Math.abs(timestamp - state.payload) < 750;
-        const commentContainer = findAncestor(comment.contents, "refg-comment");
-        if (commentContainer.style.border == "3px solid green") {
-          continue;
-        } else if (bound) {
-          commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
-        } else {
-          commentContainer.style.border = "";
-        }
+  state.mainPlayer.addEventListener("ui-update-current-time", (playerState: { payload: number }) => {
+    if (updateCount % 3 != 0) return;
+
+    for (const comment of state.comments) {
+      const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
+      const bound = Math.abs(timestamp - playerState.payload) < 1000;
+      const commentContainer = findAncestor(comment.contents, "refg-comment");
+      if (commentContainer.style.border == "3px solid green") {
+        continue;
+      } else if (bound) {
+        commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
+      } else {
+        commentContainer.style.border = "";
       }
     }
-  );
+  });
 }
