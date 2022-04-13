@@ -36,23 +36,24 @@ window.addEventListener("click", (event: MouseEvent) => {
     setTimeout(() => {
       makeReadonlyInterfaces();
     }, 1500);
-  } else if (window.location.href != url) {
+  }/*  else if (window.location.href != url) {
     url = window.location.href;
     initialize();
-  }
+  } */
 });
 
 let initTimeout: ReturnType<typeof setTimeout>;
 
 window.addEventListener("popstate", () => {
   clearTimeout(initTimeout);
-  initialize();
+  setTimeout(() => {
+    makeReadonlyInterfaces();
+  }, 1500);
 });
 
 // Initialize everything after a short delay.
 function initialize(): void {
   initTimeout = setTimeout(() => {
-    console.log("INITIALIZING");
     makeReadonlyInterfaces();
     if (document.querySelector(constants.mainCommentQuery)) makeMainEditableInterface();
     if (
