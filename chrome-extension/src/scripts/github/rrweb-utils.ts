@@ -4,13 +4,14 @@ import { eventWithTime, Mirror } from "rrweb/typings/types";
 import { INode } from "rrweb-snapshot";
 import { refBegin, refEnd, waitForPlayerClass } from "../common/constants";
 import {
+  defaultPostSave,
   findAncestor,
   loadedSessions,
   readOnlyInterfaces,
   saveChanges,
   stateMap,
 } from "../common/helpers";
-import { ReadOnlyInterface } from "../common/interfaces";
+import { ReadOnlyInterface, SaveResponse } from "../common/interfaces";
 
 function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer): void {
   if (state.payload == "paused") {
@@ -148,9 +149,13 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
     }
   );
 
-  saveChanges(idx).catch((err) => {
-    console.log(err);
-  });
+  saveChanges(idx)
+    .then((saveRes: SaveResponse) => {
+      defaultPostSave(saveRes, idx);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
 
 export function injectReadOnlyPlayer(idx: number, sessionId: string): void {

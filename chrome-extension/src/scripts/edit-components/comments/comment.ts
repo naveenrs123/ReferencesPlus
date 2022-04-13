@@ -1,16 +1,16 @@
-import { convertMsToTime, saveChanges, stateMap } from "../../common/helpers";
-import { ButtonColor, CommentData } from "../../common/interfaces";
+import { convertMsToTime, defaultPostSave, saveChanges, stateMap } from "../../common/helpers";
+import { ButtonColor, CommentData, SaveResponse } from "../../common/interfaces";
 import { color } from "../../github/borders";
 import { SavedComment } from "./saved-comment";
 import { MiniPlayerBtn } from "../util-components";
-import { refSymbol, waitForSaveClass } from "../../common/constants";
+import { refSymbol } from "../../common/constants";
 
 export function Comment(data: CommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
   const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
   timestampLabel.innerText = convertMsToTime(timestamp);
   timestampLabel.classList.add("Link--muted");
-  timestampLabel.addEventListener("click", (event: MouseEvent) => {
+  timestampLabel.addEventListener("click", () => {
     stateMap[data.idx].mainPlayer.goto(timestamp, false);
   });
 
@@ -47,13 +47,13 @@ export function Comment(data: CommentData): HTMLDivElement {
   container.style.height = "250px";
   container.style.width = "150px";
 
-  save.addEventListener("click", (event: MouseEvent) => {
+  save.addEventListener("click", () => {
     const nextCommentId = stateMap[data.idx].nextCommentId;
     if (data.comment_id == null) {
       stateMap[data.idx].nextCommentId++;
     }
 
-    handleSave(event, container, {
+    handleSave(container, {
       comment_id: data.comment_id ?? nextCommentId,
       timestamp: data.timestamp,
       idx: data.idx,
@@ -61,7 +61,7 @@ export function Comment(data: CommentData): HTMLDivElement {
       contents: null,
     });
   });
-  del.addEventListener("click", (event: MouseEvent) => handleDel(event, container));
+  del.addEventListener("click", () => handleDel(container));
 
   container.appendChild(topContainer);
   container.appendChild(commentTextArea);
@@ -70,11 +70,11 @@ export function Comment(data: CommentData): HTMLDivElement {
   return container;
 }
 
-function handleDel(event: MouseEvent, container: HTMLDivElement): void {
+function handleDel(container: HTMLDivElement): void {
   container.remove();
 }
 
-function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentData): void {
+function handleSave(container: HTMLDivElement, data: CommentData): void {
   const splitArray: string[] = splitOnRefs(data.rawText);
   const spans: HTMLSpanElement[] = [];
 
@@ -126,7 +126,8 @@ function handleSave(event: MouseEvent, container: HTMLDivElement, data: CommentD
   }
 
   saveChanges(data.idx)
-    .then(() => {
+    .then((saveRes: SaveResponse) => {
+      defaultPostSave(saveRes, data.idx);
       container.replaceWith(SavedComment(data));
     })
     .catch((err) => {

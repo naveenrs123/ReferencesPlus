@@ -168,7 +168,7 @@ export function updateCommentId(): void {
   commentId++;
 }
 
-export function saveChanges(idx: number): Promise<void> {
+export function saveChanges(idx: number, defaultSave = true): Promise<void | SaveResponse> {
   const comments: CommentData[] = [];
   stateMap[idx].comments.forEach((comment: CommentData) => {
     comments.push({
@@ -204,13 +204,17 @@ export function saveChanges(idx: number): Promise<void> {
       return res.json();
     })
     .then((data: SaveResponse) => {
-      if (data.id != "") stateMap[idx].sessionDetails.id = data.id;
-      const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
-      interfaceContainer.querySelectorAll("." + waitForSaveClass).forEach((elem: HTMLElement) => {
-        elem.removeAttribute("aria-disabled");
-      });
+      return Promise.resolve(data);
     })
     .catch(() => {
       return;
     });
+}
+
+export function defaultPostSave(data: SaveResponse, idx: number): void {
+  if (data.id != "") stateMap[idx].sessionDetails.id = data.id;
+  const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
+  interfaceContainer.querySelectorAll("." + waitForSaveClass).forEach((elem: HTMLElement) => {
+    elem.removeAttribute("aria-disabled");
+  });
 }

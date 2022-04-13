@@ -1,5 +1,5 @@
 import { matchUrl } from "./common/constants";
-import { ExtensionMessage, GitHubTabState, TabState } from "./common/interfaces";
+import { ExtensionMessage, GitHubTabState, TabState, TabUrlMap } from "./common/interfaces";
 
 /**
  * Create the Context Menu items required for the extension.
@@ -20,10 +20,12 @@ function createContextMenuItems(): void {
   });
 }
 
+const tabUrlMap: TabUrlMap = {};
+
 /**
  * Listener to insert relevant content scripts into a GitHub PR page.
  */
-chrome.tabs.onUpdated.addListener(
+/* chrome.tabs.onUpdated.addListener(
   (tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
     if (changeInfo.status == "complete") {
       if (matchUrl.test(tab.url)) {
@@ -56,6 +58,39 @@ chrome.tabs.onUpdated.addListener(
       }
     }
   }
+); */
+
+chrome.webNavigation.onDOMContentLoaded.addListener(
+  (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => {
+    if (matchUrl.test(details.url)) {
+      chrome.scripting
+        .executeScript({
+          target: { tabId: details.tabId },
+          files: ["vendors-content.js", "content.js"],
+        })
+        .then(() => {
+          return chrome.scripting.insertCSS({
+            target: { tabId: details.tabId },
+            files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
+          });
+        })
+        .then(() => {
+          void chrome.scripting.executeScript({
+            target: { tabId: details.tabId },
+            files: ["vendors-recorder.js", "recorder.js"],
+          });
+        })
+        .catch(() => {
+          return;
+        });
+    } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(details.url)) {
+      // Don't insert into internal pages.
+      void chrome.scripting.executeScript({
+        target: { tabId: details.tabId },
+        files: ["vendors-recorder.js", "recorder.js"],
+      });
+    }
+  }
 );
 
 /**
@@ -82,7 +117,11 @@ chrome.contextMenus.onClicked.addListener(
  * provided must be in the form of an {@link ExtensionMessage}.
  */
 chrome.runtime.onMessage.addListener(
-  (m: ExtensionMessage, sender: chrome.runtime.MessageSender) => {
+  (
+    m: ExtensionMessage,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ) => {
     if (m.action == "recording stopped" && m.source == "content") {
       chrome.storage.local.get(["state"], ({ state }: { state: TabState }) => {
         chrome.tabs.sendMessage<ExtensionMessage>(state.tabId, {
@@ -102,6 +141,9 @@ chrome.runtime.onMessage.addListener(
       };
       void chrome.storage.local.set(tabState);
     }
+
+    sendResponse("Received");
+    return true;
   }
 );
 

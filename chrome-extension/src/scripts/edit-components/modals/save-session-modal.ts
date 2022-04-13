@@ -1,4 +1,4 @@
-import { prDetails, stateMap } from "../../common/helpers";
+import { prDetails, saveChanges, stateMap } from "../../common/helpers";
 import { ButtonColor, CheckUniqueResponse, CoreState, SaveResponse } from "../../common/interfaces";
 import { ChangesSavedModal } from "./changes-saved-modal";
 import { PlayerBtn } from "../util-components";
@@ -71,36 +71,14 @@ function handleSave(event: MouseEvent, idx: number): void {
     .then((data: CheckUniqueResponse) => {
       if (!data.isUnique && !stateMap[idx].allowOverwrite) {
         const errorMsg = document.getElementById(`refg-save-session-error-${idx}`);
-        errorMsg.innerText =
-          "An existing document with this title has been detected, do you want to overwrite it?";
+        errorMsg.innerText = "Existing documented detected. Overwrite?";
         errorMsg.classList.remove("d-none");
         stateMap[idx].allowOverwrite = true;
         return Promise.reject("Attempt to save again.");
       } else {
         stateMap[idx].allowOverwrite = false;
-        const stateCopy: CoreState = {
-          events: stateMap[idx].events,
-          sessionDetails: stateMap[idx].sessionDetails,
-          comments: stateMap[idx].comments,
-          nextCommentId: stateMap[idx].nextCommentId,
-        };
-
-        const stringifiedData = JSON.stringify({
-          prDetails: prDetails,
-          state: stateCopy,
-        });
-
-        return fetch(`${getFetchUrl()}/insertSession`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: stringifiedData,
-        });
+        return saveChanges(idx);
       }
-    })
-    .then((res: Response) => {
-      return res.json();
     })
     .then((data: SaveResponse) => {
       if (data.id != "") stateMap[idx].sessionDetails.id = data.id;

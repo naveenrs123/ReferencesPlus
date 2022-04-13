@@ -95,7 +95,7 @@ export interface CheckUniqueResponse {
   isUnique: boolean;
 }
 
-export interface SessionToCommentMap {
+export interface SessionCommentMap {
   [sessionCommentString: string]: {
     sessionId: string;
     commentId: number;
@@ -103,12 +103,18 @@ export interface SessionToCommentMap {
 }
 
 export interface TextWithSessions {
-  textNode: Node;
-  parentElem: HTMLElement;
-  sessionCommentsArr: string[];
+  node: Node;
+  parent: HTMLElement;
+  refs: string[];
 }
 
 export interface TaggedText {
   text: string;
   isSessionString: boolean;
+}
+
+export interface TabUrlMap {
+  [tabId: number]: {
+    url: string;
+  };
 }

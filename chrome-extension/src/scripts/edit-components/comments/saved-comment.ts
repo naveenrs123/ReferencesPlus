@@ -1,5 +1,5 @@
-import { convertMsToTime, saveChanges, stateMap } from "../../common/helpers";
-import { ButtonColor, CommentData } from "../../common/interfaces";
+import { convertMsToTime, defaultPostSave, saveChanges, stateMap } from "../../common/helpers";
+import { ButtonColor, CommentData, SaveResponse } from "../../common/interfaces";
 import { Comment } from "./comment";
 import { MiniPlayerBtn } from "../util-components";
 
@@ -86,11 +86,11 @@ export function SavedComment(data: CommentData): HTMLDivElement {
   container.style.height = "250px";
   container.style.width = "150px";
 
-  edit.addEventListener("click", (event: MouseEvent) => {
-    handleEdit(event, data, container);
+  edit.addEventListener("click", () => {
+    handleEdit(data, container);
   });
-  del.addEventListener("click", (event: MouseEvent) => {
-    handleDel(event, data, container);
+  del.addEventListener("click", () => {
+    handleDel(data, container);
   });
 
   const label: HTMLLabelElement = document.createElement("label");
@@ -104,17 +104,21 @@ export function SavedComment(data: CommentData): HTMLDivElement {
   return container;
 }
 
-function handleDel(event: MouseEvent, data: CommentData, container: HTMLDivElement): void {
+function handleDel(data: CommentData, container: HTMLDivElement): void {
   container.remove();
   const index = stateMap[data.idx].comments.findIndex(
     (value: CommentData) => value.comment_id == data.comment_id
   );
   stateMap[data.idx].comments.splice(index, 1);
-  saveChanges(data.idx).catch((err) => {
-    console.log(err);
-  });
+  saveChanges(data.idx)
+    .then((saveRes: SaveResponse) => {
+      defaultPostSave(saveRes, data.idx);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
 
-function handleEdit(event: MouseEvent, data: CommentData, container: HTMLDivElement): void {
+function handleEdit(data: CommentData, container: HTMLDivElement): void {
   container.replaceWith(Comment(data));
 }

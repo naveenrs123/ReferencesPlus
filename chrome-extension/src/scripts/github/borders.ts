@@ -36,10 +36,3 @@ export function mouseOutBorders(event: MouseEvent): void {
 export function mouseOverBorders(event: MouseEvent): void {
   borderTmt = setTimeout(() => borderActions(event), 500);
 }
-
-/*
-export function setColor(event: InputEvent) {
-  let target: HTMLInputElement = event.target as HTMLInputElement;
-  color = target.value;
-}
-*/

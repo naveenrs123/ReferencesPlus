@@ -20,7 +20,7 @@ export function ChangesSavedModal(idx: number): HTMLDivElement {
   idP.innerText = `Id: ${sessionDetails.id}`;
 
   const ok = PlayerBtn("OK", ButtonColor.Green);
-  ok.addEventListener("click", (event: MouseEvent) => handleOK(event, idx));
+  ok.addEventListener("click", () => handleOK(idx));
 
   const container = document.createElement("div");
   container.id = `refg-changes-saved-modal-${idx}`;
@@ -47,7 +47,7 @@ export function ChangesSavedModal(idx: number): HTMLDivElement {
   return container;
 }
 
-function handleOK(event: MouseEvent, idx: number): void {
+function handleOK(idx: number): void {
   const playerContainer = document.getElementById(`refg-github-player-${idx}`);
   const oldModal = playerContainer.querySelector(`#refg-changes-saved-modal-${idx}`);
   playerContainer.removeChild(oldModal);
