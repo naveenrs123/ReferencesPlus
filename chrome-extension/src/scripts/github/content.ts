@@ -5,7 +5,11 @@ import * as helpers from "../common/helpers";
 import { makeMainEditableInterface } from "./builders/main-editable";
 import { makeCodeEditableInterface } from "./builders/code-editable";
 import { makePRCodeInterface } from "./builders/pr-code-editable";
-import { makeReadonlyInterfaces } from "./builders/readonly";
+import {
+  loadReferencedSessions,
+  makeReadonlyInterfaces,
+  processCommentBody,
+} from "./builders/readonly";
 
 let url = window.location.href;
 
@@ -32,21 +36,39 @@ window.addEventListener("click", (event: MouseEvent) => {
     makeCodeEditableInterface();
   } else if (target.tagName == "BUTTON" && target.classList.contains("js-add-line-comment")) {
     makePRCodeInterface();
-  } else if (target.tagName == "BUTTON" && (lowerText.includes("comment") || lowerText.includes("review"))) {
+  } else if (
+    target.tagName == "BUTTON" &&
+    (lowerText.includes("comment") || lowerText.includes("review"))
+  ) {
     setTimeout(() => {
       makeReadonlyInterfaces();
     }, 1500);
-  }/*  else if (window.location.href != url) {
+  } else if (window.location.href != url) {
     url = window.location.href;
-    initialize();
-  } */
+    setTimeout(() => {
+      makeReadonlyInterfaces();
+    }, 1500);
+  }
 });
+
+function addRefreshButton(): void {
+  const btn = document.createElement("button");
+  btn.classList.add("refg-refresh-button", "position-fixed", "btn", "p-2");
+  btn.style.bottom = "30px";
+  btn.style.left = "30px";
+  btn.style.zIndex = "2000000000";
+  btn.innerText = "⭮ Refresh Contexts";
+  btn.addEventListener("click", () => {
+    makeReadonlyInterfaces();
+  });
+  document.querySelector("body").appendChild(btn);
+}
 
 let initTimeout: ReturnType<typeof setTimeout>;
 
 window.addEventListener("popstate", () => {
   clearTimeout(initTimeout);
-  setTimeout(() => {
+  initTimeout = setTimeout(() => {
     makeReadonlyInterfaces();
   }, 1500);
 });
@@ -54,6 +76,7 @@ window.addEventListener("popstate", () => {
 // Initialize everything after a short delay.
 function initialize(): void {
   initTimeout = setTimeout(() => {
+    addRefreshButton();
     makeReadonlyInterfaces();
     if (document.querySelector(constants.mainCommentQuery)) makeMainEditableInterface();
     if (

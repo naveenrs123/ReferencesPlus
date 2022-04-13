@@ -128,7 +128,7 @@ function loadSession(sessionId: string): Promise<void> {
     });
 }
 
-function loadReferencedSessions(commentBody: HTMLElement, idx: number): Promise<void> {
+export function loadReferencedSessions(commentBody: HTMLElement, idx: number): Promise<void> {
   const sessionIds: Set<string> = new Set();
   const sessionCommentMap: interfaces.SessionCommentMap = {};
   const textNodes: interfaces.TextWithSessions[] = [];
@@ -221,33 +221,7 @@ export function makeReadonlyInterfaces(): void {
 
       const newSessions: Promise<void>[] = [];
       document.querySelectorAll('[class*="js-comment-body"]').forEach((elem: HTMLElement) => {
-        let mainInterface = elem.parentNode.querySelector(`[id^=refg-interface-container-r]`);
-        if (mainInterface) elem.parentNode.removeChild(mainInterface);
-
-        let idx: number;
-        const btn = elem.querySelector(".refg-view-interface");
-        if (btn) {
-          idx = parseInt(btn.getAttribute("data-idx"));
-        } else {
-          do {
-            idx = helpers.counter;
-            helpers.updateCounter();
-          } while (buttonIndexes.has(idx));
-        }
-
-        mainInterface = MainInterfaceR(idx);
-        elem.parentNode.appendChild(mainInterface);
-
-        helpers.readOnlyInterfaces.push({
-          commentBody: elem,
-          githubCommentId: idx,
-          events: [],
-          sessionDetails: null,
-          comments: [],
-          nextCommentId: 0,
-          mainPlayer: null,
-        });
-
+        const idx = processCommentBody(elem);
         newSessions.push(loadReferencedSessions(elem, idx));
       });
 
@@ -259,4 +233,52 @@ export function makeReadonlyInterfaces(): void {
     .catch((err) => {
       console.log(err);
     });
+}
+
+function observeCommentBody(elem: HTMLElement): void {
+  const config: MutationObserverInit = { childList: true, subtree: true };
+  const callback = (mutationsList: MutationRecord[]): void => {
+    for (const mutation of mutationsList) {
+      if (mutation.type == "childList") {
+        console.log(mutation.addedNodes);
+        console.log(mutation.removedNodes);
+      }
+    }
+  };
+
+  const observer = new MutationObserver(callback);
+  observer.observe(elem, config);
+}
+
+export function processCommentBody(elem: HTMLElement): number {
+  let mainInterface = elem.parentNode.querySelector(`[id^=refg-interface-container-r]`);
+  if (mainInterface) elem.parentNode.removeChild(mainInterface);
+
+  let idx: number;
+  const btn = elem.querySelector(".refg-view-interface");
+  if (btn) {
+    idx = parseInt(btn.getAttribute("data-idx"));
+  } else {
+    do {
+      idx = helpers.counter;
+      helpers.updateCounter();
+    } while (buttonIndexes.has(idx));
+  }
+
+  mainInterface = MainInterfaceR(idx);
+  elem.parentNode.appendChild(mainInterface);
+
+  helpers.readOnlyInterfaces.push({
+    commentBody: elem,
+    githubCommentId: idx,
+    events: [],
+    sessionDetails: null,
+    comments: [],
+    nextCommentId: 0,
+    mainPlayer: null,
+  });
+
+  observeCommentBody(elem);
+
+  return idx;
 }

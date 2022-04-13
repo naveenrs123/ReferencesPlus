@@ -25,7 +25,10 @@ export function Player(idx: number, readOnly = false): HTMLDivElement {
 export function Comments(idx: number, readOnly = false): HTMLDivElement {
   const comments = document.createElement("div");
   comments.id = readOnly ? `refg-comments-r-${idx}` : `refg-comments-${idx}`;
-  comments.classList.add("p-2", "d-flex", "overflow-x-auto", "flex-justify-center", "flex-items-center");
+  comments.classList.add("p-2", "d-flex", "overflow-x-auto", "flex-items-center");
+  comments.style.maxWidth = "100%";
+  comments.style.flex = "1 1 auto";
+
   return comments;
 }
 
