@@ -77,6 +77,7 @@ export function CommentR(data: CommentData): HTMLDivElement {
   );
   container.style.height = "250px";
   container.style.minWidth = "150px";
+  container.style.maxWidth = "200px";
 
   const label: HTMLLabelElement = document.createElement("label");
   label.classList.add("d-none", "m-2");

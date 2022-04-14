@@ -45,16 +45,17 @@ export function Comment(data: CommentData): HTMLDivElement {
     "refg-comment"
   );
   container.style.height = "250px";
-  container.style.width = "150px";
+  container.style.minWidth = "150px";
+  container.style.maxWidth = "200px";
 
   save.addEventListener("click", () => {
-    const nextCommentId = stateMap[data.idx].nextCommentId;
+    const commentId = stateMap[data.idx].nextCommentId;
     if (data.comment_id == null) {
       stateMap[data.idx].nextCommentId++;
     }
 
     handleSave(container, {
-      comment_id: data.comment_id ?? nextCommentId,
+      comment_id: data.comment_id ?? commentId,
       timestamp: data.timestamp,
       idx: data.idx,
       rawText: commentTextArea.value,

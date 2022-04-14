@@ -76,6 +76,7 @@ function handleReset(event: MouseEvent, idx: number): void {
   stateMap[idx].sessionDetails = null;
   stateMap[idx].hasUnsavedChanges = false;
   stateMap[idx].mainPlayer = null;
+  stateMap[idx].nextCommentId = 0;
 
   chrome.runtime.sendMessage<ExtensionMessage>({
     action: "[GITHUB] Ready to Receive",

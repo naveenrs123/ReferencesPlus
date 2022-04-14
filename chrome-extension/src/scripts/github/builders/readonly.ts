@@ -201,7 +201,6 @@ export function loadReferencedSessions(commentBody: HTMLElement, idx: number): P
 export function makeReadonlyInterfaces(): void {
   helpers.clearLoadedSessions();
   helpers.clearReadOnlyInterfaces();
-  helpers.clearStateMap();
 
   const existingButtons: Promise<void>[] = [];
 

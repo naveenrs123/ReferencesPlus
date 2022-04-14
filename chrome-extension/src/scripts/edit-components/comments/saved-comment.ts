@@ -84,7 +84,8 @@ export function SavedComment(data: CommentData): HTMLDivElement {
     "refg-comment"
   );
   container.style.height = "250px";
-  container.style.width = "150px";
+  container.style.minWidth = "150px";
+  container.style.maxWidth = "200px";
 
   edit.addEventListener("click", () => {
     handleEdit(data, container);
