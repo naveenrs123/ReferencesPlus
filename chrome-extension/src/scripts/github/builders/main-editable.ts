@@ -19,6 +19,8 @@ import * as utilComponents from "../../edit-components/util-components";
  */
 export function makeMainEditableInterface(): void {
   // retrieve button insertion point
+  if (!document.querySelector(constants.mainCommentQuery)) return;
+
   const details: HTMLDetailsElement = document.querySelector(constants.mainCommentQuery);
   const detailsParent = details.parentElement;
 

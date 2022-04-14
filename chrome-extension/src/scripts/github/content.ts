@@ -31,11 +31,18 @@ window.addEventListener("click", (event: MouseEvent) => {
   if (window.self != window.top) return;
   event.stopPropagation();
   const target = event.target as HTMLElement;
-  const lowerText = target.textContent.toLowerCase();
+  const lowerText = target.textContent.trim().toLowerCase();
   if (target.tagName == "BUTTON" && target.classList.contains("review-thread-reply-button")) {
-    makeCodeEditableInterface();
-  } else if (target.tagName == "BUTTON" && target.classList.contains("js-add-line-comment")) {
-    makePRCodeInterface();
+    setTimeout(() => {
+      makeCodeEditableInterface();
+    }, 1500);
+  } else if (
+    target.tagName == "BUTTON" &&
+    (target.classList.contains("js-add-line-comment") || lowerText.includes("create pull request"))
+  ) {
+    setTimeout(() => {
+      makePRCodeInterface();
+    }, 1500);
   } else if (
     target.tagName == "BUTTON" &&
     (lowerText.includes("comment") || lowerText.includes("review"))
@@ -45,9 +52,8 @@ window.addEventListener("click", (event: MouseEvent) => {
     }, 1500);
   } else if (window.location.href != url) {
     url = window.location.href;
-    setTimeout(() => {
-      makeReadonlyInterfaces();
-    }, 1500);
+    clearTimeout(initTimeout);
+    initialize();
   }
 });
 
@@ -68,9 +74,7 @@ let initTimeout: ReturnType<typeof setTimeout>;
 
 window.addEventListener("popstate", () => {
   clearTimeout(initTimeout);
-  initTimeout = setTimeout(() => {
-    makeReadonlyInterfaces();
-  }, 1500);
+  initialize();
 });
 
 // Initialize everything after a short delay.
@@ -78,13 +82,8 @@ function initialize(): void {
   initTimeout = setTimeout(() => {
     addRefreshButton();
     makeReadonlyInterfaces();
-    if (document.querySelector(constants.mainCommentQuery)) makeMainEditableInterface();
-    if (
-      document.querySelector(constants.makePrQuery) ||
-      document.querySelector(constants.betaCodeCommentQuery)
-    ) {
-      makePRCodeInterface();
-    }
+    makeMainEditableInterface();
+    makePRCodeInterface();
     makeCodeEditableInterface();
   }, 1500);
 }

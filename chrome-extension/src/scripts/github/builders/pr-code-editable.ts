@@ -8,7 +8,9 @@ export function makePRCodeInterface(): void {
   document.querySelectorAll(betaCodeCommentQuery).forEach((elem: HTMLElement) => {
     makePrInterface(elem);
   });
-  makePrInterface(document.querySelector(makePrQuery), false);
+  if (document.querySelector(makePrQuery)) {
+    makePrInterface(document.querySelector(makePrQuery), false);
+  }
 }
 
 function makePrInterface(elem: HTMLElement, isCodeComment = true): void {
