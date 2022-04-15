@@ -67,6 +67,8 @@ function onViewContextClick(event: MouseEvent): void {
     `#refg-interface-container-r-${idx}`
   );
 
+  if (!interfaceContainer) return;
+
   let active = false;
   commentBody.querySelectorAll(".refg-view-interface").forEach((btn: HTMLButtonElement) => {
     if (button == btn) {
@@ -223,27 +225,9 @@ export function makeReadonlyInterfaces(): void {
 
       return Promise.all(newSessions);
     })
-    .then(() => {
-      console.log("SUCCESS");
-    })
     .catch((err) => {
       console.log(err);
     });
-}
-
-function observeCommentBody(elem: HTMLElement): void {
-  const config: MutationObserverInit = { childList: true, subtree: true };
-  const callback = (mutationsList: MutationRecord[]): void => {
-    for (const mutation of mutationsList) {
-      if (mutation.type == "childList") {
-        console.log(mutation.addedNodes);
-        console.log(mutation.removedNodes);
-      }
-    }
-  };
-
-  const observer = new MutationObserver(callback);
-  observer.observe(elem, config);
 }
 
 export function processCommentBody(elem: HTMLElement): number {
@@ -273,8 +257,6 @@ export function processCommentBody(elem: HTMLElement): number {
     nextCommentId: 0,
     mainPlayer: null,
   });
-
-  observeCommentBody(elem);
 
   return idx;
 }
