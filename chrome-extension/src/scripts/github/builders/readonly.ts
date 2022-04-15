@@ -54,6 +54,7 @@ function tagText(textContent: string, sessionCommentsArr: string[]): interfaces.
 }
 
 function onViewContextClick(event: MouseEvent): void {
+  console.log("LISTENER CLICK");
   const button = event.target as HTMLButtonElement;
   const commentBody = helpers.findAncestor(button, "js-comment-body");
   const idx = parseInt(button.getAttribute("data-idx"));
@@ -186,6 +187,7 @@ export function loadReferencedSessions(commentBody: HTMLElement, idx: number): P
             button.setAttribute("data-sessionId", sessionId);
             button.setAttribute("data-commentId", commentId.toString());
             button.addEventListener("click", onViewContextClick);
+            button.setAttribute("data-click-listener", "true");
             nodes.push(button);
           } else {
             nodes.push(document.createTextNode(tag.text));
@@ -215,6 +217,8 @@ export function makeReadonlyInterfaces(): void {
   Promise.all(existingButtons)
     .then(() => {
       document.querySelectorAll(".refg-view-interface").forEach((elem: HTMLButtonElement) => {
+        const hasListener = elem.getAttribute("data-click-listener") === "true";
+        if (hasListener) return;
         elem.addEventListener("click", onViewContextClick);
       });
 

@@ -5,11 +5,7 @@ import * as helpers from "../common/helpers";
 import { makeMainEditableInterface } from "./builders/main-editable";
 import { makeCodeEditableInterface } from "./builders/code-editable";
 import { makePRCodeInterface } from "./builders/pr-code-editable";
-import {
-  loadReferencedSessions,
-  makeReadonlyInterfaces,
-  processCommentBody,
-} from "./builders/readonly";
+import { makeReadonlyInterfaces } from "./builders/readonly";
 
 let url = window.location.href;
 
@@ -35,21 +31,21 @@ window.addEventListener("click", (event: MouseEvent) => {
   if (target.tagName == "BUTTON" && target.classList.contains("review-thread-reply-button")) {
     setTimeout(() => {
       makeCodeEditableInterface();
-    }, 1500);
+    }, 1000);
   } else if (
     target.tagName == "BUTTON" &&
     (target.classList.contains("js-add-line-comment") || lowerText.includes("create pull request"))
   ) {
     setTimeout(() => {
       makePRCodeInterface();
-    }, 1500);
+    }, 1000);
   } else if (
     target.tagName == "BUTTON" &&
     (lowerText.includes("comment") || lowerText.includes("review"))
   ) {
     setTimeout(() => {
       makeReadonlyInterfaces();
-    }, 1500);
+    }, 1000);
   } else if (window.location.href != url) {
     url = window.location.href;
     clearTimeout(initTimeout);
@@ -73,7 +69,7 @@ function addRefreshButton(): void {
 let initTimeout: ReturnType<typeof setTimeout>;
 
 window.addEventListener("popstate", () => {
-  clearTimeout(initTimeout);
+  clearTimeout();
   initialize();
 });
 
@@ -85,7 +81,8 @@ function initialize(): void {
     makeMainEditableInterface();
     makePRCodeInterface();
     makeCodeEditableInterface();
-  }, 1500);
+  }, 1000);
 }
 
+clearTimeout(initTimeout);
 initialize();
