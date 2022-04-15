@@ -69,7 +69,7 @@ function addRefreshButton(): void {
 let initTimeout: ReturnType<typeof setTimeout>;
 
 window.addEventListener("popstate", () => {
-  clearTimeout();
+  clearTimeout(initTimeout);
   initialize();
 });
 
