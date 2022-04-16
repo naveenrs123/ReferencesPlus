@@ -125,28 +125,35 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
     id: "",
   };
   state.mainPlayer = new rrwebPlayer(replayerOptions);
-  state.mainPlayer.addEventListener("ui-update-player-state", (playerState: { payload: string }) => {
-    onPlayerStateChange(playerState, state.mainPlayer);
-  });
+  state.mainPlayer.addEventListener(
+    "ui-update-player-state",
+    (playerState: { payload: string }) => {
+      onPlayerStateChange(playerState, state.mainPlayer);
+    }
+  );
 
   const updateCount = 0;
-  state.mainPlayer.addEventListener("ui-update-current-time", (playerState: { payload: number }) => {
-    if (updateCount % 3 != 0) return;
-    for (const comment of state.comments) {
-      const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
-      const bound = Math.abs(timestamp - playerState.payload) < 750;
-      const commentContainer = findAncestor(comment.contents, "refg-comment");
-      if (bound) {
-        commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
-      } else {
-        commentContainer.style.border = "";
+  state.mainPlayer.addEventListener(
+    "ui-update-current-time",
+    (playerState: { payload: number }) => {
+      if (updateCount % 3 != 0) return;
+      for (const comment of state.comments) {
+        const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
+        const bound = Math.abs(timestamp - playerState.payload) < 750;
+        const commentContainer = findAncestor(comment.contents, "refg-comment");
+        if (bound) {
+          commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
+        } else {
+          commentContainer.style.border = "";
+        }
       }
     }
-  });
+  );
 
   saveChanges(idx)
     .then((saveRes: SaveResponse) => {
       defaultPostSave(saveRes, idx);
+      state.mainPlayer.goto(50, false);
     })
     .catch((err) => {
       console.log(err);
@@ -178,25 +185,34 @@ export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
   state.comments = loadedSession.comments;
   state.nextCommentId = loadedSession.nextCommentId;
   state.mainPlayer = new rrwebPlayer(replayerOptions);
-  state.mainPlayer.addEventListener("ui-update-player-state", (playerState: { payload: string }) => {
-    onPlayerStateChange(playerState, state.mainPlayer);
-  });
+
+  state.mainPlayer.addEventListener(
+    "ui-update-player-state",
+    (playerState: { payload: string }) => {
+      onPlayerStateChange(playerState, state.mainPlayer);
+    }
+  );
 
   const updateCount = 0;
-  state.mainPlayer.addEventListener("ui-update-current-time", (playerState: { payload: number }) => {
-    if (updateCount % 3 != 0) return;
+  state.mainPlayer.addEventListener(
+    "ui-update-current-time",
+    (playerState: { payload: number }) => {
+      if (updateCount % 3 != 0) return;
 
-    for (const comment of state.comments) {
-      const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
-      const bound = Math.abs(timestamp - playerState.payload) < 1000;
-      const commentContainer = findAncestor(comment.contents, "refg-comment");
-      if (commentContainer.style.border == "3px solid green") {
-        continue;
-      } else if (bound) {
-        commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
-      } else {
-        commentContainer.style.border = "";
+      for (const comment of state.comments) {
+        const timestamp = comment.timestamp <= 50 ? 50 : comment.timestamp;
+        const bound = Math.abs(timestamp - playerState.payload) < 1000;
+        const commentContainer = findAncestor(comment.contents, "refg-comment");
+        if (commentContainer.style.border == "3px solid green") {
+          continue;
+        } else if (bound) {
+          commentContainer.style.setProperty("border", `3px solid ${color}`, "important");
+        } else {
+          commentContainer.style.border = "";
+        }
       }
     }
-  });
+  );
+
+  state.mainPlayer.goto(50, false);
 }
