@@ -1,0 +1,1 @@
+{$and: [{_id: {$ne: ObjectId('625922ae4b96847bc8995b90')}}, {_id: {$ne: ObjectId('6259fb59130949bcc4f9aa79')}}, {_id: {$ne: ObjectId('6255dcebef36c087b4e5d1cd')}}, {_id: {$ne: ObjectId('62585854796af6bf3f51bedd')}}, {_id: {$ne: ObjectId('625b4884fa35c9687932dccb')}}, {_id: {$ne: ObjectId('625b3ab4fa35c9687932dcca')}}]}

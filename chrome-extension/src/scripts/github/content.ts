@@ -9,10 +9,6 @@ import { makeReadonlyInterfaces } from "./builders/readonly";
 
 let url = window.location.href;
 
-const matchesArr = window.location.href.match(constants.matchUrl);
-helpers.prDetails.userOrOrg = matchesArr[1];
-helpers.prDetails.repository = matchesArr[2];
-
 /**
  * Listener to handle messages sent by the background script. Messages should be in the
  * form of an {@link ExtensionMessage}.
@@ -78,6 +74,10 @@ function initialize(timeout = 1000): void {
   if (initTimeout) return;
 
   initTimeout = setTimeout(() => {
+    const matchesArr = window.location.href.match(constants.matchUrl);
+    helpers.prDetails.userOrOrg = matchesArr[1];
+    helpers.prDetails.repository = matchesArr[2];
+
     addRefreshButton();
     makeReadonlyInterfaces();
     makeMainEditableInterface();
