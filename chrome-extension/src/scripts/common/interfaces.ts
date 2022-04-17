@@ -104,7 +104,6 @@ export interface SessionCommentMap {
 
 export interface TextWithSessions {
   node: Node;
-  parent: HTMLElement;
   refs: string[];
 }
 

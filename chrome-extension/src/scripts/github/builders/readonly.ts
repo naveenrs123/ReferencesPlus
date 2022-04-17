@@ -32,7 +32,6 @@ function findSessions(
 
     textNodes[idx].push({
       node: elem,
-      parent: elem.parentElement,
       refs: sessionCommentsArr,
     });
   } else {
@@ -143,7 +142,7 @@ const textNodes: interfaces.TextWithSessionsMap = {};
 
 export function loadReferencedSessions(idx: number): void {
   for (const info of textNodes[idx]) {
-    const { node, parent, refs }: interfaces.TextWithSessions = info;
+    const { node, refs }: interfaces.TextWithSessions = info;
     const taggedText = tagText(node.textContent, refs);
     const nodes: Node[] = [];
 
@@ -175,6 +174,7 @@ export function loadReferencedSessions(idx: number): void {
 }
 
 export function makeReadonlyInterfaces(): void {
+  helpers.clearReadOnlyInterfaces();
   const existingButtons: Promise<void>[] = [];
 
   document.querySelectorAll(".refg-view-interface").forEach((elem: HTMLButtonElement) => {

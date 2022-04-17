@@ -29,32 +29,33 @@ window.addEventListener("click", (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   const lowerText = target.textContent.trim().toLowerCase();
   if (target.tagName == "BUTTON" && target.classList.contains("review-thread-reply-button")) {
-    setTimeout(() => {
-      makeCodeEditableInterface();
-    }, 1000);
+    makeCodeEditableInterface();
   } else if (
     target.tagName == "BUTTON" &&
     (target.classList.contains("js-add-line-comment") || lowerText.includes("create pull request"))
   ) {
-    setTimeout(() => {
-      makePRCodeInterface();
-    }, 1000);
+    makePRCodeInterface();
   } else if (
     target.tagName == "BUTTON" &&
-    (lowerText.includes("comment") || lowerText.includes("review"))
+    (lowerText.includes("comment") || lowerText.includes("review") || lowerText.includes("delete"))
   ) {
     setTimeout(() => {
       makeReadonlyInterfaces();
-    }, 1000);
+    }, 3000);
   } else if (window.location.href != url) {
     url = window.location.href;
-    if (initTimeout) return;
-    initialize();
+    const btn: HTMLButtonElement = document.querySelector(".refg-refresh-button");
+    if (btn) btn.remove();
+
+    if (constants.matchUrl.test(url)) initialize();
   }
 });
 
 function addRefreshButton(): void {
-  const btn = document.createElement("button");
+  let btn: HTMLButtonElement = document.querySelector(".refg-refresh-button");
+  if (btn) btn.remove();
+
+  btn = document.createElement("button");
   btn.classList.add("refg-refresh-button", "position-fixed", "btn", "p-2");
   btn.style.bottom = "30px";
   btn.style.left = "30px";
@@ -69,15 +70,12 @@ function addRefreshButton(): void {
 let initTimeout: ReturnType<typeof setTimeout>;
 
 window.addEventListener("popstate", () => {
-  if (initTimeout) return;
   initialize();
 });
 
-let initialized = false;
-
 // Initialize everything after a short delay.
 function initialize(timeout = 1000): void {
-  if (initialized) return;
+  if (initTimeout) return;
 
   initTimeout = setTimeout(() => {
     addRefreshButton();
@@ -85,10 +83,7 @@ function initialize(timeout = 1000): void {
     makeMainEditableInterface();
     makePRCodeInterface();
     makeCodeEditableInterface();
-    initialized = true;
   }, timeout);
 }
 
-if (!initTimeout && !initialized) {
-  initialize();
-}
+initialize();

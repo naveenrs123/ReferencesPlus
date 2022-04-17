@@ -27,48 +27,49 @@ const tabTimeoutMap: TabTimeoutMap = {};
  */
 chrome.tabs.onUpdated.addListener(
   (tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-    if (changeInfo.status == "complete") {
-      if (tabId in tabTimeoutMap) return;
-      if (matchUrl.test(tab.url)) {
-        tabTimeoutMap[tabId] = setTimeout(() => {
-          chrome.scripting
-            .executeScript({
+    if (changeInfo.status !== "complete") return;
+    if (tabId in tabTimeoutMap) return;
+    if (matchUrl.test(tab.url)) {
+      tabTimeoutMap[tabId] = setTimeout(() => {
+        chrome.scripting
+          .executeScript({
+            target: { tabId: tabId },
+            files: ["vendors-content.js", "content.js"],
+          })
+          .then(() => {
+            return chrome.scripting.insertCSS({
               target: { tabId: tabId },
-              files: ["vendors-content.js", "content.js"],
-            })
-            .then(() => {
-              return chrome.scripting.insertCSS({
-                target: { tabId: tabId },
-                files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
-              });
-            })
-            .then(() => {
-              return chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                files: ["vendors-recorder.js", "recorder.js"],
-              });
-            })
-            .then(() => {
-              delete tabTimeoutMap[tabId];
-            })
-            .catch(() => {
-              return;
+              files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
             });
-        }, 1000);
-      } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(tab.url)) {
-        // Don't insert into internal pages.
-        tabTimeoutMap[tabId] = setTimeout(() => {
-          chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ["vendors-recorder.js", "recorder.js"],
-          }).then(() => {
+          })
+          .then(() => {
+            return chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              files: ["vendors-recorder.js", "recorder.js"],
+            });
+          })
+          .then(() => {
             delete tabTimeoutMap[tabId];
           })
           .catch(() => {
             return;
           });
-        }, 1000);
-      }
+      }, 1000);
+    } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(tab.url)) {
+      // Don't insert into internal pages.
+      tabTimeoutMap[tabId] = setTimeout(() => {
+        chrome.scripting
+          .executeScript({
+            target: { tabId: tab.id },
+            files: ["vendors-recorder.js", "recorder.js"],
+          })
+          .then(() => {
+            delete tabTimeoutMap[tabId];
+          })
+          .catch(() => {
+            return;
+          });
+      }, 1000);
     }
   }
 );
