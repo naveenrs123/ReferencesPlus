@@ -108,13 +108,15 @@ export interface TextWithSessions {
   refs: string[];
 }
 
+export interface TextWithSessionsMap {
+  [idx: number]: TextWithSessions[];
+}
+
 export interface TaggedText {
   text: string;
   isSessionString: boolean;
 }
 
-export interface TabUrlMap {
-  [tabId: number]: {
-    url: string;
-  };
+export interface TabTimeoutMap {
+  [tabId: number]: ReturnType<typeof setTimeout>;
 }

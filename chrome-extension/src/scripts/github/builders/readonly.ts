@@ -10,9 +10,10 @@ const buttonIndexes: Set<number> = new Set();
 
 function findSessions(
   elem: Node,
+  idx: number,
   sessionIds: Set<string>,
   sessionCommentMap: interfaces.SessionCommentMap,
-  textNodes: interfaces.TextWithSessions[]
+  textNodes: interfaces.TextWithSessionsMap
 ): void {
   if (elem.nodeName == "#text") {
     const matches = elem.textContent.matchAll(constants.sessionMatchPattern);
@@ -21,19 +22,22 @@ function findSessions(
     for (const match of matches) {
       sessionIds.add(match[2]);
       sessionCommentMap[match[1]] = { sessionId: match[2], commentId: parseInt(match[3]) };
+      if (sessionCommentsArr.includes(match[1])) continue;
       sessionCommentsArr.push(match[1]);
     }
 
     if (sessionCommentsArr.length == 0) return;
 
-    textNodes.push({
+    if (!(idx in textNodes)) textNodes[idx] = [];
+
+    textNodes[idx].push({
       node: elem,
       parent: elem.parentElement,
       refs: sessionCommentsArr,
     });
   } else {
     elem.childNodes.forEach((child: Node) =>
-      findSessions(child as HTMLElement, sessionIds, sessionCommentMap, textNodes)
+      findSessions(child as HTMLElement, idx, sessionIds, sessionCommentMap, textNodes)
     );
   }
 }
@@ -54,7 +58,6 @@ function tagText(textContent: string, sessionCommentsArr: string[]): interfaces.
 }
 
 function onViewContextClick(event: MouseEvent): void {
-  console.log("LISTENER CLICK");
   const button = event.target as HTMLButtonElement;
   const commentBody = helpers.findAncestor(button, "js-comment-body");
   const idx = parseInt(button.getAttribute("data-idx"));
@@ -113,6 +116,9 @@ function onViewContextClick(event: MouseEvent): void {
 }
 
 function loadSession(sessionId: string): Promise<void> {
+  if (sessionId in helpers.loadedSessions) return;
+
+  console.log(`LOAD SESSION: ${sessionId}`);
   return fetch(`${constants.getFetchUrl()}/loadSession/${sessionId}`, {
     method: "POST",
     headers: {
@@ -131,80 +137,44 @@ function loadSession(sessionId: string): Promise<void> {
     });
 }
 
-export function loadReferencedSessions(commentBody: HTMLElement, idx: number): Promise<void> {
-  const sessionIds: Set<string> = new Set();
-  const sessionCommentMap: interfaces.SessionCommentMap = {};
-  const textNodes: interfaces.TextWithSessions[] = [];
-  findSessions(commentBody, sessionIds, sessionCommentMap, textNodes);
+const sessionIds: Set<string> = new Set();
+const sessionCommentMap: interfaces.SessionCommentMap = {};
+const textNodes: interfaces.TextWithSessionsMap = {};
 
-  for (const sessionId of Object.keys(helpers.loadedSessions)) {
-    sessionIds.delete(sessionId);
-  }
+export function loadReferencedSessions(idx: number): void {
+  for (const info of textNodes[idx]) {
+    const { node, parent, refs }: interfaces.TextWithSessions = info;
+    const taggedText = tagText(node.textContent, refs);
+    const nodes: Node[] = [];
 
-  const promiseArray: Promise<Response>[] = [];
-  sessionIds.forEach((sessionId: string) => {
-    promiseArray.push(
-      fetch(`${constants.getFetchUrl()}/loadSession/${sessionId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(helpers.prDetails),
-      })
-    );
-  });
+    taggedText.forEach((tag: interfaces.TaggedText) => {
+      if (tag.isSessionString) {
+        const { sessionId, commentId } = sessionCommentMap[tag.text];
 
-  return Promise.all(promiseArray)
-    .then((resArray: Response[]) => {
-      return Promise.all(resArray.map((res: Response) => res.json()));
-    })
-    .then((state: interfaces.CoreState[]) => {
-      for (const interfaceInfo of state) {
-        if ("sessionDetails" in interfaceInfo) {
-          helpers.loadedSessions[interfaceInfo.sessionDetails.id] = interfaceInfo;
-          helpers.loadedSessions[interfaceInfo.sessionDetails.id].events = JSON.parse(
-            interfaceInfo.stringEvents
-          ) as eventWithTime[];
+        if (!(sessionId in helpers.loadedSessions)) {
+          nodes.push(document.createTextNode(tag.text));
+          return;
         }
-      }
 
-      for (const info of textNodes) {
-        const { node, parent, refs }: interfaces.TextWithSessions = info;
-        const taggedText = tagText(node.textContent, refs);
-        const nodes: Node[] = [];
-
-        taggedText.forEach((tag: interfaces.TaggedText) => {
-          if (tag.isSessionString) {
-            const { sessionId, commentId } = sessionCommentMap[tag.text];
-
-            if (!(sessionId in helpers.loadedSessions)) {
-              nodes.push(document.createTextNode(tag.text));
-              return;
-            }
-
-            const button = document.createElement("button");
-            button.innerText = `View Context`;
-            button.classList.add("m-2", "btn", "refg-view-interface");
-            button.setAttribute("data-idx", idx.toString());
-            button.setAttribute("data-sessionId", sessionId);
-            button.setAttribute("data-commentId", commentId.toString());
-            button.addEventListener("click", onViewContextClick);
-            nodes.push(button);
-          } else {
-            nodes.push(document.createTextNode(tag.text));
-          }
-        });
-
-        const textElement = node as Element;
-        textElement.replaceWith(...nodes);
+        const button = document.createElement("button");
+        button.innerText = `View Context`;
+        button.classList.add("m-2", "btn", "refg-view-interface");
+        button.setAttribute("data-idx", idx.toString());
+        button.setAttribute("data-sessionId", sessionId);
+        button.setAttribute("data-commentId", commentId.toString());
+        button.addEventListener("click", onViewContextClick);
+        nodes.push(button);
+      } else {
+        nodes.push(document.createTextNode(tag.text));
       }
     });
+
+    const textElement = node as Element;
+    textElement.replaceWith(...nodes);
+  }
 }
 
 export function makeReadonlyInterfaces(): void {
-  helpers.clearLoadedSessions();
-  helpers.clearReadOnlyInterfaces();
-
   const existingButtons: Promise<void>[] = [];
 
   document.querySelectorAll(".refg-view-interface").forEach((elem: HTMLButtonElement) => {
@@ -217,13 +187,25 @@ export function makeReadonlyInterfaces(): void {
 
   Promise.all(existingButtons)
     .then(() => {
-      const newSessions: Promise<void>[] = [];
+      const indexes: number[] = [];
+
       document.querySelectorAll('[class*="js-comment-body"]').forEach((elem: HTMLElement) => {
         const idx = processCommentBody(elem);
-        newSessions.push(loadReferencedSessions(elem, idx));
+        indexes.push(idx);
+        findSessions(elem, idx, sessionIds, sessionCommentMap, textNodes);
       });
 
-      return Promise.all(newSessions);
+      const promiseArray: Promise<void>[] = [];
+      sessionIds.forEach((sessionId: string) => {
+        promiseArray.push(loadSession(sessionId));
+      });
+
+      return Promise.all(promiseArray).then(() => {
+        indexes.forEach((idx: number) => {
+          if (!(idx in textNodes)) return;
+          loadReferencedSessions(idx);
+        });
+      });
     })
     .catch((err) => {
       console.log(err);

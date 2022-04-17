@@ -101,6 +101,9 @@ function handleComment(event: MouseEvent, idx: number): void {
 
 // TODO: Complete Function
 function handleCopyAll(event: MouseEvent, idx: number): void {
+  const btn = event.target as HTMLButtonElement;
+  if (btn.getAttribute("aria-disabled") === "true") return;
+
   const sessionId = stateMap[idx].sessionDetails.id;
   let clipboardString = "";
   stateMap[idx].comments.forEach((comment: CommentData) => {

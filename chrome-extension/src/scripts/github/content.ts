@@ -48,8 +48,8 @@ window.addEventListener("click", (event: MouseEvent) => {
     }, 1000);
   } else if (window.location.href != url) {
     url = window.location.href;
-    clearTimeout(initTimeout);
-    initialize();
+    if (initTimeout) return;
+    initialize(500);
   }
 });
 
@@ -69,20 +69,26 @@ function addRefreshButton(): void {
 let initTimeout: ReturnType<typeof setTimeout>;
 
 window.addEventListener("popstate", () => {
-  clearTimeout(initTimeout);
-  initialize();
+  if (initTimeout) return;
+  initialize(500);
 });
 
+let initialized = false;
+
 // Initialize everything after a short delay.
-function initialize(): void {
+function initialize(timeout: number): void {
+  if (initialized) return;
+
   initTimeout = setTimeout(() => {
     addRefreshButton();
     makeReadonlyInterfaces();
     makeMainEditableInterface();
     makePRCodeInterface();
     makeCodeEditableInterface();
-  }, 1000);
+    initialized = true;
+  }, timeout);
 }
 
-clearTimeout(initTimeout);
-initialize();
+if (!initTimeout && !initialized) {
+  initialize(500);
+}

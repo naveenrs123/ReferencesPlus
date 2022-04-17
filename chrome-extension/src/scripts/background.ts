@@ -1,5 +1,5 @@
 import { matchUrl } from "./common/constants";
-import { ExtensionMessage, GitHubTabState, TabState } from "./common/interfaces";
+import { ExtensionMessage, GitHubTabState, TabState, TabTimeoutMap } from "./common/interfaces";
 
 /**
  * Create the Context Menu items required for the extension.
@@ -20,43 +20,86 @@ function createContextMenuItems(): void {
   });
 }
 
+const tabTimeoutMap: TabTimeoutMap = {};
+
 /**
  * Listener to insert relevant content scripts into a GitHub PR page.
  */
 chrome.tabs.onUpdated.addListener(
   (tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
     if (changeInfo.status == "complete") {
+      if (tabId in tabTimeoutMap) return;
       if (matchUrl.test(tab.url)) {
-        chrome.scripting
-          .executeScript({
-            target: { tabId: tabId },
-            files: ["vendors-content.js", "content.js"],
-          })
-          .then(() => {
-            return chrome.scripting.insertCSS({
+        tabTimeoutMap[tabId] = setTimeout(() => {
+          chrome.scripting
+            .executeScript({
               target: { tabId: tabId },
-              files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
+              files: ["vendors-content.js", "content.js"],
+            })
+            .then(() => {
+              return chrome.scripting.insertCSS({
+                target: { tabId: tabId },
+                files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
+              });
+            })
+            .then(() => {
+              return chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ["vendors-recorder.js", "recorder.js"],
+              });
+            })
+            .then(() => {
+              delete tabTimeoutMap[tabId];
+            })
+            .catch(() => {
+              return;
             });
-          })
-          .then(() => {
-            void chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              files: ["vendors-recorder.js", "recorder.js"],
-            });
-          })
-          .catch(() => {
-            return;
-          });
+        }, 1000);
       } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(tab.url)) {
         // Don't insert into internal pages.
-        void chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: ["vendors-recorder.js", "recorder.js"],
-        });
+        tabTimeoutMap[tabId] = setTimeout(() => {
+          void chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ["vendors-recorder.js", "recorder.js"],
+          });
+        }, 1000);
       }
     }
   }
 );
+
+/* chrome.webNavigation.onHistoryStateUpdated.addListener(
+  (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => {
+    if (matchUrl.test(details.url)) {
+      chrome.scripting
+        .executeScript({
+          target: { tabId: details.tabId },
+          files: ["vendors-content.js", "content.js"],
+        })
+        .then(() => {
+          return chrome.scripting.insertCSS({
+            target: { tabId: details.tabId },
+            files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
+          });
+        })
+        .then(() => {
+          void chrome.scripting.executeScript({
+            target: { tabId: details.tabId },
+            files: ["vendors-recorder.js", "recorder.js"],
+          });
+        })
+        .catch(() => {
+          return;
+        });
+    } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(details.url)) {
+      // Don't insert into internal pages.
+      void chrome.scripting.executeScript({
+        target: { tabId: details.tabId },
+        files: ["vendors-recorder.js", "recorder.js"],
+      });
+    }
+  }
+); */
 
 /**
  * An event listener to check for interactions with Context Menu items.
