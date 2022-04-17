@@ -109,16 +109,26 @@ def load_session(session_id):
         doc = collection.find_one({"sessionDetails.id": session_id})
 
         if doc is not None:
-            byte_events = gzip.decompress(doc["encodedEvents"])
-            string_events = bytes.decode(byte_events, "utf-8")
+            if "encodedEvents" in doc:
+                byte_events = gzip.decompress(doc["encodedEvents"])
+                string_events = bytes.decode(byte_events, "utf-8")
 
-            return_doc = {
-                "events": None,
-                "stringEvents": string_events,
-                "sessionDetails": doc["sessionDetails"],
-                "comments": doc["comments"],
-                "nextCommentId": doc["nextCommentId"]
-            }
+                return_doc = {
+                    "events": None,
+                    "stringEvents": string_events,
+                    "sessionDetails": doc["sessionDetails"],
+                    "comments": doc["comments"],
+                    "nextCommentId": doc["nextCommentId"]
+                }
+            else:
+                return_doc = {
+                    "events": None,
+                    "stringEvents": doc["stringEvents"],
+                    "sessionDetails": doc["sessionDetails"],
+                    "comments": doc["comments"],
+                    "nextCommentId": doc["nextCommentId"]
+                }
+
             return jsonify(return_doc)
 
         return jsonify({})
