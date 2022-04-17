@@ -31,7 +31,7 @@ export function MainInterface(idx: number, isEvenlyPadded = false): HTMLDivEleme
   label.id = `refg-comment-info-${idx}`;
   label.classList.add("d-none", "m-2", "text-center");
   label.innerText =
-    "Double click on comments to copy them. Click on 'Copy All' to copy all comments.";
+    "Click the top-right icon on a comment to copy it. Click on 'Copy All' to copy all comments.";
 
   const container = utilComponents.InterfaceContainer(idx, isEvenlyPadded, false);
   container.addEventListener("click", (event: MouseEvent) => event.preventDefault());

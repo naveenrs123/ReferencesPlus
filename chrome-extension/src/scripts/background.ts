@@ -58,9 +58,14 @@ chrome.tabs.onUpdated.addListener(
       } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(tab.url)) {
         // Don't insert into internal pages.
         tabTimeoutMap[tabId] = setTimeout(() => {
-          void chrome.scripting.executeScript({
+          chrome.scripting.executeScript({
             target: { tabId: tab.id },
             files: ["vendors-recorder.js", "recorder.js"],
+          }).then(() => {
+            delete tabTimeoutMap[tabId];
+          })
+          .catch(() => {
+            return;
           });
         }, 1000);
       }

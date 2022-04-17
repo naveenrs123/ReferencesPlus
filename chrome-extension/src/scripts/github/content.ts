@@ -49,7 +49,7 @@ window.addEventListener("click", (event: MouseEvent) => {
   } else if (window.location.href != url) {
     url = window.location.href;
     if (initTimeout) return;
-    initialize(500);
+    initialize();
   }
 });
 
@@ -70,13 +70,13 @@ let initTimeout: ReturnType<typeof setTimeout>;
 
 window.addEventListener("popstate", () => {
   if (initTimeout) return;
-  initialize(500);
+  initialize();
 });
 
 let initialized = false;
 
 // Initialize everything after a short delay.
-function initialize(timeout: number): void {
+function initialize(timeout = 1000): void {
   if (initialized) return;
 
   initTimeout = setTimeout(() => {
@@ -90,5 +90,5 @@ function initialize(timeout: number): void {
 }
 
 if (!initTimeout && !initialized) {
-  initialize(500);
+  initialize();
 }

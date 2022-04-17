@@ -13,7 +13,8 @@ export function MainInterfaceR(idx: number): HTMLDivElement {
   const label: HTMLLabelElement = document.createElement("label");
   label.id = `refg-comment-info-r-${idx}`;
   label.classList.add("d-none", "m-2", "text-center");
-  label.innerText = "Double click on comments to copy them. Click on 'Copy All' to copy all comments.";
+  label.innerText =
+    "Click the top-right icon on a comment to copy it. Click on 'Copy All' to copy all comments.";
 
   const container = InterfaceContainer(idx, false, true);
   container.appendChild(player);
