@@ -131,8 +131,8 @@ function handleSave(container: HTMLDivElement, data: CommentData): void {
       defaultPostSave(saveRes, data.idx);
       container.replaceWith(SavedComment(data));
     })
-    .catch((err) => {
-      console.log(err);
+    .catch(() => {
+      return;
     });
 }
 

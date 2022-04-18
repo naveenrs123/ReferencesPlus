@@ -57,6 +57,7 @@ function tagText(textContent: string, sessionCommentsArr: string[]): interfaces.
 }
 
 function onViewContextClick(event: MouseEvent): void {
+  console.log("LISTENER CLICK");
   const button = event.target as HTMLButtonElement;
   const commentBody = helpers.findAncestor(button, "js-comment-body");
   const idx = parseInt(button.getAttribute("data-idx"));
@@ -114,8 +115,7 @@ function onViewContextClick(event: MouseEvent): void {
   }
 }
 
-function loadSession(sessionId: string, existingIds?: string[]): Promise<interfaces.CoreState> {
-  console.log(`LOAD SESSION: ${sessionId}`);
+function loadSession(sessionId: string): Promise<interfaces.CoreState> {
   return fetch(`${constants.getFetchUrl()}/loadSession/${sessionId}`, {
     method: "POST",
     headers: {
@@ -154,7 +154,7 @@ export function loadReferencedSessions(idx: number): void {
         button.setAttribute("data-idx", idx.toString());
         button.setAttribute("data-sessionId", sessionId);
         button.setAttribute("data-commentId", commentId.toString());
-        button.addEventListener("click", onViewContextClick);
+        button.onclick = onViewContextClick;
         nodes.push(button);
       } else {
         nodes.push(document.createTextNode(tag.text));
@@ -177,6 +177,7 @@ export function makeReadonlyInterfaces(): void {
     const sessionId = elem.getAttribute("data-sessionId");
     buttonIndexes.add(index);
     buttonSessionIds.add(sessionId);
+    elem.onclick = onViewContextClick;
   });
 
   buttonSessionIds.forEach((sessionId: string) => {
@@ -199,8 +200,8 @@ export function makeReadonlyInterfaces(): void {
 
       const promiseArray: Promise<interfaces.CoreState>[] = [];
       sessionIds.forEach((sessionId: string) => {
-        if (sessionId in helpers.loadedSessions) return;
-        promiseArray.push(loadSession(sessionId, btnSessionIds));
+        if (sessionId in helpers.loadedSessions || btnSessionIds.includes(sessionId)) return;
+        promiseArray.push(loadSession(sessionId));
       });
 
       return Promise.all(promiseArray).then((newSessions: interfaces.CoreState[]) => {
@@ -220,8 +221,8 @@ export function makeReadonlyInterfaces(): void {
         });
       });
     })
-    .catch((err) => {
-      console.log(err);
+    .catch(() => {
+      return;
     });
 }
 

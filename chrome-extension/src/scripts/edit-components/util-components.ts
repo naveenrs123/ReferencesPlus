@@ -94,6 +94,7 @@ export function ShowInterfaceBtn(
   btn = document.createElement("button");
   btn.id = id;
   btn.setAttribute("role", "button");
+  btn.setAttribute("data-idx", idx.toString());
   btn.classList.add("toolbar-item", "details-reset", "btn-octicon");
   btn.style.fill = "#57606a";
 

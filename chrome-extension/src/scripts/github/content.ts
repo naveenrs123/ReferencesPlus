@@ -71,7 +71,7 @@ window.addEventListener("popstate", () => {
 });
 
 // Initialize everything after a short delay.
-function initialize(timeout = 250): void {
+function initialize(timeout = 500): void {
   if (initTimeout != undefined || initialized) return;
 
   initialized = true;

@@ -115,8 +115,8 @@ function handleDel(data: CommentData, container: HTMLDivElement): void {
     .then((saveRes: SaveResponse) => {
       defaultPostSave(saveRes, data.idx);
     })
-    .catch((err) => {
-      console.log(err);
+    .catch(() => {
+      return;
     });
 }
 
