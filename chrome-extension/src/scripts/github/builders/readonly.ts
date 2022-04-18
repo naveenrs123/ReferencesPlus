@@ -114,9 +114,7 @@ function onViewContextClick(event: MouseEvent): void {
   }
 }
 
-function loadSession(sessionId: string): Promise<void> {
-  if (sessionId in helpers.loadedSessions) return;
-
+function loadSession(sessionId: string, existingIds?: string[]): Promise<interfaces.CoreState> {
   console.log(`LOAD SESSION: ${sessionId}`);
   return fetch(`${constants.getFetchUrl()}/loadSession/${sessionId}`, {
     method: "POST",
@@ -127,12 +125,7 @@ function loadSession(sessionId: string): Promise<void> {
   })
     .then((res: Response) => res.json())
     .then((data: interfaces.CoreState) => {
-      if ("sessionDetails" in data) {
-        helpers.loadedSessions[data.sessionDetails.id] = data;
-        helpers.loadedSessions[data.sessionDetails.id].events = JSON.parse(
-          data.stringEvents
-        ) as eventWithTime[];
-      }
+      return data;
     });
 }
 
@@ -175,32 +168,52 @@ export function loadReferencedSessions(idx: number): void {
 
 export function makeReadonlyInterfaces(): void {
   helpers.clearReadOnlyInterfaces();
-  const existingButtons: Promise<void>[] = [];
+  const buttonSessionIds: Set<string> = new Set();
+  const existingBtnPromises: Promise<interfaces.CoreState>[] = [];
 
   document.querySelectorAll(".refg-view-interface").forEach((elem: HTMLButtonElement) => {
     elem.classList.remove("btn-primary");
     const index = parseInt(elem.getAttribute("data-idx"));
     const sessionId = elem.getAttribute("data-sessionId");
     buttonIndexes.add(index);
-    existingButtons.push(loadSession(sessionId));
+    buttonSessionIds.add(sessionId);
   });
 
-  Promise.all(existingButtons)
-    .then(() => {
-      const indexes: number[] = [];
+  buttonSessionIds.forEach((sessionId: string) => {
+    if (sessionId in helpers.loadedSessions) return;
+    existingBtnPromises.push(loadSession(sessionId));
+  });
 
+  Promise.all(existingBtnPromises)
+    .then((btnSessions: interfaces.CoreState[]) => {
+      const btnSessionIds = btnSessions.map(
+        (value: interfaces.CoreState) => value.sessionDetails.id
+      );
+
+      const indexes: number[] = [];
       document.querySelectorAll('[class*="js-comment-body"]').forEach((elem: HTMLElement) => {
         const idx = processCommentBody(elem);
         indexes.push(idx);
         findSessions(elem, idx, sessionIds, sessionCommentMap, textNodes);
       });
 
-      const promiseArray: Promise<void>[] = [];
+      const promiseArray: Promise<interfaces.CoreState>[] = [];
       sessionIds.forEach((sessionId: string) => {
-        promiseArray.push(loadSession(sessionId));
+        if (sessionId in helpers.loadedSessions) return;
+        promiseArray.push(loadSession(sessionId, btnSessionIds));
       });
 
-      return Promise.all(promiseArray).then(() => {
+      return Promise.all(promiseArray).then((newSessions: interfaces.CoreState[]) => {
+        newSessions.push(...btnSessions);
+        newSessions.forEach((data: interfaces.CoreState) => {
+          if ("sessionDetails" in data) {
+            helpers.loadedSessions[data.sessionDetails.id] = data;
+            helpers.loadedSessions[data.sessionDetails.id].events = JSON.parse(
+              data.stringEvents
+            ) as eventWithTime[];
+          }
+        });
+
         indexes.forEach((idx: number) => {
           if (!(idx in textNodes)) return;
           loadReferencedSessions(idx);

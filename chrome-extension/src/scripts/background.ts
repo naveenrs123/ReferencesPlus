@@ -54,7 +54,7 @@ chrome.tabs.onUpdated.addListener(
           .catch(() => {
             return;
           });
-      }, 1000);
+      }, 1200);
     } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(tab.url)) {
       // Don't insert into internal pages.
       tabTimeoutMap[tabId] = setTimeout(() => {
@@ -69,7 +69,7 @@ chrome.tabs.onUpdated.addListener(
           .catch(() => {
             return;
           });
-      }, 1000);
+      }, 1200);
     }
   }
 );

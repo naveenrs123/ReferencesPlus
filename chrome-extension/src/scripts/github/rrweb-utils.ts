@@ -3,12 +3,7 @@ import { color, mouseOutBorders, mouseOverBorders } from "./borders";
 import { eventWithTime, Mirror } from "rrweb/typings/types";
 import { INode } from "rrweb-snapshot";
 import { refBegin, refEnd, waitForPlayerClass } from "../common/constants";
-import {
-  findAncestor,
-  loadedSessions,
-  readOnlyInterfaces,
-  stateMap,
-} from "../common/helpers";
+import { findAncestor, loadedSessions, readOnlyInterfaces, stateMap } from "../common/helpers";
 import { ReadOnlyInterface } from "../common/interfaces";
 
 function onPlayerStateChange(state: { payload: string }, mainPlayer: rrwebPlayer): void {
@@ -148,7 +143,7 @@ export function injectMainPlayer(events: eventWithTime[], idx: number, website: 
     }
   );
 
-  state.mainPlayer.goto(50, false);
+  state.mainPlayer.goto(100, false);
 }
 
 export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
@@ -205,5 +200,5 @@ export function injectReadOnlyPlayer(idx: number, sessionId: string): void {
     }
   );
 
-  state.mainPlayer.goto(50, false);
+  state.mainPlayer.goto(100, false);
 }

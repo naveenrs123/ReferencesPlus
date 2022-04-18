@@ -39,18 +39,14 @@ window.addEventListener("click", (event: MouseEvent) => {
       makeReadonlyInterfaces();
     }, 3000);
   } else if (window.location.href != url) {
+    initialized = false;
     url = window.location.href;
-    const btn: HTMLButtonElement = document.querySelector(".refg-refresh-button");
-    if (btn) btn.remove();
-
-    if (constants.matchUrl.test(url)) initialize();
   }
 });
 
 function addRefreshButton(): void {
   let btn: HTMLButtonElement = document.querySelector(".refg-refresh-button");
   if (btn) btn.remove();
-
   btn = document.createElement("button");
   btn.classList.add("refg-refresh-button", "position-fixed", "btn", "p-2");
   btn.style.bottom = "30px";
@@ -64,25 +60,31 @@ function addRefreshButton(): void {
 }
 
 let initTimeout: ReturnType<typeof setTimeout>;
+let initialized = false;
 
 window.addEventListener("popstate", () => {
-  initialize();
+  if (constants.matchUrl.test(url)) {
+    initialize();
+  } else {
+    document.querySelector(".refg-refresh-button")?.remove();
+  }
 });
 
 // Initialize everything after a short delay.
-function initialize(timeout = 1000): void {
-  if (initTimeout) return;
+function initialize(timeout = 250): void {
+  if (initTimeout != undefined || initialized) return;
+
+  initialized = true;
 
   initTimeout = setTimeout(() => {
     const matchesArr = window.location.href.match(constants.matchUrl);
     helpers.prDetails.userOrOrg = matchesArr[1];
     helpers.prDetails.repository = matchesArr[2];
-
-    addRefreshButton();
     makeReadonlyInterfaces();
     makeMainEditableInterface();
     makePRCodeInterface();
     makeCodeEditableInterface();
+    addRefreshButton();
   }, timeout);
 }
 
