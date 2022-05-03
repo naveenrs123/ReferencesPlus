@@ -7,13 +7,9 @@ This project aims to enhance the GitHub PR Discussion experience by embedding we
 
 There is room to extend this project by adding more features as well, such as code references, indirect references, and greater support for platform-specific items.
 
-<br>
-
 ### **Backend Server**
 
 **[Information and Setup Guide](backend-server/guide.md)**
-
-<br>
 
 ### **Chrome Extension**
 
