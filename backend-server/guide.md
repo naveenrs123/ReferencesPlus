@@ -8,7 +8,7 @@ The database is a **MongoDB** database hosted on Microsoft Azure.
 
 There is a function_parser library that is copied locally with a few modifications from the original. These changes were done to make the library work with javascript_code correctly and fix some bugs. Unfortunately, it does not appear to be functional. **Use at your own risk!**
 
-Locally, the version of Python used is `3.9.7`.
+Locally, the version of Python used is `3.9.7`, installed through Anaconda. You can install Anaconda [here](https://www.anaconda.com/products/distribution). Alternatively, you should be able to directly install Python. 
 
 ### **Environment Variables**
 Several environment variables are used by the backend server. These are:
