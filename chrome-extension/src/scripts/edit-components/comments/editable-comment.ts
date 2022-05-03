@@ -1,14 +1,29 @@
-import { convertMsToTime, defaultPostSave, saveChanges, stateMap } from "../../common/helpers";
+/**
+ * Creates an editable comment.
+ */
+
+import {
+  convertMsToTimestamp,
+  defaultPostSave,
+  saveChanges,
+  splitOnRefs,
+  stateMap,
+} from "../../common/helpers";
 import { ButtonColor, CommentData, SaveResponse } from "../../common/interfaces";
 import { color } from "../../github/borders";
 import { SavedComment } from "./saved-comment";
 import { MiniPlayerBtn } from "../util-components";
-import { refSymbol } from "../../common/constants";
+import { saveCommentMatch } from "../../common/constants";
 
-export function Comment(data: CommentData): HTMLDivElement {
+/**
+ * Builds an editable comment with the given data.
+ * @param data the data for the editable comment.
+ * @returns A {@link HTMLDivElement} with the editable comment.
+ */
+export function EditableComment(data: CommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
   const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
-  timestampLabel.innerText = convertMsToTime(timestamp);
+  timestampLabel.innerText = convertMsToTimestamp(timestamp);
   timestampLabel.classList.add("Link--muted");
   timestampLabel.addEventListener("click", () => {
     stateMap[data.idx].mainPlayer.goto(timestamp, false);
@@ -71,18 +86,26 @@ export function Comment(data: CommentData): HTMLDivElement {
   return container;
 }
 
+/**
+ * Click handler for the "Delete" button.
+ * @param container The container containing the button.
+ */
 function handleDel(container: HTMLDivElement): void {
   container.remove();
 }
 
+/**
+ * Click handler for the "Save" button.
+ * @param container The container containing the button.
+ * @param data The comment data
+ */
 function handleSave(container: HTMLDivElement, data: CommentData): void {
   const splitArray: string[] = splitOnRefs(data.rawText);
   const spans: HTMLSpanElement[] = [];
 
   splitArray.forEach((text: string) => {
     const span: HTMLSpanElement = document.createElement("span");
-    const pattern = RegExp(`${refSymbol}\\[(\\d+)\\]${refSymbol}`, "i");
-    const matches = text.match(pattern); // match with a group to get the node id
+    const matches = text.match(saveCommentMatch); // match with a group to get the node id
     if (matches != null) {
       span.classList.add("Link");
       const nodeId = parseInt(matches[1]);
@@ -134,31 +157,4 @@ function handleSave(container: HTMLDivElement, data: CommentData): void {
     .catch(() => {
       return;
     });
-}
-
-function splitOnRefs(splitString: string): string[] {
-  const splitArray: string[] = [];
-  let str = "";
-  let matchingRef = false;
-  for (const c of splitString) {
-    if (c == refSymbol) {
-      if (!matchingRef && str.length > 0) {
-        splitArray.push(str);
-        matchingRef = true;
-        str = c;
-      } else if (matchingRef && str.length > 0) {
-        str += c;
-        matchingRef = false;
-        splitArray.push(str);
-        str = "";
-      } else {
-        str += c;
-        matchingRef = true;
-      }
-    } else {
-      str += c;
-    }
-  }
-  splitArray.push(str);
-  return splitArray;
 }

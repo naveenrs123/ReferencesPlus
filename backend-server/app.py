@@ -83,7 +83,7 @@ def insert_session():
 
 @app.route("/checkUnique/<title>", methods=["POST"])
 def check_unique(title):
-    """ Check if session is unique. """
+    """ Check if a session is unique. NOT USED IN CURRENT IMPLEMENTATION. """
 
     if request.get_json() is not None:
         json_data = request.get_json()
@@ -100,7 +100,7 @@ def check_unique(title):
 
 @app.route("/loadSession/<session_id>", methods=["POST"])
 def load_session(session_id):
-    """ Load a session if it exists """
+    """ Load a session if it exists. """
     if request.get_json() is not None:
         json_data = request.get_json()
         sessions = client.get_database("sessions")

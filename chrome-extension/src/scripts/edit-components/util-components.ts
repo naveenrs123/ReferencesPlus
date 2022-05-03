@@ -1,6 +1,16 @@
+/**
+ * Builds several utility components and containers.
+ */
+
 import { buttonColorToClass } from "../common/helpers";
 import { ButtonColor } from "../common/interfaces";
 
+/**
+ * Builds the player container.
+ * @param idx The index of the relevant interface.
+ * @param readOnly Flag identifying whether the interface is readonly.
+ * @returns A {@link HTMLDivElement} containing the player placeholder.
+ */
 export function Player(idx: number, readOnly = false): HTMLDivElement {
   const player = document.createElement("div");
   player.id = readOnly ? `refg-github-player-r-${idx}` : `refg-github-player-${idx}`;
@@ -22,6 +32,12 @@ export function Player(idx: number, readOnly = false): HTMLDivElement {
   return player;
 }
 
+/**
+ * Builds the container for anchored comments.
+ * @param idx The index of the relevant interface.
+ * @param readOnly Flag identifying whether the interface is readonly.
+ * @returns A {@link HTMLDivElement} that is the comment container.
+ */
 export function Comments(idx: number, readOnly = false): HTMLDivElement {
   const comments = document.createElement("div");
   comments.id = readOnly ? `refg-comments-r-${idx}` : `refg-comments-${idx}`;
@@ -32,22 +48,41 @@ export function Comments(idx: number, readOnly = false): HTMLDivElement {
   return comments;
 }
 
+/**
+ * Builds a button for use in the player interface.
+ * @param text Text of the button.
+ * @param color Button color.
+ * @param toggleClasses Classes that can be used to toggle the button visibility.
+ * @param disabled decides whether the button is disabled on creation.
+ * @param id Id of the button.
+ * @returns a button.
+ */
 export function PlayerBtn(
   text: string,
   color: ButtonColor = ButtonColor.Default,
-  toggleClass: string[] = [],
+  toggleClasses: string[] = [],
   disabled?: boolean,
   id?: string
 ): HTMLButtonElement {
   const btn = document.createElement("button");
   if (id !== undefined) btn.id = id;
-  btn.classList.add("m-2", "btn", buttonColorToClass(color), ...toggleClass);
+  btn.classList.add("m-2", "btn", buttonColorToClass(color), ...toggleClasses);
   btn.setAttribute("type", "button");
   if (disabled) btn.setAttribute("aria-disabled", "true");
   btn.innerText = text;
   return btn;
 }
 
+/**
+ * Builds a mini button for use in the player interface.
+ * @param text Text of the button.
+ * @param color Button color.
+ * @param toggleClasses Classes that can be used to toggle visibility.
+ * @param margins decides the margins to use.
+ * @param disabled decides whether the button is disabled on creation.
+ * @param id Id of the button.
+ * @returns a button.
+ */
 export function MiniPlayerBtn(
   text: string,
   color: ButtonColor,
@@ -65,6 +100,13 @@ export function MiniPlayerBtn(
   return btn;
 }
 
+/**
+ * Builds a text input.
+ * @param placeholder Placeholder text.
+ * @param toggleClass Classes that can be used to toggle visibility.
+ * @param id Id of the text input.
+ * @returns the text input.
+ */
 export function TextInput(
   placeholder: string,
   toggleClass: string[] = [],
@@ -109,7 +151,7 @@ export function ShowInterfaceBtn(
 }
 
 /**
- * Create a container div element that will contain emulator interactions.
+ * Creates a container div element that will contain emulator interactions.
  * @returns The created container div.
  */
 export function InterfaceContainer(

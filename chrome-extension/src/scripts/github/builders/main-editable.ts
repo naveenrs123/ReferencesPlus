@@ -1,10 +1,19 @@
+/**
+ * Builds the main interface above the PR comment box in the Conversations tab.
+ */
+
 import * as constants from "../../common/constants";
 import * as helpers from "../../common/helpers";
 import { ExtensionMessage } from "../../common/interfaces";
 import { MainInterface } from "../../edit-components/sections/main-interface";
 import * as utilComponents from "../../edit-components/util-components";
 
-function buttonClicked(event: MouseEvent, idx: number): void {
+/**
+ * Handler for a click event on the activate button.
+ * @param event The mouse event.
+ * @param idx The index used to identify the interface and its associated state.
+ */
+function activateButtonClicked(event: MouseEvent, idx: number): void {
   console.log("MAIN CLICKED");
   event.preventDefault();
   const timelineActions = document.querySelector(".discussion-timeline-actions");
@@ -45,16 +54,6 @@ function buttonClicked(event: MouseEvent, idx: number): void {
 }
 
 /**
- * Builds the main menu container.
- * @returns A div representing the main menu container.
- */
-/* function MainMenu(): HTMLDivElement {
-  const container = document.createElement("div");
-  container.classList.add("d-flex", "flex-justify-between");
-  return container;
-} */
-
-/**
  * Creates an editable interface for the main comment box on the page.
  */
 export function makeMainEditableInterface(): void {
@@ -67,7 +66,7 @@ export function makeMainEditableInterface(): void {
   let btn: HTMLButtonElement = detailsParent.querySelector("[id^=refg-show-interface]");
   if (btn) {
     btn.onclick = (event: MouseEvent): void =>
-      buttonClicked(event, parseInt(btn.getAttribute("data-idx")));
+      activateButtonClicked(event, parseInt(btn.getAttribute("data-idx")));
     return;
   }
 
@@ -75,7 +74,7 @@ export function makeMainEditableInterface(): void {
   const idx = helpers.counter;
   helpers.updateCounter();
   btn = utilComponents.ShowInterfaceBtn(detailsParent, idx);
-  btn.onclick = (event: MouseEvent): void => buttonClicked(event, idx);
+  btn.onclick = (event: MouseEvent): void => activateButtonClicked(event, idx);
 
   detailsParent.appendChild(btn);
 

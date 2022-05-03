@@ -1,12 +1,21 @@
-import { convertMsToTime, readOnlyInterfaces } from "../../common/helpers";
+/**
+ * Builds a readonly comment.
+ */
+
+import { convertMsToTimestamp, readOnlyInterfaces, splitOnRefs } from "../../common/helpers";
 import { CommentData } from "../../common/interfaces";
 import { refSymbol } from "../../common/constants";
 import { color } from "../../github/borders";
 
+/**
+ * Creates a readonly comment with the given data.
+ * @param data The comment data.
+ * @returns A {@link HTMLDivElement} with the readonly comment.
+ */
 export function CommentR(data: CommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
   const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
-  timestampLabel.innerText = convertMsToTime(timestamp);
+  timestampLabel.innerText = convertMsToTimestamp(timestamp);
   timestampLabel.classList.add("Link--muted");
   timestampLabel.addEventListener("click", () => {
     readOnlyInterfaces[data.idx].mainPlayer.goto(timestamp, false);
@@ -89,6 +98,11 @@ export function CommentR(data: CommentData): HTMLDivElement {
   return container;
 }
 
+/**
+ * Processes the comment data and creates the interactive comment text.
+ * @param data the comment data.
+ * @param idx The index linked to the relevant interface.
+ */
 export function processComment(data: CommentData, idx: number): void {
   const splitArray: string[] = splitOnRefs(data.rawText);
   const spans: HTMLSpanElement[] = [];
@@ -131,31 +145,4 @@ export function processComment(data: CommentData, idx: number): void {
     data.contents.appendChild(span);
   });
   data.idx = idx;
-}
-
-function splitOnRefs(splitString: string): string[] {
-  const splitArray: string[] = [];
-  let str = "";
-  let matchingRef = false;
-  for (const c of splitString) {
-    if (c == refSymbol) {
-      if (!matchingRef && str.length > 0) {
-        splitArray.push(str);
-        matchingRef = true;
-        str = c;
-      } else if (matchingRef && str.length > 0) {
-        str += c;
-        matchingRef = false;
-        splitArray.push(str);
-        str = "";
-      } else {
-        str += c;
-        matchingRef = true;
-      }
-    } else {
-      str += c;
-    }
-  }
-  splitArray.push(str);
-  return splitArray;
 }

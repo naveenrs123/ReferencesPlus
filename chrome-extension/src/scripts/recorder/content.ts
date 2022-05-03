@@ -1,3 +1,7 @@
+/**
+ * Entry point for code that records interactions on any website.
+ */
+
 import { ExtensionMessage } from "../common/interfaces";
 import { record } from "rrweb";
 import { eventWithTime, listenerHandler } from "rrweb/typings/types";
@@ -19,7 +23,11 @@ chrome.runtime.onMessage.addListener(function (m: ExtensionMessage) {
   }
 });
 
+/**
+ * Records interactions using rrweb.
+ */
 function recordInteractions(): void {
+  events = [];
   stopFn = record({
     emit(event) {
       events.push(event);
@@ -27,6 +35,9 @@ function recordInteractions(): void {
   });
 }
 
+/**
+ * Stops recording.
+ */
 function stopRecording(): void {
   if (stopFn && events.length > 2) {
     stopFn();

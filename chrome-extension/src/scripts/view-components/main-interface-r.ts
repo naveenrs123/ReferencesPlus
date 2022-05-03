@@ -1,12 +1,12 @@
 import { Comments, InterfaceContainer, Player } from "../edit-components/util-components";
-import { LeftButtonsR } from "./sections/left-buttons-r";
+import { PlayerButtonsR } from "./sections/player-buttons-r";
 
 /**
  * Builds the contents of the player container for emulator interactions.
  * @param playerContainer The container to which the contents will be added.
  */
 export function MainInterfaceR(idx: number): HTMLDivElement {
-  const closeResetSection: HTMLDivElement = LeftButtonsR(idx);
+  const closeResetSection: HTMLDivElement = PlayerButtonsR(idx);
   const player: HTMLDivElement = Player(idx, true);
   const comments: HTMLDivElement = Comments(idx, true);
 

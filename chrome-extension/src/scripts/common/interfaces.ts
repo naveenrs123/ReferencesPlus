@@ -2,16 +2,7 @@
 import rrwebPlayer from "rrweb-player";
 import { eventWithTime } from "rrweb/typings/types";
 
-export interface HoverInfo {
-  node: HTMLElement;
-  posX: number;
-  posY: number;
-}
-
-export interface IDictionary<TValue> {
-  [id: string]: TValue;
-}
-
+// GENERAL
 export interface ExtensionMessage {
   action: string;
   source: string;
@@ -28,6 +19,11 @@ export enum ButtonColor {
 }
 
 // INTERFACE STATE
+export interface PRDetails {
+  userOrOrg: string;
+  repository: string;
+}
+
 export interface SessionDetails {
   title: string;
   website: string;
@@ -64,35 +60,20 @@ export interface EditableInterface extends CoreState {
   allowOverwrite?: boolean;
 }
 
+// TEXT PROCESSING
+export interface TextWithSessions {
+  node: Node;
+  refs: string[];
+}
+
+export interface TaggedText {
+  text: string;
+  isSessionString: boolean;
+}
+
+// MAPS
 export interface EditableInterfacesMap {
   [id: number]: EditableInterface;
-}
-
-export interface LoadedSessions {
-  [sessionId: string]: CoreState;
-}
-// INTERFACE STATE
-
-export interface GitHubTabState {
-  state: TabState;
-}
-
-export interface TabState {
-  tabId: number;
-  idx: number;
-}
-
-export interface PRDetails {
-  userOrOrg: string;
-  repository: string;
-}
-
-export interface SaveResponse {
-  id: string;
-}
-
-export interface CheckUniqueResponse {
-  isUnique: boolean;
 }
 
 export interface SessionCommentMap {
@@ -102,20 +83,37 @@ export interface SessionCommentMap {
   };
 }
 
-export interface TextWithSessions {
-  node: Node;
-  refs: string[];
-}
-
 export interface TextWithSessionsMap {
   [idx: number]: TextWithSessions[];
-}
-
-export interface TaggedText {
-  text: string;
-  isSessionString: boolean;
 }
 
 export interface TabTimeoutMap {
   [tabId: number]: ReturnType<typeof setTimeout>;
 }
+
+export interface LoadedSessionsMap {
+  [sessionId: string]: CoreState;
+}
+
+// TAB STATE
+export interface GitHubTabState {
+  state: TabState;
+}
+
+export interface TabState {
+  tabId: number;
+  idx: number;
+}
+
+// RESPONSES
+export interface SaveResponse {
+  id: string;
+}
+
+export interface CheckUniqueResponse {
+  isUnique: boolean;
+}
+
+
+
+

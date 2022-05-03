@@ -1,10 +1,19 @@
+/**
+ * Contains the buttons to enable the main functions of the editable interface.
+ */
+
 import { waitForPlayerClass, waitForSaveClass } from "../../common/constants";
 import { Comments, Player, PlayerBtn } from "../util-components";
-import { Comment } from "../comments/comment";
+import { EditableComment } from "../comments/editable-comment";
 import { ButtonColor, CommentData, ExtensionMessage } from "../../common/interfaces";
 import { stateMap } from "../../common/helpers";
 
-export function LeftButtons(idx: number): HTMLDivElement {
+/**
+ * Builds the player buttons for a particular interface.
+ * @param idx The index of the interface.
+ * @returns A {@link HTMLDivElement} containing the player buttons.
+ */
+export function PlayerButtons(idx: number): HTMLDivElement {
   const close: HTMLButtonElement = PlayerBtn("Close");
   close.addEventListener("click", (event: MouseEvent) => handleClose(event, idx));
   const reset: HTMLButtonElement = PlayerBtn("Reset");
@@ -43,6 +52,11 @@ export function LeftButtons(idx: number): HTMLDivElement {
   return leftButtonsContainer;
 }
 
+/**
+ * Click handler for the "Close" button.
+ * @param event Mouse event.
+ * @param idx Index of the relevant container.
+ */
 function handleClose(event: MouseEvent, idx: number): void {
   // const playerContainer = document.getElementById(`refg-github-player-${idx}`);
   // const oldModal = playerContainer.querySelector(`#refg-unsaved-changes-modal-${idx}`);
@@ -55,6 +69,11 @@ function handleClose(event: MouseEvent, idx: number): void {
   stateMap[idx] = null;
 }
 
+/**
+ * Click handler for the "Reset" button.
+ * @param event Mouse event.
+ * @param idx Index of the relevant container.
+ */
 function handleReset(event: MouseEvent, idx: number): void {
   const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
   const player = document.getElementById(`refg-github-player-${idx}`) as HTMLDivElement;
@@ -85,10 +104,15 @@ function handleReset(event: MouseEvent, idx: number): void {
   });
 }
 
+/**
+ * Click handler for the "Comment" button.
+ * @param event Mouse event.
+ * @param idx Index of the relevant container.
+ */
 function handleComment(event: MouseEvent, idx: number): void {
   const commentSection = document.getElementById(`refg-comments-${idx}`) as HTMLDivElement;
   commentSection.appendChild(
-    Comment({
+    EditableComment({
       comment_id: null, // give it a null comment id until it is saved.
       timestamp: stateMap[idx].mainPlayer.getReplayer().getCurrentTime(),
       idx: idx,
@@ -99,7 +123,11 @@ function handleComment(event: MouseEvent, idx: number): void {
   stateMap[idx].hasUnsavedChanges = true;
 }
 
-// TODO: Complete Function
+/**
+ * Click handler for the "Copy All" button.
+ * @param event Mouse event.
+ * @param idx Index of the relevant container.
+ */
 function handleCopyAll(event: MouseEvent, idx: number): void {
   const btn = event.target as HTMLButtonElement;
   if (btn.getAttribute("aria-disabled") === "true") return;

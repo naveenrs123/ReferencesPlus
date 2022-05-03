@@ -1,8 +1,17 @@
+/**
+ * Contains the buttons to enable the main functions of the readonly interface.
+ */
+
 import { readOnlyInterfaces } from "../../common/helpers";
 import { ButtonColor, CommentData, ReadOnlyInterface } from "../../common/interfaces";
 import { PlayerBtn } from "../../edit-components/util-components";
 
-export function LeftButtonsR(idx: number): HTMLDivElement {
+/**
+ * Builds the player buttons for a particular interface.
+ * @param idx The index of the interface.
+ * @returns A {@link HTMLDivElement} containing the player buttons.
+ */
+export function PlayerButtonsR(idx: number): HTMLDivElement {
   const copyAll: HTMLButtonElement = PlayerBtn("Copy All", ButtonColor.Default);
   copyAll.addEventListener("click", (event: MouseEvent) => handleCopyAll(event, idx));
 
@@ -17,6 +26,11 @@ export function LeftButtonsR(idx: number): HTMLDivElement {
   return leftButtonsContainer;
 }
 
+/**
+ * Click handler for the "Copy All" button.
+ * @param event Mouse event.
+ * @param idx Index of the relevant container.
+ */
 function handleCopyAll(event: MouseEvent, idx: number): void {
   const index = readOnlyInterfaces.findIndex((value: ReadOnlyInterface) => {
     return value.githubCommentId == idx;

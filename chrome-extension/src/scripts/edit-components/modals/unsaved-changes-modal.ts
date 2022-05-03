@@ -1,3 +1,9 @@
+/**
+ * NOT USED
+ *
+ * Would indicate unsaved changes to the user and prompt them to save.
+ */
+
 import { stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";
 import { ChangesSavedModal } from "./changes-saved-modal";

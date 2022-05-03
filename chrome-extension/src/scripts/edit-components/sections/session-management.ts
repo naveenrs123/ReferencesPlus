@@ -1,3 +1,10 @@
+/**
+ * NOT USED
+ *
+ * Would be a separate section to control session management. This would involve allowing users to
+ * save and load sessions manually.
+ */
+
 import { getFetchUrl } from "../../common/constants";
 import { prDetails, stateMap } from "../../common/helpers";
 import { CoreState, SaveResponse, SessionDetails } from "../../common/interfaces";

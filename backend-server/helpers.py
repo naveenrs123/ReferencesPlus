@@ -1,28 +1,8 @@
-from typing import Dict, List, TypedDict, Type
+""" Some small helpers. """
+
 from urllib.request import urlopen
 
-class SessionDetails(TypedDict):
-    title: str
-    website: str
-    id: int
-
-class CommentData(TypedDict):
-    comment_id: int
-    timestamp: int
-    idx: int
-    rawText: str
-
-class InterfaceStateReq(TypedDict):
-    events: List[any]
-    sessionDetails: SessionDetails
-    comments: List[CommentData]
-
-class InsertSessionReq(TypedDict):
-    prDetails: str
-    state: InterfaceStateReq
-
-
-def raw_file_to_line_array(file_url) -> Dict[str, List[str]]:
+def raw_file_to_line_array(file_url):
     """ Extract the contents of a file from a URL containing
         the raw contents."""
     file = urlopen(file_url)
@@ -41,7 +21,8 @@ def raw_file_to_line_array(file_url) -> Dict[str, List[str]]:
     return {"contents": contents, "lines": lines}
 
 
-def get_directory(path: str) -> str:
+def get_directory(path: str):
+    """ Get the directory from a path """
     path_tokens = path.split("/")
     if len(path_tokens) > 1:
         return path_tokens[len(path_tokens) - 2]

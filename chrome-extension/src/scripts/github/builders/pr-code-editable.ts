@@ -1,10 +1,22 @@
+/**
+ * Builds the interface for a comment directly on code in the beta files view and for a
+ * create PR comment box.
+ */
+
 import { betaCodeCommentQuery, makePrQuery } from "../../common/constants";
 import { counter, findAncestor, stateMap, updateCounter } from "../../common/helpers";
 import { ExtensionMessage } from "../../common/interfaces";
 import { MainInterface } from "../../edit-components/sections/main-interface";
 import { ShowInterfaceBtn } from "../../edit-components/util-components";
 
-function buttonClicked(
+/**
+ * Handler for a click event on the activate button.
+ * @param event The mouse event.
+ * @param idx The index used to identify the interface and its associated state.
+ * @param detailsParent Parent element of the activate button.
+ * @param isCodeComment Flag that determines what elements to retrieve.
+ */
+function activateButtonClicked(
   event: MouseEvent,
   idx: number,
   detailsParent: HTMLElement,
@@ -48,15 +60,9 @@ function buttonClicked(
   }
 }
 
-export function makePRCodeInterface(): void {
-  document.querySelectorAll(betaCodeCommentQuery).forEach((elem: HTMLElement) => {
-    makePrInterface(elem);
-  });
-  if (document.querySelector(makePrQuery)) {
-    makePrInterface(document.querySelector(makePrQuery), false);
-  }
-}
-
+/**
+ * Creates an editable interface for a code comment in the beta or a create pr comment box.
+ */
 function makePrInterface(elem: HTMLElement, isCodeComment = true): void {
   if (!elem) return;
   const detailsParent = elem.parentElement;
@@ -64,7 +70,12 @@ function makePrInterface(elem: HTMLElement, isCodeComment = true): void {
   let btn: HTMLButtonElement = detailsParent.querySelector("[id^=refg-show-interface]");
   if (btn) {
     btn.onclick = (event: MouseEvent): void =>
-      buttonClicked(event, parseInt(btn.getAttribute("data-idx")), detailsParent, isCodeComment);
+      activateButtonClicked(
+        event,
+        parseInt(btn.getAttribute("data-idx")),
+        detailsParent,
+        isCodeComment
+      );
     return;
   }
 
@@ -74,7 +85,7 @@ function makePrInterface(elem: HTMLElement, isCodeComment = true): void {
   btn = ShowInterfaceBtn(detailsParent, idx);
 
   btn.onclick = (event: MouseEvent): void =>
-    buttonClicked(event, idx, detailsParent, isCodeComment);
+    activateButtonClicked(event, idx, detailsParent, isCodeComment);
 
   detailsParent.appendChild(btn);
 
@@ -97,4 +108,18 @@ function makePrInterface(elem: HTMLElement, isCodeComment = true): void {
     ? commentForm.parentElement
     : document.querySelector(".js-slash-command-surface");
   makePrContainer.insertBefore(mainInterface, commentForm);
+}
+
+/**
+ * Creates the editable interfaces for any code comments in the beta view
+ * and the create PR comment box if on the page.
+ */
+export function makePRCodeInterface(): void {
+  document.querySelectorAll(betaCodeCommentQuery).forEach((elem: HTMLElement) => {
+    makePrInterface(elem);
+  });
+
+  if (document.querySelector(makePrQuery)) {
+    makePrInterface(document.querySelector(makePrQuery), false);
+  }
 }

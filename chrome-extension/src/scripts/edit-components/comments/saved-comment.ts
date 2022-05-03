@@ -1,12 +1,21 @@
-import { convertMsToTime, defaultPostSave, saveChanges, stateMap } from "../../common/helpers";
+/**
+ * Builds a saved comment.
+ */
+
+import { convertMsToTimestamp, defaultPostSave, saveChanges, stateMap } from "../../common/helpers";
 import { ButtonColor, CommentData, SaveResponse } from "../../common/interfaces";
-import { Comment } from "./comment";
+import { EditableComment } from "./editable-comment";
 import { MiniPlayerBtn } from "../util-components";
 
+/**
+ * Creates a saved comment with the given data.
+ * @param data The comment data.
+ * @returns A {@link HTMLDivElement} with the saved comment.
+ */
 export function SavedComment(data: CommentData): HTMLDivElement {
   const timestampLabel = document.createElement("label");
   const timestamp = data.timestamp <= 50 ? 50 : data.timestamp;
-  timestampLabel.innerText = convertMsToTime(timestamp);
+  timestampLabel.innerText = convertMsToTimestamp(timestamp);
   timestampLabel.classList.add("Link--muted");
   timestampLabel.addEventListener("click", () => {
     stateMap[data.idx].mainPlayer.goto(timestamp, false);
@@ -105,6 +114,11 @@ export function SavedComment(data: CommentData): HTMLDivElement {
   return container;
 }
 
+/**
+ * Click handler for the "Delete" button.
+ * @param data the data for the comment.
+ * @param container The container containing the button.
+ */
 function handleDel(data: CommentData, container: HTMLDivElement): void {
   container.remove();
   const index = stateMap[data.idx].comments.findIndex(
@@ -120,6 +134,12 @@ function handleDel(data: CommentData, container: HTMLDivElement): void {
     });
 }
 
+
+/**
+ * Click handler for the "Edit" button.
+ * @param data the data for the comment.
+ * @param container The container containing the button.
+ */
 function handleEdit(data: CommentData, container: HTMLDivElement): void {
-  container.replaceWith(Comment(data));
+  container.replaceWith(EditableComment(data));
 }

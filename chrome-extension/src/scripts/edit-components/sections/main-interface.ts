@@ -1,18 +1,22 @@
-import { LeftButtons } from "./left-buttons";
+/**
+ * This builds the main editable interface.
+ */
+
+import { PlayerButtons } from "./player-buttons";
 import * as utilComponents from "../util-components";
 
 /**
- * Builds the contents of the player container for emulator interactions.
+ * Builds the editable interface.
  * @param playerContainer The container to which the contents will be added.
  */
 export function MainInterface(idx: number, isEvenlyPadded = false): HTMLDivElement {
-  const closeResetSection: HTMLDivElement = LeftButtons(idx);
+  const closeResetSection: HTMLDivElement = PlayerButtons(idx);
 
   // const mainMenu: HTMLDivElement = MainMenu();
   // mainMenu.appendChild(closeResetSection);
 
   /*
-    This section is commented out because session management is not required for the study.
+    NOTE: This section is commented out because session management is not fully implemented
 
     const sessionManagementSection: HTMLDivElement = SessionManagement(idx);
 

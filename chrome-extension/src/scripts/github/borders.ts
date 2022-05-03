@@ -1,8 +1,11 @@
-let borderTmt: NodeJS.Timeout;
-let border: string;
-let outline: string;
+/**
+ * Code that creates borders in the player when the user interacts with it.
+ */
 
 export const color = "red";
+
+let border: string;
+let outline: string;
 
 /**
  * Function that performs actions related to adding borders to elements that are moused over.
@@ -21,7 +24,6 @@ export function borderActions(event: MouseEvent): void {
  * @param event A mouse event corresponding to a mouseout.
  */
 export function mouseOutBorders(event: MouseEvent): void {
-  clearTimeout(borderTmt);
   const target = event.target as HTMLElement;
   target.style.border = border;
   target.style.outline = outline;
@@ -34,5 +36,5 @@ export function mouseOutBorders(event: MouseEvent): void {
  * @param event A mouse event corresponding to a mouseover.
  */
 export function mouseOverBorders(event: MouseEvent): void {
-  borderTmt = setTimeout(() => borderActions(event), 500);
+  borderActions(event);
 }

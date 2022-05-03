@@ -1,20 +1,26 @@
+/**
+ * Builds a readonly interface for every anchored comment inserted into GitHub comments.
+ */
+
 import * as interfaces from "../../common/interfaces";
 import * as constants from "../../common/constants";
 import * as helpers from "../../common/helpers";
 import { eventWithTime } from "rrweb/typings/types";
-import { injectReadOnlyPlayer } from "../rrweb-utils";
+import { injectReadOnlyPlayer } from "../player";
 import { CommentR, processComment } from "../../view-components/comments/comment-r";
 import { MainInterfaceR } from "../../view-components/main-interface-r";
 
 const buttonIndexes: Set<number> = new Set();
+const sessionIds: Set<string> = new Set();
+const sessionCommentMap: interfaces.SessionCommentMap = {};
+const textSessionsMap: interfaces.TextWithSessionsMap = {};
 
-function findSessions(
-  elem: Node,
-  idx: number,
-  sessionIds: Set<string>,
-  sessionCommentMap: interfaces.SessionCommentMap,
-  textNodes: interfaces.TextWithSessionsMap
-): void {
+/**
+ * Recursively find all session strings in an element and its descendants.
+ * @param elem Element where searching is started
+ * @param idx index of a GitHub comment
+ */
+function findSessions(elem: Node, idx: number): void {
   if (elem.nodeName == "#text") {
     const matches = elem.textContent.matchAll(constants.sessionMatchPattern);
     const sessionCommentsArr: string[] = [];
@@ -28,19 +34,23 @@ function findSessions(
 
     if (sessionCommentsArr.length == 0) return;
 
-    if (!(idx in textNodes)) textNodes[idx] = [];
+    if (!(idx in textSessionsMap)) textSessionsMap[idx] = [];
 
-    textNodes[idx].push({
+    textSessionsMap[idx].push({
       node: elem,
       refs: sessionCommentsArr,
     });
   } else {
-    elem.childNodes.forEach((child: Node) =>
-      findSessions(child as HTMLElement, idx, sessionIds, sessionCommentMap, textNodes)
-    );
+    elem.childNodes.forEach((child: Node) => findSessions(child as HTMLElement, idx));
   }
 }
 
+/**
+ * Tag the text to identify which parts are session strings and which parts are regular text.
+ * @param textContent The raw text to tag.
+ * @param sessionCommentsArr An array of session-comment strings to split on.
+ * @returns An array containing the tagged representation of the text.
+ */
 function tagText(textContent: string, sessionCommentsArr: string[]): interfaces.TaggedText[] {
   const taggedText: interfaces.TaggedText[] = [];
   let modified = textContent;
@@ -56,8 +66,12 @@ function tagText(textContent: string, sessionCommentsArr: string[]): interfaces.
   return taggedText;
 }
 
+/**
+ * An click event handler that loads the relevant information when the "View Context"
+ * button is clicked.
+ * @param event The mouse event.
+ */
 function onViewContextClick(event: MouseEvent): void {
-  console.log("LISTENER CLICK");
   const button = event.target as HTMLButtonElement;
   const commentBody = helpers.findAncestor(button, "js-comment-body");
   const idx = parseInt(button.getAttribute("data-idx"));
@@ -115,6 +129,11 @@ function onViewContextClick(event: MouseEvent): void {
   }
 }
 
+/**
+ * Load the session associated with the given session id.
+ * @param sessionId The session id to load.
+ * @returns A promise containing the core state associated with the loaded session.
+ */
 function loadSession(sessionId: string): Promise<interfaces.CoreState> {
   return fetch(`${constants.getFetchUrl()}/loadSession/${sessionId}`, {
     method: "POST",
@@ -129,12 +148,12 @@ function loadSession(sessionId: string): Promise<interfaces.CoreState> {
     });
 }
 
-const sessionIds: Set<string> = new Set();
-const sessionCommentMap: interfaces.SessionCommentMap = {};
-const textNodes: interfaces.TextWithSessionsMap = {};
-
-export function loadReferencedSessions(idx: number): void {
-  for (const info of textNodes[idx]) {
+/**
+ * Load all referenced sessions for a particular text node.
+ * @param idx The index associated with the text node.
+ */
+function loadReferencedSessions(idx: number): void {
+  for (const info of textSessionsMap[idx]) {
     const { node, refs }: interfaces.TextWithSessions = info;
     const taggedText = tagText(node.textContent, refs);
     const nodes: Node[] = [];
@@ -166,6 +185,45 @@ export function loadReferencedSessions(idx: number): void {
   }
 }
 
+/**
+ * Processes the comment body by adding a read only interface into it.
+ * @param elem The {@link HTMLElement} that is the comment body.
+ * @returns A number representing the index of the comment body.
+ */
+function processCommentBody(elem: HTMLElement): number {
+  let mainInterface = elem.parentNode.querySelector(`[id^=refg-interface-container-r]`);
+  if (mainInterface) elem.parentNode.removeChild(mainInterface);
+
+  let idx: number;
+  const btn = elem.querySelector(".refg-view-interface");
+  if (btn) {
+    idx = parseInt(btn.getAttribute("data-idx"));
+  } else {
+    do {
+      idx = helpers.counter;
+      helpers.updateCounter();
+    } while (buttonIndexes.has(idx));
+  }
+
+  mainInterface = MainInterfaceR(idx);
+  elem.parentNode.appendChild(mainInterface);
+
+  helpers.readOnlyInterfaces.push({
+    commentBody: elem,
+    githubCommentId: idx,
+    events: [],
+    sessionDetails: null,
+    comments: [],
+    nextCommentId: 0,
+    mainPlayer: null,
+  });
+
+  return idx;
+}
+
+/**
+ * Builds all readonly interfaces from anchored comments inserted into GitHub comments.
+ */
 export function makeReadonlyInterfaces(): void {
   helpers.clearReadOnlyInterfaces();
   const buttonSessionIds: Set<string> = new Set();
@@ -195,7 +253,7 @@ export function makeReadonlyInterfaces(): void {
       document.querySelectorAll('[class*="js-comment-body"]').forEach((elem: HTMLElement) => {
         const idx = processCommentBody(elem);
         indexes.push(idx);
-        findSessions(elem, idx, sessionIds, sessionCommentMap, textNodes);
+        findSessions(elem, idx);
       });
 
       const promiseArray: Promise<interfaces.CoreState>[] = [];
@@ -216,7 +274,7 @@ export function makeReadonlyInterfaces(): void {
         });
 
         indexes.forEach((idx: number) => {
-          if (!(idx in textNodes)) return;
+          if (!(idx in textSessionsMap)) return;
           loadReferencedSessions(idx);
         });
       });
@@ -224,35 +282,4 @@ export function makeReadonlyInterfaces(): void {
     .catch(() => {
       return;
     });
-}
-
-export function processCommentBody(elem: HTMLElement): number {
-  let mainInterface = elem.parentNode.querySelector(`[id^=refg-interface-container-r]`);
-  if (mainInterface) elem.parentNode.removeChild(mainInterface);
-
-  let idx: number;
-  const btn = elem.querySelector(".refg-view-interface");
-  if (btn) {
-    idx = parseInt(btn.getAttribute("data-idx"));
-  } else {
-    do {
-      idx = helpers.counter;
-      helpers.updateCounter();
-    } while (buttonIndexes.has(idx));
-  }
-
-  mainInterface = MainInterfaceR(idx);
-  elem.parentNode.appendChild(mainInterface);
-
-  helpers.readOnlyInterfaces.push({
-    commentBody: elem,
-    githubCommentId: idx,
-    events: [],
-    sessionDetails: null,
-    comments: [],
-    nextCommentId: 0,
-    mainPlayer: null,
-  });
-
-  return idx;
 }

@@ -1,8 +1,14 @@
+/**
+ * Background script for the Chrome extension.
+ */
+
 import { matchUrl } from "./common/constants";
 import { ExtensionMessage, GitHubTabState, TabState, TabTimeoutMap } from "./common/interfaces";
 
+const tabTimeoutMap: TabTimeoutMap = {};
+
 /**
- * Create the Context Menu items required for the extension.
+ * Creates the Context Menu items required for the extension.
  */
 function createContextMenuItems(): void {
   chrome.contextMenus.removeAll();
@@ -19,8 +25,6 @@ function createContextMenuItems(): void {
     contexts: ["all"],
   });
 }
-
-const tabTimeoutMap: TabTimeoutMap = {};
 
 /**
  * Listener to insert relevant content scripts into a GitHub PR page.
@@ -74,39 +78,6 @@ chrome.tabs.onUpdated.addListener(
   }
 );
 
-/* chrome.webNavigation.onHistoryStateUpdated.addListener(
-  (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => {
-    if (matchUrl.test(details.url)) {
-      chrome.scripting
-        .executeScript({
-          target: { tabId: details.tabId },
-          files: ["vendors-content.js", "content.js"],
-        })
-        .then(() => {
-          return chrome.scripting.insertCSS({
-            target: { tabId: details.tabId },
-            files: ["css/rrweb-player.min.css", "css/refg-styles.css"],
-          });
-        })
-        .then(() => {
-          void chrome.scripting.executeScript({
-            target: { tabId: details.tabId },
-            files: ["vendors-recorder.js", "recorder.js"],
-          });
-        })
-        .catch(() => {
-          return;
-        });
-    } else if (!/^(?:edge|chrome|brave):\/\/.*$/.test(details.url)) {
-      // Don't insert into internal pages.
-      void chrome.scripting.executeScript({
-        target: { tabId: details.tabId },
-        files: ["vendors-recorder.js", "recorder.js"],
-      });
-    }
-  }
-); */
-
 /**
  * An event listener to check for interactions with Context Menu items.
  */
@@ -134,7 +105,7 @@ chrome.runtime.onMessage.addListener(
   (
     m: ExtensionMessage,
     sender: chrome.runtime.MessageSender,
-    sendResponse: (response?: any) => void
+    sendResponse: (response?: string) => void
   ) => {
     if (m.action == "recording stopped" && m.source == "content") {
       chrome.storage.local.get(["state"], ({ state }: { state: TabState }) => {

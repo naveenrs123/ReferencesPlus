@@ -1,5 +1,11 @@
+/**
+ * NOT USED
+ *
+ * Would be used to save sessions with a title.
+ */
+
 import { prDetails, saveChanges, stateMap } from "../../common/helpers";
-import { ButtonColor, CheckUniqueResponse, CoreState, SaveResponse } from "../../common/interfaces";
+import { ButtonColor, CheckUniqueResponse, SaveResponse } from "../../common/interfaces";
 import { ChangesSavedModal } from "./changes-saved-modal";
 import { PlayerBtn } from "../util-components";
 import { getFetchUrl } from "../../common/constants";

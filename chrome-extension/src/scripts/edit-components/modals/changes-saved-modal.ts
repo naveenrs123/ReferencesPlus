@@ -1,3 +1,9 @@
+/**
+ * NOT USED
+ *
+ * Would be used to display the details of the session when it is saved.
+ */
+
 import { unsavedCommentClass, waitForSaveClass } from "../../common/constants";
 import { stateMap } from "../../common/helpers";
 import { ButtonColor } from "../../common/interfaces";

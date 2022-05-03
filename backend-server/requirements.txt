@@ -7,4 +7,4 @@ pymongo[srv]>=3.0
 python-dotenv>=0.1
 requests>=2.0
 PyGithub>=1.5
-tree-sitter
+# tree-sitter

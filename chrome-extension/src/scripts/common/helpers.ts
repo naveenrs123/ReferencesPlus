@@ -1,130 +1,34 @@
-import { getFetchUrl, waitForSaveClass } from "./constants";
+import { getFetchUrl, refSymbol, waitForSaveClass } from "./constants";
 import {
   ButtonColor,
   CoreState,
   PRDetails,
   SaveResponse,
   EditableInterfacesMap,
-  LoadedSessions,
+  LoadedSessionsMap,
   ReadOnlyInterface,
   CommentData,
 } from "./interfaces";
 
-export let stateMap: EditableInterfacesMap = {};
-export let loadedSessions: LoadedSessions = {};
+export const stateMap: EditableInterfacesMap = {};
+export const loadedSessions: LoadedSessionsMap = {};
+export const prDetails: PRDetails = {
+  userOrOrg: "",
+  repository: "",
+};
+
+export let counter = 0;
 export let readOnlyInterfaces: ReadOnlyInterface[] = [];
 
 export function clearReadOnlyInterfaces(): void {
   readOnlyInterfaces = [];
 }
 
-export function clearLoadedSessions(): void {
-  loadedSessions = {};
-}
-
-export function clearStateMap(): void {
-  stateMap = {};
-}
-
-export const prDetails: PRDetails = {
-  userOrOrg: "",
-  repository: "",
-};
-export let counter = 0;
-export let commentId = 1;
-
 /**
- * Function that allows an element to be dragged across a page.
- *
- * Taken from: https://www.w3schools.com/howto/howto_js_draggable.asp
- *
- * @param elmnt The element you want to make draggable.
+ * Converts a {@link ButtonColor} to a string representing a background color class.
+ * @param color
+ * @returns
  */
-export function dragElement(elmnt: HTMLElement, dragElmnt: HTMLElement): void {
-  let pos1 = 0;
-  let pos2 = 0;
-  let pos3 = 0;
-  let pos4 = 0;
-
-  if (dragElmnt) {
-    // if present, the header is where you move the DIV from:
-    dragElmnt.onmousedown = dragMouseDown;
-  } else {
-    // otherwise, move the DIV from anywhere inside the DIV:
-    elmnt.onmousedown = dragMouseDown;
-  }
-
-  function dragMouseDown(e: MouseEvent): void {
-    e.preventDefault();
-    // get the mouse cursor position at startup:
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    // call a function whenever the cursor moves:
-    document.onmousemove = elementDrag;
-  }
-
-  function elementDrag(e: MouseEvent): void {
-    e.preventDefault();
-    // calculate the new cursor position:
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    // set the element's new position:
-    elmnt.style.top = `${elmnt.offsetTop - pos2}px`;
-    elmnt.style.left = `${elmnt.offsetLeft - pos1}px`;
-  }
-
-  function closeDragElement(): void {
-    // stop moving when mouse button is released:
-    document.onmouseup = null;
-    document.onmousemove = null;
-  }
-}
-
-/**
- * Creates the header element used to drag the emulator buttons container.
- * Also adds appropriate styles.
- *
- * @returns A HTML Div Element representing the header used for dragging.
- */
-export function buildButtonDiv(
-  id: string,
-  content: string,
-  color = "blue",
-  cursor = "auto"
-): HTMLDivElement {
-  const grab: HTMLDivElement = document.createElement("div");
-  grab.id = id;
-  grab.style.backgroundColor = color;
-  grab.style.cursor = cursor;
-  grab.style.color = "#FFFFFF";
-  grab.style.width = "55px";
-  grab.style.textAlign = "center";
-  grab.classList.add("d-flex");
-  grab.style.justifyContent = "center";
-  grab.style.alignItems = "center";
-
-  const text: HTMLParagraphElement = document.createElement("p");
-  text.textContent = content;
-  text.style.margin = "0";
-  grab.appendChild(text);
-
-  return grab;
-}
-
-export function shiftPosition(
-  pos: number,
-  elmntDimension: number,
-  clientDimension: number
-): number {
-  while (pos + elmntDimension >= clientDimension) {
-    pos -= 25;
-  }
-  return pos;
-}
-
 export function buttonColorToClass(color: ButtonColor): string {
   switch (color) {
     case ButtonColor.Green:
@@ -138,12 +42,22 @@ export function buttonColorToClass(color: ButtonColor): string {
   }
 }
 
+/**
+ * Pads the number with zeroes to the specified number of digits.
+ * @param num The number to pad.
+ * @param digits The final padded length.
+ * @returns
+ */
 function padToNDigits(num: number, digits = 2): string {
   return num.toString().padStart(digits, "0");
 }
 
-export function convertMsToTime(milliseconds: number): string {
-  //const ms = Math.floor(milliseconds % 1000);
+/**
+ * Converts milliseconds to seconds and minutes.
+ * @param milliseconds The number of milliseconds to be converted.
+ * @returns
+ */
+export function convertMsToTimestamp(milliseconds: number): string {
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
 
@@ -153,10 +67,19 @@ export function convertMsToTime(milliseconds: number): string {
   return `${padToNDigits(minutes)}:${padToNDigits(seconds)}`;
 }
 
+/**
+ * Updates the counter.
+ */
 export function updateCounter(): void {
   counter++;
 }
 
+/**
+ * Finds an ancestor element with a particular class.
+ * @param elem Element where searching will begin.
+ * @param className The search class.
+ * @returns
+ */
 export function findAncestor(elem: HTMLElement, className: string): HTMLElement {
   while (!elem.classList.contains(className)) {
     elem = elem.parentElement;
@@ -164,10 +87,11 @@ export function findAncestor(elem: HTMLElement, className: string): HTMLElement 
   return elem;
 }
 
-export function updateCommentId(): void {
-  commentId++;
-}
-
+/**
+ * Saves any changes to a particular session.
+ * @param idx The index for the state to save.
+ * @returns A promise with the save response.
+ */
 export function saveChanges(idx: number): Promise<void | SaveResponse> {
   const comments: CommentData[] = [];
   stateMap[idx].comments.forEach((comment: CommentData) => {
@@ -211,10 +135,48 @@ export function saveChanges(idx: number): Promise<void | SaveResponse> {
     });
 }
 
+/**
+ * Default behaviour after changes are saved. Updates the session id and enables
+ * any disabled buttons.
+ * @param data The save response.
+ * @param idx The index of the state associated with the save.
+ */
 export function defaultPostSave(data: SaveResponse, idx: number): void {
   if (data?.id !== "") stateMap[idx].sessionDetails.id = data.id;
   const interfaceContainer = document.getElementById(`refg-interface-container-${idx}`);
   interfaceContainer.querySelectorAll("." + waitForSaveClass).forEach((elem: HTMLElement) => {
     elem.removeAttribute("aria-disabled");
   });
+}
+
+/**
+ * Splits a string into an array with regular text and element references.
+ * @param commentString the raw string of the comment.
+ * @returns A string array with the split string.
+ */
+ export function splitOnRefs(commentString: string): string[] {
+  const splitArray: string[] = [];
+  let str = "";
+  let matchingRef = false;
+  for (const c of commentString) {
+    if (c == refSymbol) {
+      if (!matchingRef && str.length > 0) {
+        splitArray.push(str);
+        matchingRef = true;
+        str = c;
+      } else if (matchingRef && str.length > 0) {
+        str += c;
+        matchingRef = false;
+        splitArray.push(str);
+        str = "";
+      } else {
+        str += c;
+        matchingRef = true;
+      }
+    } else {
+      str += c;
+    }
+  }
+  splitArray.push(str);
+  return splitArray;
 }
