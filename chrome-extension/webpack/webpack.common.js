@@ -27,7 +27,6 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: "manifest.json" },
-        { from: "./src/templates", to: "" },
         { from: "./src/static", to: "static" },
         { from: "./src/styles/*.css", to: "css/[name].css" },
       ],
